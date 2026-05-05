@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TaxNest App — Interactive Demo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    /* ════════════════════════════════════
+       APP DEMO PAGE — SPECIFIC STYLES
+    ════════════════════════════════════ */
+
+    .demo-page { background: var(--bg); min-height: 100vh; }
+
+    /* ── Demo Nav ── */
+    .demo-nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0.9rem 2.5rem;
+      background: rgba(6,8,18,0.85);
+      border-bottom: 1px solid rgba(139,92,246,0.15);
+      backdrop-filter: blur(20px);
+    }
+    .demo-nav-logo { display:flex; align-items:center; gap:0.6rem; text-decoration:none; }
+    .demo-nav-logo .logo-mark { width:36px; height:36px; font-size:1rem; }
+    .demo-nav-logo span { font-family:'Syne',sans-serif; font-weight:700; color:#fff; font-size:1.1rem; }
+    .demo-nav-badge { background:linear-gradient(135deg,#7c3aed,#a855f7); color:#fff; font-size:0.72rem; font-weight:600; padding:0.3rem 0.8rem; border-radius:20px; letter-spacing:.04em; }
+    .demo-back { color: var(--muted); text-decoration:none; font-size:0.85rem; display:flex; align-items:center; gap:0.4rem; transition: color .2s; }
+    .demo-back:hover { color: #fff; }
+
+    /* ── Demo Hero ── */
+    .demo-hero {
+      padding: 10rem 2rem 5rem;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .demo-hero .orb { opacity: 0.25; }
+    .demo-hero-tag { display:inline-flex; align-items:center; gap:0.5rem; background:rgba(124,58,237,0.15); border:1px solid rgba(124,58,237,0.3); border-radius:30px; padding:0.4rem 1.1rem; font-size:0.8rem; color:var(--purple-light); letter-spacing:.06em; text-transform:uppercase; margin-bottom:1.5rem; }
+    .demo-hero h1 { font-family:'Syne',sans-serif; font-size:clamp(2.2rem,5vw,4rem); font-weight:800; color:#fff; line-height:1.1; margin-bottom:1.2rem; }
+    .demo-hero p { color:var(--muted); font-size:1.1rem; max-width:560px; margin: 0 auto 2rem; line-height:1.7; }
+    .dev-badge { display:inline-flex; align-items:center; gap:0.5rem; background:rgba(234,179,8,0.1); border:1px solid rgba(234,179,8,0.3); border-radius:30px; padding:0.5rem 1.2rem; color:#fbbf24; font-size:0.85rem; font-weight:500; }
+    .dev-dot { width:8px; height:8px; border-radius:50%; background:#fbbf24; animation: blink 1.5s ease-in-out infinite; }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+    /* ══════════════════════════════════
+       FEATURE SHOWCASE SECTIONS
+    ══════════════════════════════════ */
+    .feature-showcase { padding: 5rem 2rem; position: relative; }
+    .feature-showcase.alt { background: rgba(255,255,255,0.015); }
+    .fs-container { max-width:1200px; margin:0 auto; display:grid; grid-template-columns:1fr 1fr; gap:5rem; align-items:center; }
+    .fs-container.flip { direction: rtl; }
+    .fs-container.flip > * { direction: ltr; }
+
+    /* Phone mockup */
+    .phone-scene { position:relative; display:flex; align-items:center; justify-content:center; padding: 3rem 2rem; }
+    .phone-wrap {
+      position:relative; z-index:2;
+      animation: phoneFloat 6s ease-in-out infinite;
+    }
+    .phone-wrap:hover { animation-play-state: paused; }
+    @keyframes phoneFloat { 0%,100%{transform:translateY(0) rotateY(-8deg) rotateX(3deg)} 50%{transform:translateY(-18px) rotateY(8deg) rotateX(-2deg)} }
+
+    .phone-3d {
+      width: 270px;
+      background: linear-gradient(145deg, #1a1a2e, #16213e, #0f3460);
+      border-radius: 42px;
+      padding: 14px;
+      box-shadow:
+        0 0 0 1px rgba(139,92,246,0.4),
+        0 40px 80px rgba(0,0,0,0.8),
+        0 20px 40px rgba(124,58,237,0.25),
+        inset 0 0 0 1px rgba(255,255,255,0.06),
+        -8px 12px 30px rgba(0,0,0,0.5);
+      position: relative;
+      transform-style: preserve-3d;
+    }
+    .phone-3d::before {
+      content:'';
+      position:absolute; top:14px; left:50%; transform:translateX(-50%);
+      width:100px; height:28px;
+      background:linear-gradient(135deg,#111,#1e1e1e);
+      border-radius:0 0 16px 16px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.04);
+      z-index:10;
+    }
+    .phone-3d::after {
+      content:'';
+      position:absolute; top:22px; left:50%; transform:translateX(-50%);
+      width:10px; height:10px; border-radius:50%;
+      background: radial-gradient(circle, #2a2a4a 30%, #111 100%);
+      border:1.5px solid rgba(255,255,255,0.08);
+      z-index:11;
+    }
+    .phone-screen {
+      width:100%; background:#060812;
+      border-radius:30px; overflow:hidden;
+      min-height:530px;
+      position:relative;
+      border: 1px solid rgba(255,255,255,0.05);
+    }
+
+    /* Side buttons */
+    .phone-btn-r {
+      position:absolute; right:-4px; top:100px; width:4px; height:60px;
+      background:linear-gradient(180deg,#222,#1a1a2e);
+      border-radius:0 3px 3px 0;
+      box-shadow: 2px 0 6px rgba(0,0,0,0.4);
+    }
+    .phone-btn-l1, .phone-btn-l2 {
+      position:absolute; left:-4px; width:4px;
+      background:linear-gradient(180deg,#222,#1a1a2e);
+      border-radius:3px 0 0 3px;
+      box-shadow: -2px 0 6px rgba(0,0,0,0.4);
+    }
+    .phone-btn-l1 { top:80px; height:35px; }
+    .phone-btn-l2 { top:128px; height:65px; }
+
+    /* Phone glow */
+    .phone-glow {
+      position:absolute; inset:-40px; border-radius:60%;
+      background: radial-gradient(ellipse, rgba(124,58,237,0.2) 0%, transparent 70%);
+      z-index:1; pointer-events:none;
+      animation: glowPulse 4s ease-in-out infinite;
+    }
+    @keyframes glowPulse { 0%,100%{opacity:0.6} 50%{opacity:1} }
+
+    /* ── App UI Inside phone ── */
+    .app-ui { height:100%; display:flex; flex-direction:column; }
+
+    /* Flash bar */
+    .flash-bar {
+      background: linear-gradient(90deg, #7c3aed, #a855f7, #7c3aed);
+      background-size: 200% 100%;
+      animation: flashSlide 3s linear infinite;
+      padding: 0.4rem 0.8rem;
+      font-size:0.62rem; font-weight:600; color:#fff;
+      text-align:center; letter-spacing:.04em;
+      flex-shrink:0;
+    }
+    @keyframes flashSlide { 0%{background-position:0%} 100%{background-position:200%} }
+
+    /* App Top Bar */
+    .app-topbar {
+      display:flex; align-items:center; justify-content:space-between;
+      padding:0.6rem 0.8rem 0.4rem;
+      flex-shrink:0;
+    }
+    .app-logo-sm {
+      width:28px; height:28px; border-radius:50%;
+      background:linear-gradient(135deg,#7c3aed,#a855f7);
+      display:flex; align-items:center; justify-content:center;
+      font-size:0.75rem; font-weight:700; color:#fff;
+    }
+    .app-name-sm { font-family:'Syne',sans-serif; font-weight:700; color:#fff; font-size:0.85rem; }
+    .app-profile-sm {
+      width:28px; height:28px; border-radius:50%;
+      background:linear-gradient(135deg,#1e293b,#334155);
+      border:2px solid rgba(139,92,246,0.5);
+      display:flex; align-items:center; justify-content:center;
+      font-size:0.75rem;
+    }
+
+    /* App cards grid */
+    .app-cards-scroll { padding:0.5rem 0.8rem; flex:1; overflow:hidden; }
+    .app-cards-title { color:rgba(255,255,255,0.4); font-size:0.58rem; letter-spacing:.08em; text-transform:uppercase; margin-bottom:0.5rem; }
+    .app-cards-grid { display:grid; grid-template-columns:1fr 1fr; gap:0.5rem; }
+    .app-card-item {
+      background:rgba(255,255,255,0.04);
+      border:1px solid rgba(255,255,255,0.07);
+      border-radius:12px; padding:0.6rem;
+      display:flex; flex-direction:column; gap:0.2rem;
+      transition: all .25s ease; cursor:pointer;
+    }
+    .app-card-item:hover, .app-card-item.active {
+      background:rgba(124,58,237,0.15);
+      border-color:rgba(124,58,237,0.4);
+      transform:scale(1.02);
+    }
+    .app-card-item.main-feat {
+      grid-column: 1/-1;
+      background: linear-gradient(135deg, rgba(124,58,237,0.2), rgba(168,85,247,0.1));
+      border-color: rgba(124,58,237,0.4);
+    }
+    .aci-icon { font-size:1.2rem; margin-bottom:0.1rem; }
+    .aci-name { font-size:0.65rem; font-weight:600; color:#fff; }
+    .aci-sub { font-size:0.55rem; color:rgba(255,255,255,0.4); }
+
+    /* Feature content panel */
+    .fs-content { padding: 1rem 0; }
+    .fs-number { font-family:'Syne',sans-serif; font-size:5rem; font-weight:800; color:rgba(124,58,237,0.12); line-height:1; margin-bottom:-1rem; }
+    .fs-tag { display:inline-block; background:rgba(124,58,237,0.15); border:1px solid rgba(124,58,237,0.3); border-radius:20px; padding:0.3rem 0.9rem; font-size:0.75rem; color:var(--purple-light); letter-spacing:.06em; text-transform:uppercase; margin-bottom:1rem; }
+    .fs-h3 { font-family:'Syne',sans-serif; font-size:clamp(1.5rem,3vw,2.2rem); font-weight:700; color:#fff; line-height:1.2; margin-bottom:1rem; }
+    .fs-body { color:var(--muted); line-height:1.75; font-size:1rem; margin-bottom:1.5rem; }
+    .fs-bullets { list-style:none; padding:0; display:flex; flex-direction:column; gap:0.6rem; }
+    .fs-bullets li { display:flex; align-items:flex-start; gap:0.6rem; color:rgba(255,255,255,0.75); font-size:0.9rem; line-height:1.5; }
+    .fs-bullets li::before { content:'→'; color:var(--purple); flex-shrink:0; font-weight:600; margin-top:0.05em; }
+    .fs-note { margin-top:1.5rem; padding:1rem; background:rgba(124,58,237,0.08); border:1px solid rgba(124,58,237,0.2); border-radius:10px; font-size:0.82rem; color:rgba(255,255,255,0.6); line-height:1.5; }
+    .fs-note strong { color:rgba(124,58,237,0.9); }
+
+    /* In-app screens */
+    .screen-docs { padding:0.5rem 0.8rem; }
+    .doc-item { display:flex; align-items:center; gap:0.5rem; padding:0.4rem 0.5rem; border-radius:8px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06); margin-bottom:0.35rem; }
+    .doc-icon { font-size:0.9rem; }
+    .doc-name { font-size:0.6rem; color:#fff; font-weight:500; flex:1; }
+    .doc-dl { font-size:0.5rem; color:var(--purple-light); }
+
+    .screen-creds { padding:0.5rem 0.8rem; }
+    .cred-item { display:flex; align-items:center; justify-content:space-between; padding:0.4rem 0.6rem; border-radius:8px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06); margin-bottom:0.35rem; }
+    .cred-label { font-size:0.6rem; color:rgba(255,255,255,0.5); }
+    .cred-val { font-size:0.58rem; color:#fff; font-family:monospace; letter-spacing:.04em; }
+    .cred-eye { font-size:0.7rem; cursor:pointer; }
+
+    .screen-chat { padding:0.5rem 0.8rem; display:flex; flex-direction:column; gap:0.4rem; }
+    .chat-msg { max-width:80%; padding:0.4rem 0.65rem; border-radius:10px; font-size:0.58rem; line-height:1.4; }
+    .chat-msg.them { background:rgba(124,58,237,0.2); border:1px solid rgba(124,58,237,0.3); color:rgba(255,255,255,0.85); align-self:flex-start; border-radius:10px 10px 10px 2px; }
+    .chat-msg.me { background:rgba(255,255,255,0.06); color:rgba(255,255,255,0.7); align-self:flex-end; border-radius:10px 10px 2px 10px; }
+    .chat-time { font-size:0.46rem; color:rgba(255,255,255,0.3); }
+
+    .screen-upload { padding:0.5rem 0.8rem; }
+    .upload-zone { border:2px dashed rgba(124,58,237,0.4); border-radius:12px; padding:1rem; text-align:center; margin-bottom:0.6rem; background:rgba(124,58,237,0.05); animation: uploadPulse 3s ease-in-out infinite; }
+    @keyframes uploadPulse { 0%,100%{border-color:rgba(124,58,237,0.4)} 50%{border-color:rgba(168,85,247,0.7)} }
+    .upload-icon { font-size:1.5rem; margin-bottom:0.3rem; }
+    .upload-txt { font-size:0.6rem; color:rgba(255,255,255,0.5); }
+    .upload-types { display:flex; flex-wrap:wrap; gap:0.3rem; margin-top:0.5rem; }
+    .upload-type-tag { background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:6px; padding:0.2rem 0.4rem; font-size:0.52rem; color:rgba(255,255,255,0.5); }
+
+    .screen-ledger { padding:0.5rem 0.8rem; }
+    .ledger-search { background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:8px; padding:0.4rem 0.6rem; font-size:0.6rem; color:rgba(255,255,255,0.4); margin-bottom:0.5rem; display:flex; align-items:center; gap:0.4rem; }
+    .ledger-item { display:flex; align-items:center; justify-content:space-between; padding:0.4rem 0.5rem; border-radius:8px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06); margin-bottom:0.3rem; }
+    .ledger-name { font-size:0.6rem; color:#fff; font-weight:500; }
+    .ledger-amt { font-size:0.58rem; color:var(--purple-light); }
+    .ledger-pdf { font-size:0.5rem; color:rgba(255,255,255,0.25); }
+
+    /* Divider */
+    .section-divider {
+      text-align:center; padding:3rem 2rem;
+      color:rgba(255,255,255,0.08); font-family:'Syne',sans-serif;
+      font-size:1rem; letter-spacing:.15em; text-transform:uppercase;
+    }
+
+    /* CTA at bottom */
+    .demo-bottom-cta { text-align:center; padding:5rem 2rem; }
+    .demo-bottom-cta h2 { font-family:'Syne',sans-serif; font-size:clamp(1.8rem,4vw,3rem); color:#fff; margin-bottom:1rem; }
+    .demo-bottom-cta p { color:var(--muted); margin-bottom:2rem; }
+
+    /* Responsive */
+    @media(max-width:900px){
+      .fs-container, .fs-container.flip { grid-template-columns:1fr; direction:ltr; gap:2.5rem; }
+      .fs-container.flip .phone-scene { order:-1; }
+      .phone-scene { padding:1.5rem; }
+      .phone-3d { width:220px; }
+      .phone-screen { min-height:420px; }
+      .demo-nav { padding:0.7rem 1.2rem; }
+    }
+  </style>
+</head>
+<body class="demo-page">
+
+  <!-- ── Demo Nav ── -->
+  <nav class="demo-nav">
+    <a href="index.html" class="demo-back">← Back to TaxNest</a>
+    <a href="index.html" class="demo-nav-logo">
+      <div class="logo-mark">₹</div>
+      <span>TaxNest</span>
+    </a>
+    <div class="demo-nav-badge">🔧 In Development</div>
+  </nav>
+
+  <!-- ── Demo Hero ── -->
+  <section class="demo-hero">
+    <div class="orb orb1"></div>
+    <div class="orb orb2"></div>
+    <div class="grid-overlay"></div>
+
+    <div class="demo-hero-tag">
+      <span class="badge-dot"></span>
+      Interactive Preview
+    </div>
+    <h1>The TaxNest<br /><span class="grad-text">Mobile App</span></h1>
+    <p>Your complete accounting companion — available on iPhone. Upload documents, access credentials, download ledgers, and stay compliant — all from your pocket.</p>
+    <div class="dev-badge">
+      <span class="dev-dot"></span>
+      Currently in Development — Preview Only
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════
+       FEATURE 1 — KYC & Documents
+       Phone LEFT | Content RIGHT
+  ═══════════════════════════════════ -->
+  <section class="feature-showcase">
+    <div class="fs-container fade-up" style="--d:0.1s">
+
+      <!-- Phone -->
+      <div class="phone-scene">
+        <div class="phone-glow"></div>
+        <div class="phone-wrap">
+          <div class="phone-3d">
+            <div class="phone-btn-r"></div>
+            <div class="phone-btn-l1"></div>
+            <div class="phone-btn-l2"></div>
+            <div class="phone-screen">
+              <div class="app-ui">
+                <div class="flash-bar">📋 GSTR-1 Due: 11th June — Upload Sales Bills Now</div>
+                <div class="app-topbar">
+                  <div class="app-logo-sm">₹</div>
+                  <div class="app-name-sm">TaxNest</div>
+                  <div class="app-profile-sm">👤</div>
+                </div>
+                <div class="app-cards-scroll">
+                  <div class="app-cards-title">My Documents</div>
+                  <div class="screen-docs">
+                    <div class="doc-item"><span class="doc-icon">📜</span><span class="doc-name">GST Certificate</span><span class="doc-dl">⬇ Download</span></div>
+                    <div class="doc-item"><span class="doc-icon">📄</span><span class="doc-name">ITR FY 2024-25</span><span class="doc-dl">⬇ Download</span></div>
+                    <div class="doc-item"><span class="doc-icon">📄</span><span class="doc-name">ITR FY 2023-24</span><span class="doc-dl">⬇ Download</span></div>
+                    <div class="doc-item"><span class="doc-icon">📄</span><span class="doc-name">ITR FY 2022-23</span><span class="doc-dl">⬇ Download</span></div>
+                    <div class="doc-item"><span class="doc-icon">🧾</span><span class="doc-name">GSTR-3B Jun 25</span><span class="doc-dl">⬇ Download</span></div>
+                    <div class="doc-item"><span class="doc-icon">🧾</span><span class="doc-name">GSTR-1 Jun 25</span><span class="doc-dl">⬇ Download</span></div>
+                    <div class="doc-item"><span class="doc-icon">🏭</span><span class="doc-name">Udyam Certificate</span><span class="doc-dl">⬇ Download</span></div>
+                    <div class="doc-item"><span class="doc-icon">🪪</span><span class="doc-name">KYC — PAN Card</span><span class="doc-dl">⬇ Download</span></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Content -->
+      <div class="fs-content fade-up" style="--d:0.2s">
+        <div class="fs-number">01</div>
+        <div class="fs-tag">Document Vault</div>
+        <h2 class="fs-h3">All your important documents, one secure place</h2>
+        <p class="fs-body">No more searching through emails and folders. Every critical document your business holds is stored securely and available for instant download — anytime, anywhere.</p>
+        <ul class="fs-bullets">
+          <li>GST Certificate & Udyam Registration</li>
+          <li>Last 3 years ITRs and financial statements</li>
+          <li>All filed GSTR-3B and GSTR-1 returns (12 months)</li>
+          <li>KYC documents — PAN, Aadhaar, Bank details</li>
+        </ul>
+        <div class="fs-note"><strong>Preview only:</strong> In the demo, documents are listed and searchable but downloads are disabled. The full app provides real-time secure download access.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════
+       FEATURE 2 — Credentials
+       Content LEFT | Phone RIGHT
+  ═══════════════════════════════════ -->
+  <section class="feature-showcase alt">
+    <div class="fs-container flip fade-up" style="--d:0.1s">
+
+      <!-- Phone -->
+      <div class="phone-scene">
+        <div class="phone-glow"></div>
+        <div class="phone-wrap">
+          <div class="phone-3d">
+            <div class="phone-btn-r"></div>
+            <div class="phone-btn-l1"></div>
+            <div class="phone-btn-l2"></div>
+            <div class="phone-screen">
+              <div class="app-ui">
+                <div class="flash-bar">🔐 Your Credentials — Tap to Reveal</div>
+                <div class="app-topbar">
+                  <div class="app-logo-sm">₹</div>
+                  <div class="app-name-sm">TaxNest</div>
+                  <div class="app-profile-sm">👤</div>
+                </div>
+                <div class="app-cards-scroll">
+                  <div class="app-cards-title">My Credentials</div>
+                  <div class="screen-creds">
+                    <div style="font-size:0.58rem;color:rgba(255,255,255,0.35);margin-bottom:0.5rem;">Tap 👁 to reveal password</div>
+                    <div class="cred-item">
+                      <div><div class="cred-label">GST Portal ID</div><div class="cred-val">27AABCU9603R1ZJ</div></div>
+                      <div class="cred-eye">👁</div>
+                    </div>
+                    <div class="cred-item">
+                      <div><div class="cred-label">GST Password</div><div class="cred-val">••••••••</div></div>
+                      <div class="cred-eye">👁</div>
+                    </div>
+                    <div class="cred-item">
+                      <div><div class="cred-label">Income Tax ID</div><div class="cred-val">AABCU9603R</div></div>
+                      <div class="cred-eye">👁</div>
+                    </div>
+                    <div class="cred-item">
+                      <div><div class="cred-label">IT Password</div><div class="cred-val">••••••••</div></div>
+                      <div class="cred-eye">👁</div>
+                    </div>
+                    <div class="cred-item">
+                      <div><div class="cred-label">E-Way Bill ID</div><div class="cred-val">27AABCU9603R1ZJ</div></div>
+                      <div class="cred-eye">👁</div>
+                    </div>
+                    <div class="cred-item">
+                      <div><div class="cred-label">E-Way Password</div><div class="cred-val">••••••••</div></div>
+                      <div class="cred-eye">👁</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Content -->
+      <div class="fs-content fade-up" style="--d:0.2s">
+        <div class="fs-number">02</div>
+        <div class="fs-tag">Credentials</div>
+        <h2 class="fs-h3">All portal logins, securely stored and always accessible</h2>
+        <p class="fs-body">Never scramble for a password at filing time. Your GST, Income Tax, and E-Way Bill portal credentials are stored with military-grade encryption and accessible in seconds.</p>
+        <ul class="fs-bullets">
+          <li>GST Portal — Username & Password</li>
+          <li>Income Tax Portal — Login credentials</li>
+          <li>E-Way Bill Portal — Access details</li>
+          <li>Tap-to-reveal with secure authentication</li>
+        </ul>
+        <div class="fs-note"><strong>Preview note:</strong> In the demo you can see credential fields. Reveal functionality is disabled for security in this preview.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════
+       FEATURE 3 — Chat
+       Phone LEFT | Content RIGHT
+  ═══════════════════════════════════ -->
+  <section class="feature-showcase">
+    <div class="fs-container fade-up" style="--d:0.1s">
+
+      <!-- Phone -->
+      <div class="phone-scene">
+        <div class="phone-glow"></div>
+        <div class="phone-wrap">
+          <div class="phone-3d">
+            <div class="phone-btn-r"></div>
+            <div class="phone-btn-l1"></div>
+            <div class="phone-btn-l2"></div>
+            <div class="phone-screen">
+              <div class="app-ui">
+                <div class="flash-bar">💬 Team Online — Avg Response: 2 Hours</div>
+                <div class="app-topbar">
+                  <div class="app-logo-sm">₹</div>
+                  <div class="app-name-sm">TaxNest Chat</div>
+                  <div class="app-profile-sm">👤</div>
+                </div>
+                <div class="app-cards-scroll">
+                  <div class="screen-chat">
+                    <div class="chat-msg them">Hello! How can we help you today?<div class="chat-time">TaxNest Team · 10:02 AM</div></div>
+                    <div class="chat-msg me">When is my next GSTR-1 due?<div class="chat-time" style="text-align:right">You · 10:04 AM</div></div>
+                    <div class="chat-msg them">Your GSTR-1 for May is due on 11th June. Please upload all sales bills by 9th June.<div class="chat-time">TaxNest Team · 10:05 AM</div></div>
+                    <div class="chat-msg me">Okay, will upload today. Also need last month's P&L.<div class="chat-time" style="text-align:right">You · 10:07 AM</div></div>
+                    <div class="chat-msg them">Your P&L for April is ready! Check the Ledger section to download it as a PDF. 📄<div class="chat-time">TaxNest Team · 10:08 AM</div></div>
+                    <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:0.4rem;display:flex;gap:0.3rem;margin-top:auto;align-items:center;margin-top:0.5rem;">
+                      <span style="font-size:0.55rem;color:rgba(255,255,255,0.3);flex:1;">Type a message…</span>
+                      <span style="font-size:0.8rem;">📎</span>
+                      <span style="background:linear-gradient(135deg,#7c3aed,#a855f7);border-radius:50%;width:18px;height:18px;display:flex;align-items:center;justify-content:center;font-size:0.55rem;">→</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Content -->
+      <div class="fs-content fade-up" style="--d:0.2s">
+        <div class="fs-number">03</div>
+        <div class="fs-tag">Team Chat</div>
+        <h2 class="fs-h3">Direct line to your TaxNest accountant</h2>
+        <p class="fs-body">Have a question about your filing? Need your P&L urgently? Just message the team directly inside the app. No emails, no hold music — just real accountants, real answers.</p>
+        <ul class="fs-bullets">
+          <li>Direct chat with your dedicated accountant</li>
+          <li>Share documents and invoices in chat</li>
+          <li>Get compliance reminders and deadline alerts</li>
+          <li>Average response time under 2 hours</li>
+        </ul>
+        <div class="fs-note"><strong>Preview note:</strong> Chat messages shown are sample conversations. In the live app, this connects directly to your TaxNest team.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════
+       FEATURE 4 — Upload (MAIN FEATURE)
+       Content LEFT | Phone RIGHT
+  ═══════════════════════════════════ -->
+  <section class="feature-showcase alt">
+    <div class="fs-container flip fade-up" style="--d:0.1s">
+
+      <!-- Phone -->
+      <div class="phone-scene">
+        <div class="phone-glow"></div>
+        <div class="phone-wrap">
+          <div class="phone-3d" style="box-shadow: 0 0 0 2px rgba(168,85,247,0.6), 0 40px 80px rgba(0,0,0,0.8), 0 20px 40px rgba(124,58,237,0.4), inset 0 0 0 1px rgba(255,255,255,0.06), -8px 12px 30px rgba(0,0,0,0.5);">
+            <div class="phone-btn-r"></div>
+            <div class="phone-btn-l1"></div>
+            <div class="phone-btn-l2"></div>
+            <div class="phone-screen">
+              <div class="app-ui">
+                <div class="flash-bar" style="background:linear-gradient(90deg,#a855f7,#ec4899,#a855f7);background-size:200%;animation:flashSlide 2s linear infinite;">⭐ MAIN FEATURE — Upload Documents Here</div>
+                <div class="app-topbar">
+                  <div class="app-logo-sm">₹</div>
+                  <div class="app-name-sm">Upload</div>
+                  <div class="app-profile-sm">👤</div>
+                </div>
+                <div class="app-cards-scroll">
+                  <div class="screen-upload">
+                    <div class="upload-zone">
+                      <div class="upload-icon">📤</div>
+                      <div style="font-size:0.65rem;color:#fff;font-weight:600;margin-bottom:0.2rem;">Tap to Upload</div>
+                      <div class="upload-txt">Photo, PDF, or Camera</div>
+                    </div>
+                    <div class="app-cards-title">Document Types</div>
+                    <div class="upload-types">
+                      <span class="upload-type-tag">🧾 Sales Bill</span>
+                      <span class="upload-type-tag">🛒 Purchase Bill</span>
+                      <span class="upload-type-tag">📄 Credit Note</span>
+                      <span class="upload-type-tag">📋 Debit Note</span>
+                      <span class="upload-type-tag">🏦 Bank Statement</span>
+                      <span class="upload-type-tag">💵 Cash Statement</span>
+                    </div>
+                    <div style="margin-top:0.8rem;padding:0.5rem;background:rgba(124,58,237,0.08);border:1px solid rgba(124,58,237,0.2);border-radius:8px;font-size:0.58rem;color:rgba(255,255,255,0.5);text-align:center;">
+                      ⚡ AI processes your document in &lt;24 hours
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Content -->
+      <div class="fs-content fade-up" style="--d:0.2s">
+        <div class="fs-number">04</div>
+        <div class="fs-tag" style="background:rgba(168,85,247,0.2);border-color:rgba(168,85,247,0.4);color:#d8b4fe;">⭐ Main Feature</div>
+        <h2 class="fs-h3">Upload once. Your accounting is done.</h2>
+        <p class="fs-body">This is the heart of TaxNest. Simply photograph or upload your business documents and our AI — backed by expert accountants — records everything automatically in your books within 24 hours.</p>
+        <ul class="fs-bullets">
+          <li>Sales & Purchase bills — photo or PDF</li>
+          <li>Credit notes and Debit notes</li>
+          <li>Bank & Cash statements</li>
+          <li>AI extracts amounts, GST, and party details</li>
+          <li>Reflected in your books within 24 hours</li>
+          <li>All documents stored securely for 7 years</li>
+        </ul>
+        <div class="fs-note" style="border-color:rgba(168,85,247,0.3);background:rgba(168,85,247,0.08);"><strong style="color:#d8b4fe;">Preview note:</strong> The upload interface is fully visible in the demo. Actual file processing happens in the live app connected to our accounting backend.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════
+       FEATURE 5 — Ledger
+       Phone LEFT | Content RIGHT
+  ═══════════════════════════════════ -->
+  <section class="feature-showcase">
+    <div class="fs-container fade-up" style="--d:0.1s">
+
+      <!-- Phone -->
+      <div class="phone-scene">
+        <div class="phone-glow"></div>
+        <div class="phone-wrap">
+          <div class="phone-3d">
+            <div class="phone-btn-r"></div>
+            <div class="phone-btn-l1"></div>
+            <div class="phone-btn-l2"></div>
+            <div class="phone-screen">
+              <div class="app-ui">
+                <div class="flash-bar">📊 Ledger Section — Search & Download</div>
+                <div class="app-topbar">
+                  <div class="app-logo-sm">₹</div>
+                  <div class="app-name-sm">Ledgers</div>
+                  <div class="app-profile-sm">👤</div>
+                </div>
+                <div class="app-cards-scroll">
+                  <div class="screen-ledger">
+                    <div class="ledger-search">🔍 <span>Search ledger…</span></div>
+                    <div class="app-cards-title">All Ledgers — FY 2025-26</div>
+                    <div class="ledger-item"><div><div class="ledger-name">Sales Account</div><div class="ledger-pdf">PDF</div></div><div class="ledger-amt">₹18,45,200</div></div>
+                    <div class="ledger-item"><div><div class="ledger-name">Purchase Account</div><div class="ledger-pdf">PDF</div></div><div class="ledger-amt">₹12,80,500</div></div>
+                    <div class="ledger-item"><div><div class="ledger-name">Raj Traders (Debtor)</div><div class="ledger-pdf">PDF</div></div><div class="ledger-amt">₹3,20,000</div></div>
+                    <div class="ledger-item"><div><div class="ledger-name">Shyam & Sons (Creditor)</div><div class="ledger-pdf">PDF</div></div><div class="ledger-amt">₹1,55,000</div></div>
+                    <div class="ledger-item"><div><div class="ledger-name">GST Output Tax A/c</div><div class="ledger-pdf">PDF</div></div><div class="ledger-amt">₹2,82,600</div></div>
+                    <div class="ledger-item"><div><div class="ledger-name">Cash In Hand</div><div class="ledger-pdf">PDF</div></div><div class="ledger-amt">₹45,800</div></div>
+                    <div style="text-align:center;margin-top:0.5rem;font-size:0.55rem;color:rgba(255,255,255,0.2);">↓ Download disabled in demo ↓</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Content -->
+      <div class="fs-content fade-up" style="--d:0.2s">
+        <div class="fs-number">05</div>
+        <div class="fs-tag">Ledger Download</div>
+        <h2 class="fs-h3">Download any ledger, any time — as a PDF</h2>
+        <p class="fs-body">Need your sales ledger for a bank loan? Want to check a debtor balance instantly? Every ledger of your company is available for PDF download directly from the app — no waiting, no requesting.</p>
+        <ul class="fs-bullets">
+          <li>All account ledgers updated in real-time</li>
+          <li>Search any ledger by party name or account</li>
+          <li>Download as formatted PDF instantly</li>
+          <li>Date range filter — custom periods</li>
+          <li>Complete FY-wise history maintained</li>
+        </ul>
+        <div class="fs-note"><strong>Preview note:</strong> In this demo you can browse and search ledgers. Download functionality is available only in the live app after login.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Bottom CTA -->
+  <div class="demo-bottom-cta fade-up" style="--d:0.1s">
+    <div style="display:inline-block;background:rgba(124,58,237,0.1);border:1px solid rgba(124,58,237,0.25);border-radius:12px;padding:3rem 4rem;position:relative;overflow:hidden;">
+      <div class="price-glow" style="opacity:0.4"></div>
+      <h2>Ready to simplify your accounting?</h2>
+      <p>Contact TaxNest today and get started for just ₹1,000/month.</p>
+      <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;">
+        <a href="index.html#contact" class="btn btn-primary">Contact Now</a>
+        <a href="index.html#pricing" class="btn btn-ghost">See Pricing</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="footer-inner container">
+      <a href="index.html" class="footer-logo">
+        <div class="logo-mark sm">₹</div>
+        <span>TaxNest</span>
+      </a>
+      <p class="footer-tagline">Smart Accounting with AI Automation</p>
+      <div class="footer-links">
+        <a href="mailto:taxnest.info@gmail.com">Email</a>
+        <a href="tel:8320222643">Phone</a>
+        <a href="https://www.instagram.com/taxnest_2026" target="_blank" rel="noopener">Instagram</a>
+      </div>
+      <p class="footer-copy">© 2026 TaxNest. All rights reserved. | Ahmedabad, Gujarat</p>
+    </div>
+  </footer>
+
+</body>
+</html>
