@@ -48,13 +48,14 @@ img { display:block; max-width:100%; }
   position:absolute; top:-60px;
   font-size:1.4rem; font-weight:800;
   font-family:'Syne',sans-serif;
-  color:rgba(124,58,237,0.55);
+  color:rgba(255,215,0,0.0.85);
   text-shadow:
-    0 0 8px rgba(124,58,237,0.6),
+    0 0 8px rgba(255,215,0,0.8),
+    0 0 16px rgba(255,200,0,0.6) 
     0 4px 12px rgba(0,0,0,0.5);
   animation: rupFall linear infinite;
   transform-style:preserve-3d;
-  filter: drop-shadow(0 0 4px rgba(124,58,237,0.7));
+  filter: drop-shadow(0 0 6px rgba(255,215,0,0.9));
 }
 /* Positions & timing */
 .r1{left:5%;  animation-duration:7s;  animation-delay:0s;    font-size:1.8rem; opacity:.7;}
