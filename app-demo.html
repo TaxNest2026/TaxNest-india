@@ -1,0 +1,944 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TaxNest App — Interactive Demo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+<style>
+/* ═══════════════════════════════════════════
+   BASE & RESETS
+═══════════════════════════════════════════ */
+:root {
+  --gold-start:#fff9d0;--gold-mid:#ffd000;--gold-deep:#e89a00;--gold-dark:#b86800;
+  --g: linear-gradient(170deg,var(--gold-start) 0%,#ffe566 15%,var(--gold-mid) 30%,var(--gold-deep) 50%,var(--gold-mid) 70%,#ffe566 85%,var(--gold-start) 100%);
+}
+.demo-page{background:var(--bg);min-height:100vh;}
+
+/* ═══ GOLDEN RUPEE ═══ */
+.gr{background:var(--g);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;filter:drop-shadow(0 1px 0 rgba(100,55,0,.6)) drop-shadow(0 3px 6px rgba(0,0,0,.45)) drop-shadow(0 0 12px rgba(255,185,0,.4));font-weight:800;font-family:'Syne',sans-serif;}
+
+/* ═══ DEMO NAV ═══ */
+.demo-nav{position:fixed;top:0;left:0;right:0;z-index:200;display:flex;align-items:center;justify-content:space-between;padding:0.9rem 2.5rem;background:rgba(6,8,18,0.9);border-bottom:1px solid rgba(139,92,246,0.15);backdrop-filter:blur(20px);}
+.demo-nav-logo{display:flex;align-items:center;gap:0.6rem;text-decoration:none;}
+.demo-nav-logo img{width:36px;height:36px;border-radius:50%;object-fit:cover;box-shadow:0 4px 16px rgba(212,160,0,.4);}
+.demo-nav-logo span{font-family:'Syne',sans-serif;font-weight:700;color:#fff;font-size:1.1rem;}
+.demo-nav-badge{background:linear-gradient(135deg,#7c3aed,#a855f7);color:#fff;font-size:0.72rem;font-weight:600;padding:0.3rem 0.8rem;border-radius:20px;letter-spacing:.04em;}
+.demo-back{color:var(--muted);text-decoration:none;font-size:0.85rem;display:flex;align-items:center;gap:0.4rem;transition:color .2s;}
+.demo-back:hover{color:#fff;}
+
+/* ═══ DEMO HERO ═══ */
+.demo-hero{padding:9rem 2rem 5rem;text-align:center;position:relative;overflow:hidden;}
+.orb{position:absolute;border-radius:50%;filter:blur(80px);pointer-events:none;z-index:0;animation:orbDrift 12s ease-in-out infinite;}
+.orb1{width:500px;height:500px;top:-150px;left:-100px;background:radial-gradient(circle,rgba(124,58,237,0.2),transparent 70%);}
+.orb2{width:400px;height:400px;bottom:-100px;right:-80px;background:radial-gradient(circle,rgba(168,85,247,0.15),transparent 70%);animation-delay:4s;}
+@keyframes orbDrift{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(30px,-20px) scale(1.05)}66%{transform:translate(-20px,30px) scale(0.95)}}
+.grid-overlay{position:absolute;inset:0;background-image:linear-gradient(rgba(124,58,237,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(124,58,237,0.04) 1px,transparent 1px);background-size:60px 60px;pointer-events:none;z-index:0;}
+.demo-hero-tag{display:inline-flex;align-items:center;gap:0.5rem;background:rgba(124,58,237,0.15);border:1px solid rgba(124,58,237,0.3);border-radius:30px;padding:0.4rem 1.1rem;font-size:0.8rem;color:var(--purple-light);letter-spacing:.06em;text-transform:uppercase;margin-bottom:1.5rem;position:relative;z-index:1;}
+.badge-dot{width:7px;height:7px;border-radius:50%;background:#a855f7;animation:blink 2s ease-in-out infinite;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.demo-hero h1{font-family:'Syne',sans-serif;font-size:clamp(2.2rem,5vw,4rem);font-weight:800;color:#fff;line-height:1.1;margin-bottom:1.2rem;position:relative;z-index:1;}
+.grad-text{background:linear-gradient(135deg,#a855f7,#7c3aed,#c084fc);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.demo-hero p{color:var(--muted);font-size:1.1rem;max-width:560px;margin:0 auto 2rem;line-height:1.7;position:relative;z-index:1;}
+.dev-badge{display:inline-flex;align-items:center;gap:0.5rem;background:rgba(234,179,8,0.1);border:1px solid rgba(234,179,8,0.3);border-radius:30px;padding:0.5rem 1.2rem;color:#fbbf24;font-size:0.85rem;font-weight:500;position:relative;z-index:1;}
+.dev-dot{width:8px;height:8px;border-radius:50%;background:#fbbf24;animation:blink 1.5s ease-in-out infinite;}
+
+/* ═══ FEATURE SHOWCASE ═══ */
+.feature-showcase{padding:5rem 2rem;position:relative;}
+.feature-showcase.alt{background:rgba(255,255,255,0.015);}
+.fs-container{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:5rem;align-items:center;}
+.fs-container.flip{direction:rtl;}
+.fs-container.flip>*{direction:ltr;}
+
+/* ═══ PHONE MOCKUP ═══ */
+.phone-scene{position:relative;display:flex;align-items:center;justify-content:center;padding:3rem 2rem;}
+.phone-wrap{position:relative;z-index:2;animation:phoneFloat 6s ease-in-out infinite;}
+.phone-wrap:hover{animation-play-state:paused;}
+@keyframes phoneFloat{0%,100%{transform:translateY(0) rotateY(-8deg) rotateX(3deg)}50%{transform:translateY(-18px) rotateY(8deg) rotateX(-2deg)}}
+.phone-3d{width:270px;background:linear-gradient(145deg,#1a1a2e,#16213e,#0f3460);border-radius:42px;padding:14px;box-shadow:0 0 0 1px rgba(139,92,246,0.4),0 40px 80px rgba(0,0,0,0.8),0 20px 40px rgba(124,58,237,0.25),inset 0 0 0 1px rgba(255,255,255,0.06),-8px 12px 30px rgba(0,0,0,0.5);position:relative;transform-style:preserve-3d;}
+.phone-3d::before{content:'';position:absolute;top:14px;left:50%;transform:translateX(-50%);width:100px;height:28px;background:linear-gradient(135deg,#111,#1e1e1e);border-radius:0 0 16px 16px;box-shadow:0 2px 8px rgba(0,0,0,0.6),inset 0 1px 0 rgba(255,255,255,0.04);z-index:10;}
+.phone-3d::after{content:'';position:absolute;top:22px;left:50%;transform:translateX(-50%);width:10px;height:10px;border-radius:50%;background:radial-gradient(circle,#2a2a4a 30%,#111 100%);border:1.5px solid rgba(255,255,255,0.08);z-index:11;}
+.phone-screen{width:100%;background:#060812;border-radius:30px;overflow:hidden;min-height:530px;position:relative;border:1px solid rgba(255,255,255,0.05);}
+.phone-btn-r{position:absolute;right:-4px;top:100px;width:4px;height:60px;background:linear-gradient(180deg,#222,#1a1a2e);border-radius:0 3px 3px 0;box-shadow:2px 0 6px rgba(0,0,0,0.4);}
+.phone-btn-l1,.phone-btn-l2{position:absolute;left:-4px;width:4px;background:linear-gradient(180deg,#222,#1a1a2e);border-radius:3px 0 0 3px;box-shadow:-2px 0 6px rgba(0,0,0,0.4);}
+.phone-btn-l1{top:80px;height:35px;} .phone-btn-l2{top:128px;height:65px;}
+.phone-glow{position:absolute;inset:-40px;border-radius:60%;background:radial-gradient(ellipse,rgba(124,58,237,0.2) 0%,transparent 70%);z-index:1;pointer-events:none;animation:glowPulse 4s ease-in-out infinite;}
+@keyframes glowPulse{0%,100%{opacity:0.6}50%{opacity:1}}
+
+/* ═══ APP UI INSIDE PHONE ═══ */
+.app-ui{height:100%;display:flex;flex-direction:column;}
+.flash-bar{background:linear-gradient(90deg,#7c3aed,#a855f7,#7c3aed);background-size:200% 100%;animation:flashSlide 3s linear infinite;padding:0.4rem 0.8rem;font-size:0.62rem;font-weight:600;color:#fff;text-align:center;letter-spacing:.04em;flex-shrink:0;}
+@keyframes flashSlide{0%{background-position:0%}100%{background-position:200%}}
+.app-topbar{display:flex;align-items:center;justify-content:space-between;padding:0.6rem 0.8rem 0.4rem;flex-shrink:0;}
+.app-logo-img{width:28px;height:28px;border-radius:50%;object-fit:cover;}
+.app-logo-fallback{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#7c3aed,#a855f7);display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:700;color:#fff;}
+.app-name-sm{font-family:'Syne',sans-serif;font-weight:700;color:#fff;font-size:0.85rem;}
+.app-profile-sm{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#1e293b,#334155);border:2px solid rgba(139,92,246,0.5);display:flex;align-items:center;justify-content:center;font-size:0.75rem;}
+.app-cards-scroll{padding:0.5rem 0.8rem;flex:1;overflow:hidden;}
+.app-cards-title{color:rgba(255,255,255,0.4);font-size:0.58rem;letter-spacing:.08em;text-transform:uppercase;margin-bottom:0.5rem;}
+
+/* ═══ FEATURE CONTENT ═══ */
+.fs-content{padding:1rem 0;}
+.fs-number{font-family:'Syne',sans-serif;font-size:5rem;font-weight:800;color:rgba(124,58,237,0.12);line-height:1;margin-bottom:-1rem;}
+.fs-tag{display:inline-block;background:rgba(124,58,237,0.15);border:1px solid rgba(124,58,237,0.3);border-radius:20px;padding:0.3rem 0.9rem;font-size:0.75rem;color:var(--purple-light);letter-spacing:.06em;text-transform:uppercase;margin-bottom:1rem;}
+.fs-h3{font-family:'Syne',sans-serif;font-size:clamp(1.5rem,3vw,2.2rem);font-weight:700;color:#fff;line-height:1.2;margin-bottom:1rem;}
+.fs-body{color:var(--muted);line-height:1.75;font-size:1rem;margin-bottom:1.5rem;}
+.fs-bullets{list-style:none;padding:0;display:flex;flex-direction:column;gap:0.6rem;}
+.fs-bullets li{display:flex;align-items:flex-start;gap:0.6rem;color:rgba(255,255,255,0.75);font-size:0.9rem;line-height:1.5;}
+.fs-bullets li::before{content:'→';color:var(--purple);flex-shrink:0;font-weight:600;margin-top:0.05em;}
+.fs-note{margin-top:1.5rem;padding:1rem;background:rgba(124,58,237,0.08);border:1px solid rgba(124,58,237,0.2);border-radius:10px;font-size:0.82rem;color:rgba(255,255,255,0.6);line-height:1.5;}
+.fs-note strong{color:rgba(124,58,237,0.9);}
+
+/* ═══ INTERACTIVE SCREENS ═══ */
+
+/* --- LEDGER SEARCH --- */
+.screen-ledger{padding:0.5rem 0.8rem;}
+.ledger-search-wrap{position:relative;margin-bottom:0.5rem;}
+.ledger-search-input{width:100%;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:8px;padding:0.4rem 0.6rem 0.4rem 1.5rem;font-size:0.6rem;color:#fff;outline:none;transition:border-color .2s;font-family:'DM Sans',sans-serif;}
+.ledger-search-input::placeholder{color:rgba(255,255,255,0.3);}
+.ledger-search-input:focus{border-color:rgba(124,58,237,0.5);background:rgba(124,58,237,0.08);}
+.ledger-search-icon{position:absolute;left:0.45rem;top:50%;transform:translateY(-50%);font-size:0.65rem;color:rgba(255,255,255,0.3);}
+.ledger-item{display:flex;align-items:center;justify-content:space-between;padding:0.42rem 0.5rem;border-radius:8px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);margin-bottom:0.3rem;cursor:pointer;transition:all .2s;}
+.ledger-item:hover,.ledger-item.active{background:rgba(124,58,237,0.12);border-color:rgba(124,58,237,0.35);}
+.ledger-name{font-size:0.6rem;color:#fff;font-weight:500;}
+.ledger-amt{font-size:0.58rem;color:var(--purple-light);font-family:'Syne',sans-serif;font-weight:600;}
+.ledger-pdf{font-size:0.48rem;color:rgba(255,255,255,0.2);}
+.ledger-no-results{text-align:center;padding:1rem 0;font-size:0.6rem;color:rgba(255,255,255,0.25);}
+
+/* --- CREDENTIALS --- */
+.screen-creds{padding:0.5rem 0.8rem;}
+.cred-item{display:flex;align-items:center;justify-content:space-between;padding:0.4rem 0.6rem;border-radius:8px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);margin-bottom:0.35rem;cursor:pointer;transition:all .2s;}
+.cred-item:hover{background:rgba(124,58,237,0.1);border-color:rgba(124,58,237,0.3);}
+.cred-label{font-size:0.58rem;color:rgba(255,255,255,0.45);}
+.cred-val{font-size:0.58rem;color:#fff;font-family:monospace;letter-spacing:.04em;}
+.cred-eye{font-size:0.75rem;cursor:pointer;transition:transform .2s;user-select:none;}
+.cred-eye:hover{transform:scale(1.2);}
+.cred-revealed .cred-val{color:#4ade80;}
+.cred-toast{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);background:rgba(124,58,237,0.9);color:#fff;font-size:0.55rem;padding:0.3rem 0.7rem;border-radius:20px;font-family:'Syne',sans-serif;font-weight:600;white-space:nowrap;opacity:0;transition:opacity .3s;pointer-events:none;z-index:20;}
+.cred-toast.show{opacity:1;}
+
+/* --- GST RETURNS --- */
+.screen-gst{padding:0.5rem 0.8rem;}
+.gst-return-item{display:flex;align-items:center;justify-content:space-between;padding:0.45rem 0.5rem;border-radius:8px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);margin-bottom:0.3rem;cursor:pointer;transition:all .25s;}
+.gst-return-item:hover{background:rgba(124,58,237,0.12);border-color:rgba(124,58,237,0.35);transform:scale(1.01);}
+.gst-return-item.active{background:rgba(124,58,237,0.18);border-color:rgba(124,58,237,0.5);}
+.gst-name{font-size:0.62rem;color:#fff;font-weight:600;}
+.gst-period{font-size:0.52rem;color:rgba(255,255,255,0.4);}
+.gst-status{font-size:0.5rem;padding:0.15rem 0.4rem;border-radius:6px;font-weight:700;letter-spacing:.04em;}
+.gst-status.filed{background:rgba(74,222,128,0.12);color:#4ade80;border:1px solid rgba(74,222,128,0.25);}
+.gst-status.pending{background:rgba(251,191,36,0.12);color:#fbbf24;border:1px solid rgba(251,191,36,0.25);}
+.gst-detail-panel{background:rgba(124,58,237,0.08);border:1px solid rgba(124,58,237,0.2);border-radius:8px;padding:0.6rem;margin-top:0.4rem;animation:slideDown .3s ease;}
+@keyframes slideDown{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
+.gst-detail-row{display:flex;justify-content:space-between;margin-bottom:0.2rem;}
+.gst-detail-label{font-size:0.52rem;color:rgba(255,255,255,0.4);}
+.gst-detail-val{font-size:0.54rem;color:#fff;font-weight:600;font-family:'Syne',sans-serif;}
+
+/* --- UPLOAD --- */
+.screen-upload{padding:0.5rem 0.8rem;}
+.upload-zone{border:2px dashed rgba(124,58,237,0.4);border-radius:12px;padding:1rem;text-align:center;margin-bottom:0.6rem;background:rgba(124,58,237,0.05);cursor:pointer;transition:all .25s;animation:uploadPulse 3s ease-in-out infinite;}
+.upload-zone:hover,.upload-zone.drag-over{border-color:rgba(168,85,247,0.8);background:rgba(124,58,237,0.12);transform:scale(1.01);}
+@keyframes uploadPulse{0%,100%{border-color:rgba(124,58,237,0.4)}50%{border-color:rgba(168,85,247,0.75)}}
+.upload-icon{font-size:1.5rem;margin-bottom:0.3rem;}
+.upload-txt{font-size:0.6rem;color:rgba(255,255,255,0.5);}
+.upload-types{display:flex;flex-wrap:wrap;gap:0.3rem;margin-top:0.5rem;}
+.upload-type-tag{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:6px;padding:0.2rem 0.4rem;font-size:0.52rem;color:rgba(255,255,255,0.5);cursor:pointer;transition:all .2s;}
+.upload-type-tag:hover{background:rgba(124,58,237,0.15);border-color:rgba(124,58,237,0.35);color:var(--purple-light);}
+.upload-demo-msg{margin-top:0.6rem;padding:0.4rem 0.5rem;background:rgba(74,222,128,0.08);border:1px solid rgba(74,222,128,0.2);border-radius:8px;font-size:0.56rem;color:#4ade80;text-align:center;display:none;animation:slideDown .3s ease;}
+.upload-demo-msg.show{display:block;}
+.upload-progress{width:100%;height:4px;background:rgba(255,255,255,0.08);border-radius:2px;margin-top:0.4rem;overflow:hidden;display:none;}
+.upload-progress-bar{height:100%;background:linear-gradient(90deg,#7c3aed,#a855f7);border-radius:2px;width:0%;transition:width 0.05s linear;}
+.upload-progress.show{display:block;}
+
+/* --- DOCS --- */
+.screen-docs{padding:0.5rem 0.8rem;}
+.doc-item{display:flex;align-items:center;gap:0.5rem;padding:0.4rem 0.5rem;border-radius:8px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);margin-bottom:0.35rem;cursor:pointer;transition:all .2s;}
+.doc-item:hover{background:rgba(124,58,237,0.1);border-color:rgba(124,58,237,0.3);}
+.doc-icon{font-size:0.9rem;}
+.doc-name{font-size:0.6rem;color:#fff;font-weight:500;flex:1;}
+.doc-dl{font-size:0.5rem;color:var(--purple-light);}
+
+/* --- CHAT (demo, non-interactive) --- */
+.screen-chat{padding:0.5rem 0.8rem;display:flex;flex-direction:column;gap:0.4rem;}
+.chat-msg{max-width:80%;padding:0.4rem 0.65rem;border-radius:10px;font-size:0.58rem;line-height:1.4;}
+.chat-msg.them{background:rgba(124,58,237,0.2);border:1px solid rgba(124,58,237,0.3);color:rgba(255,255,255,0.85);align-self:flex-start;border-radius:10px 10px 10px 2px;}
+.chat-msg.me{background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.7);align-self:flex-end;border-radius:10px 10px 2px 10px;}
+.chat-time{font-size:0.46rem;color:rgba(255,255,255,0.3);}
+.chat-input-bar{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:0.4rem;display:flex;gap:0.3rem;margin-top:auto;align-items:center;margin-top:0.5rem;}
+
+/* ═══ SECTION DIVIDER ═══ */
+.section-divider{text-align:center;padding:3rem 2rem;color:rgba(255,255,255,0.08);font-family:'Syne',sans-serif;font-size:1rem;letter-spacing:.15em;text-transform:uppercase;}
+
+/* ═══ BOTTOM CTA ═══ */
+.demo-bottom-cta{text-align:center;padding:5rem 2rem;}
+.demo-bottom-cta h2{font-family:'Syne',sans-serif;font-size:clamp(1.8rem,4vw,3rem);color:#fff;margin-bottom:1rem;}
+.demo-bottom-cta p{color:var(--muted);margin-bottom:2rem;}
+
+/* ═══ SUGGESTION SECTION ═══ */
+.suggestion-section{
+  position:relative;padding:6rem 2rem;
+  background:linear-gradient(180deg,rgba(124,58,237,0.03) 0%,rgba(6,8,18,0) 100%);
+  border-top:1px solid rgba(124,58,237,0.12);
+}
+.suggestion-inner{max-width:780px;margin:0 auto;text-align:center;}
+.suggestion-tag{display:inline-flex;align-items:center;gap:0.5rem;background:rgba(251,191,36,0.1);border:1px solid rgba(251,191,36,0.3);border-radius:30px;padding:0.4rem 1rem;font-size:0.78rem;color:#fbbf24;font-weight:600;letter-spacing:.04em;margin-bottom:1.5rem;}
+.suggestion-h2{font-family:'Syne',sans-serif;font-size:clamp(1.8rem,4vw,2.8rem);font-weight:800;color:#fff;line-height:1.15;margin-bottom:1rem;}
+.suggestion-sub{color:var(--muted);font-size:1rem;line-height:1.7;margin-bottom:2.5rem;max-width:580px;margin-left:auto;margin-right:auto;}
+.suggestion-form{display:flex;flex-direction:column;gap:1rem;text-align:left;}
+.sf-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
+.sf-group{display:flex;flex-direction:column;gap:0.4rem;}
+.sf-label{font-size:0.78rem;color:rgba(255,255,255,0.55);letter-spacing:.04em;font-weight:500;}
+.sf-input,.sf-select,.sf-textarea{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:0.75rem 1rem;font-size:0.9rem;color:#fff;font-family:'DM Sans',sans-serif;outline:none;transition:all .25s;width:100%;}
+.sf-input::placeholder,.sf-textarea::placeholder{color:rgba(255,255,255,0.25);}
+.sf-input:focus,.sf-select:focus,.sf-textarea:focus{border-color:rgba(124,58,237,0.6);background:rgba(124,58,237,0.07);box-shadow:0 0 0 3px rgba(124,58,237,0.1);}
+.sf-select{cursor:pointer;}
+.sf-select option{background:#0a0d1f;color:#fff;}
+.sf-textarea{resize:vertical;min-height:110px;line-height:1.6;}
+.sf-stars{display:flex;gap:0.4rem;margin-top:0.2rem;}
+.sf-star{font-size:1.6rem;cursor:pointer;transition:transform .15s;filter:grayscale(1) opacity(.4);}
+.sf-star.active,.sf-star:hover,.sf-star.hover{filter:grayscale(0) opacity(1);transform:scale(1.15);}
+.sf-submit{background:linear-gradient(135deg,#7c3aed,#a855f7);color:#fff;border:none;border-radius:50px;padding:0.9rem 2.2rem;font-family:'Syne',sans-serif;font-size:1rem;font-weight:600;cursor:pointer;transition:all .25s;align-self:flex-start;position:relative;overflow:hidden;}
+.sf-submit::after{content:'';position:absolute;inset:0;border-radius:inherit;background:rgba(255,255,255,0.1);opacity:0;transition:opacity .2s;}
+.sf-submit:hover::after{opacity:1;}
+.sf-submit:hover{transform:translateY(-2px);box-shadow:0 16px 48px rgba(124,58,237,0.5);}
+.sf-submit:disabled{opacity:0.6;cursor:not-allowed;transform:none;}
+.suggestion-success{display:none;text-align:center;padding:2.5rem;background:rgba(74,222,128,0.06);border:1px solid rgba(74,222,128,0.2);border-radius:20px;animation:slideDown .4s ease;}
+@keyframes slideDown{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
+.suggestion-success-icon{font-size:3rem;margin-bottom:1rem;}
+.suggestion-success h3{font-family:'Syne',sans-serif;color:#4ade80;font-size:1.5rem;margin-bottom:0.6rem;}
+.suggestion-success p{color:var(--muted);line-height:1.7;}
+.sf-char-count{font-size:0.7rem;color:rgba(255,255,255,0.25);text-align:right;margin-top:0.2rem;}
+
+/* ═══ TOOLTIPS ═══ */
+.demo-tooltip{position:fixed;background:rgba(10,13,31,0.95);border:1px solid rgba(124,58,237,0.4);border-radius:10px;padding:0.6rem 0.9rem;font-size:0.78rem;color:#fff;pointer-events:none;z-index:999;opacity:0;transition:opacity .2s;max-width:220px;box-shadow:0 8px 24px rgba(0,0,0,0.6);}
+.demo-tooltip.show{opacity:1;}
+
+/* ═══ HINT BADGES ═══ */
+.interactive-hint{display:inline-flex;align-items:center;gap:0.4rem;background:rgba(251,191,36,0.1);border:1px solid rgba(251,191,36,0.2);border-radius:8px;padding:0.3rem 0.7rem;font-size:0.72rem;color:#fbbf24;margin-bottom:1rem;animation:hintPulse 2s ease-in-out infinite;}
+@keyframes hintPulse{0%,100%{box-shadow:0 0 0 0 rgba(251,191,36,0.2)}50%{box-shadow:0 0 0 6px rgba(251,191,36,0)}}
+
+/* ═══ RESPONSIVE ═══ */
+@media(max-width:900px){
+  .fs-container,.fs-container.flip{grid-template-columns:1fr;direction:ltr;gap:2.5rem;}
+  .fs-container.flip .phone-scene{order:-1;}
+  .phone-scene{padding:1.5rem;}
+  .phone-3d{width:220px;}
+  .phone-screen{min-height:420px;}
+  .demo-nav{padding:0.7rem 1.2rem;}
+  .sf-row{grid-template-columns:1fr;}
+}
+@media(max-width:600px){
+  .suggestion-section{padding:4rem 1.2rem;}
+}
+</style>
+</head>
+<body class="demo-page">
+
+<!-- Tooltip -->
+<div class="demo-tooltip" id="tooltip"></div>
+
+<!-- ── DEMO NAV ── -->
+<nav class="demo-nav">
+  <a href="index.html" class="demo-back">← Back to TaxNest</a>
+  <a href="index.html" class="demo-nav-logo">
+    <img src="taxnest-logo.webp" alt="TaxNest" onerror="this.style.display='none';" />
+    <span>TaxNest</span>
+  </a>
+  <div class="demo-nav-badge">🔧 In Development</div>
+</nav>
+
+<!-- ── DEMO HERO ── -->
+<section class="demo-hero">
+  <div class="orb orb1"></div>
+  <div class="orb orb2"></div>
+  <div class="grid-overlay"></div>
+  <div class="demo-hero-tag">
+    <span class="badge-dot"></span>
+    Interactive Preview
+  </div>
+  <h1>The TaxNest<br /><span class="grad-text">Mobile App</span></h1>
+  <p>Your complete accounting companion — available on iPhone. Search ledgers, reveal credentials, browse GST returns, and experience document upload — all interactive below.</p>
+  <div class="dev-badge">
+    <span class="dev-dot"></span>
+    Currently in Development — Interactive Preview
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     FEATURE 1 — KYC Documents
+     Phone LEFT | Content RIGHT
+════════════════════════════════════════════ -->
+<section class="feature-showcase">
+  <div class="fs-container fade-up" style="--d:0.1s">
+    <div class="phone-scene">
+      <div class="phone-glow"></div>
+      <div class="phone-wrap">
+        <div class="phone-3d">
+          <div class="phone-btn-r"></div><div class="phone-btn-l1"></div><div class="phone-btn-l2"></div>
+          <div class="phone-screen">
+            <div class="app-ui">
+              <div class="flash-bar">📁 Your Documents — Tap to Preview</div>
+              <div class="app-topbar">
+                <img src="taxnest-logo.webp" class="app-logo-img" onerror="this.outerHTML='<div class=\'app-logo-fallback\'>₹</div>';" />
+                <div class="app-name-sm">Documents</div>
+                <div class="app-profile-sm">👤</div>
+              </div>
+              <div class="app-cards-scroll">
+                <div class="app-cards-title">KYC & Business Documents</div>
+                <div class="screen-docs" id="docs-screen">
+                  <div class="doc-item" onclick="showDocToast(this,'GST Registration Certificate')" data-tip="Click to preview (demo)">
+                    <div class="doc-icon">📋</div>
+                    <div class="doc-name">GST Certificate</div>
+                    <div class="doc-dl">VIEW</div>
+                  </div>
+                  <div class="doc-item" onclick="showDocToast(this,'PAN Card')" data-tip="Click to preview (demo)">
+                    <div class="doc-icon">🪪</div>
+                    <div class="doc-name">PAN Card</div>
+                    <div class="doc-dl">VIEW</div>
+                  </div>
+                  <div class="doc-item" onclick="showDocToast(this,'Aadhaar Card')" data-tip="Click to preview (demo)">
+                    <div class="doc-icon">🆔</div>
+                    <div class="doc-name">Aadhaar Card</div>
+                    <div class="doc-dl">VIEW</div>
+                  </div>
+                  <div class="doc-item" onclick="showDocToast(this,'Bank Statement — April 2026')" data-tip="Click to preview (demo)">
+                    <div class="doc-icon">🏦</div>
+                    <div class="doc-name">Bank Statement — Apr '26</div>
+                    <div class="doc-dl">VIEW</div>
+                  </div>
+                  <div class="doc-item" onclick="showDocToast(this,'GSTR-1 Filed Return — Mar 2026')" data-tip="Click to preview (demo)">
+                    <div class="doc-icon">🧾</div>
+                    <div class="doc-name">GSTR-1 — Mar '26 Filed</div>
+                    <div class="doc-dl">VIEW</div>
+                  </div>
+                  <div style="text-align:center;margin-top:0.4rem;font-size:0.52rem;color:rgba(255,255,255,0.18);">Downloads disabled in demo</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="fs-content fade-up" style="--d:0.2s">
+      <div class="fs-number">01</div>
+      <div class="fs-tag">Document Vault</div>
+      <h2 class="fs-h3">All your business documents, one secure place</h2>
+      <p class="fs-body">From GST certificates and PAN to bank statements and filed returns — everything is stored, categorised, and accessible instantly. No more hunting through emails or WhatsApp for documents at deadline time.</p>
+      <div class="interactive-hint">👆 Tap documents on the phone to preview them</div>
+      <ul class="fs-bullets">
+        <li>GST Registration Certificate & amendments</li>
+        <li>PAN, Aadhaar, and KYC documents</li>
+        <li>Bank statements — all months</li>
+        <li>All filed GST & TDS returns</li>
+        <li>KYC documents — secure & encrypted</li>
+      </ul>
+      <div class="fs-note"><strong>Preview note:</strong> Documents are listed and previewable in demo. Actual download is available in the live app after authentication.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     FEATURE 2 — Credentials (INTERACTIVE REVEAL)
+     Content LEFT | Phone RIGHT
+════════════════════════════════════════════ -->
+<section class="feature-showcase alt">
+  <div class="fs-container flip fade-up" style="--d:0.1s">
+    <div class="phone-scene">
+      <div class="phone-glow"></div>
+      <div class="phone-wrap">
+        <div class="phone-3d" style="box-shadow:0 0 0 2px rgba(168,85,247,0.5),0 40px 80px rgba(0,0,0,0.8),0 20px 40px rgba(124,58,237,0.4),inset 0 0 0 1px rgba(255,255,255,0.06),-8px 12px 30px rgba(0,0,0,0.5);">
+          <div class="phone-btn-r"></div><div class="phone-btn-l1"></div><div class="phone-btn-l2"></div>
+          <div class="phone-screen" style="position:relative;">
+            <div class="app-ui">
+              <div class="flash-bar" style="background:linear-gradient(90deg,#a855f7,#ec4899,#a855f7);background-size:200%;animation:flashSlide 2s linear infinite;">🔐 Tap 👁 to Reveal — Demo IDs Inside</div>
+              <div class="app-topbar">
+                <img src="taxnest-logo.webp" class="app-logo-img" onerror="this.outerHTML='<div class=\'app-logo-fallback\'>₹</div>';" />
+                <div class="app-name-sm">Credentials</div>
+                <div class="app-profile-sm">👤</div>
+              </div>
+              <div class="app-cards-scroll">
+                <div class="app-cards-title">My Portal Credentials</div>
+                <div class="screen-creds">
+                  <div style="font-size:0.55rem;color:rgba(255,255,255,0.3);margin-bottom:0.5rem;text-align:center;">Tap 👁 to reveal demo password</div>
+                  <div class="cred-item" id="cr1">
+                    <div><div class="cred-label">GST Portal ID</div><div class="cred-val" id="cr1-val">29ABCDE1234F1ZQ</div></div>
+                    <div class="cred-eye" onclick="toggleCred('cr1','29ABCDE1234F1ZQ','Demo@GST#2026')">👁</div>
+                  </div>
+                  <div class="cred-item" id="cr2">
+                    <div><div class="cred-label">GST Password</div><div class="cred-val" id="cr2-val">••••••••</div></div>
+                    <div class="cred-eye" onclick="toggleCred('cr2','Demo@GST#2026','Demo@GST#2026')">👁</div>
+                  </div>
+                  <div class="cred-item" id="cr3">
+                    <div><div class="cred-label">Income Tax ID</div><div class="cred-val" id="cr3-val">ABCDE1234F</div></div>
+                    <div class="cred-eye" onclick="toggleCred('cr3','ABCDE1234F','ITR@Demo#26')">👁</div>
+                  </div>
+                  <div class="cred-item" id="cr4">
+                    <div><div class="cred-label">IT Password</div><div class="cred-val" id="cr4-val">••••••••</div></div>
+                    <div class="cred-eye" onclick="toggleCred('cr4','ITR@Demo#26','ITR@Demo#26')">👁</div>
+                  </div>
+                  <div class="cred-item" id="cr5">
+                    <div><div class="cred-label">E-Way Bill ID</div><div class="cred-val" id="cr5-val">29ABCDE1234F1ZQ</div></div>
+                    <div class="cred-eye" onclick="toggleCred('cr5','29ABCDE1234F1ZQ','Eway@Demo2026')">👁</div>
+                  </div>
+                  <div class="cred-item" id="cr6">
+                    <div><div class="cred-label">E-Way Password</div><div class="cred-val" id="cr6-val">••••••••</div></div>
+                    <div class="cred-eye" onclick="toggleCred('cr6','Eway@Demo2026','Eway@Demo2026')">👁</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="cred-toast" id="cred-toast">🔓 Demo credential revealed!</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="fs-content fade-up" style="--d:0.2s">
+      <div class="fs-number">02</div>
+      <div class="fs-tag">Credentials</div>
+      <h2 class="fs-h3">All portal logins, securely stored and always accessible</h2>
+      <p class="fs-body">Never scramble for a password at filing time. Your GST, Income Tax, and E-Way Bill portal credentials are stored with military-grade encryption and accessible in seconds — right from your phone.</p>
+      <div class="interactive-hint">👁 Tap the eye icon on the phone to reveal demo credentials</div>
+      <ul class="fs-bullets">
+        <li>GST Portal — Username & Password</li>
+        <li>Income Tax Portal — Login credentials</li>
+        <li>E-Way Bill Portal — Access details</li>
+        <li>Tap-to-reveal with biometric authentication</li>
+      </ul>
+      <div class="fs-note"><strong>Preview note:</strong> These are demo credentials for illustration. In the live app, your real credentials are stored with AES-256 encryption and only revealed after biometric verification.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     FEATURE 3 — GST Returns List (INTERACTIVE)
+     Phone LEFT | Content RIGHT
+════════════════════════════════════════════ -->
+<section class="feature-showcase">
+  <div class="fs-container fade-up" style="--d:0.1s">
+    <div class="phone-scene">
+      <div class="phone-glow"></div>
+      <div class="phone-wrap">
+        <div class="phone-3d">
+          <div class="phone-btn-r"></div><div class="phone-btn-l1"></div><div class="phone-btn-l2"></div>
+          <div class="phone-screen">
+            <div class="app-ui">
+              <div class="flash-bar">🧾 GST Returns — Tap to See Details</div>
+              <div class="app-topbar">
+                <img src="taxnest-logo.webp" class="app-logo-img" onerror="this.outerHTML='<div class=\'app-logo-fallback\'>₹</div>';" />
+                <div class="app-name-sm">GST Returns</div>
+                <div class="app-profile-sm">👤</div>
+              </div>
+              <div class="app-cards-scroll">
+                <div class="app-cards-title">FY 2025-26 — All Returns</div>
+                <div class="screen-gst" id="gst-screen">
+                  <!-- Will be populated by JS -->
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="fs-content fade-up" style="--d:0.2s">
+      <div class="fs-number">03</div>
+      <div class="fs-tag">GST Returns</div>
+      <h2 class="fs-h3">Complete GST filing history — always at your fingertips</h2>
+      <p class="fs-body">Every GSTR-1 and GSTR-3B filed by TaxNest is recorded with acknowledgement numbers, tax liability, and filing dates. Know exactly what was filed, when, and how much was paid — without calling your CA.</p>
+      <div class="interactive-hint">🧾 Tap any return on the phone to expand details</div>
+      <ul class="fs-bullets">
+        <li>GSTR-1 & GSTR-3B for every month</li>
+        <li>Filing date, ARN number, and tax paid</li>
+        <li>ITC claimed vs available comparison</li>
+        <li>Pending returns highlighted in yellow</li>
+      </ul>
+      <div class="fs-note"><strong>Preview note:</strong> Data shown is demo data. In the live app this reflects your actual filed returns synced from the GST portal.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     FEATURE 4 — Upload (INTERACTIVE DEMO)
+     Content LEFT | Phone RIGHT
+════════════════════════════════════════════ -->
+<section class="feature-showcase alt">
+  <div class="fs-container flip fade-up" style="--d:0.1s">
+    <div class="phone-scene">
+      <div class="phone-glow"></div>
+      <div class="phone-wrap">
+        <div class="phone-3d" style="box-shadow:0 0 0 2px rgba(168,85,247,0.6),0 40px 80px rgba(0,0,0,0.8),0 20px 40px rgba(124,58,237,0.4),inset 0 0 0 1px rgba(255,255,255,0.06),-8px 12px 30px rgba(0,0,0,0.5);">
+          <div class="phone-btn-r"></div><div class="phone-btn-l1"></div><div class="phone-btn-l2"></div>
+          <div class="phone-screen">
+            <div class="app-ui">
+              <div class="flash-bar" style="background:linear-gradient(90deg,#a855f7,#ec4899,#a855f7);background-size:200%;animation:flashSlide 2s linear infinite;">⭐ Main Feature — Tap Upload Zone</div>
+              <div class="app-topbar">
+                <img src="taxnest-logo.webp" class="app-logo-img" onerror="this.outerHTML='<div class=\'app-logo-fallback\'>₹</div>';" />
+                <div class="app-name-sm">Upload</div>
+                <div class="app-profile-sm">👤</div>
+              </div>
+              <div class="app-cards-scroll">
+                <div class="screen-upload">
+                  <div class="upload-zone" id="upload-zone" onclick="startUploadDemo()" ondragover="this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')">
+                    <div class="upload-icon" id="upload-icon">📤</div>
+                    <div style="font-size:0.65rem;color:#fff;font-weight:600;margin-bottom:0.2rem;" id="upload-title">Tap to Experience Upload</div>
+                    <div class="upload-txt" id="upload-sub">Photo, PDF, or Camera</div>
+                  </div>
+                  <div class="upload-progress" id="upload-progress">
+                    <div class="upload-progress-bar" id="upload-bar"></div>
+                  </div>
+                  <div class="upload-demo-msg" id="upload-msg">✅ Document received! AI processing started — ready in 24h</div>
+                  <div class="app-cards-title" style="margin-top:0.6rem;">Select Document Type</div>
+                  <div class="upload-types">
+                    <span class="upload-type-tag" onclick="selectDocType(this)">🧾 Sales Bill</span>
+                    <span class="upload-type-tag" onclick="selectDocType(this)">🛒 Purchase Bill</span>
+                    <span class="upload-type-tag" onclick="selectDocType(this)">📄 Credit Note</span>
+                    <span class="upload-type-tag" onclick="selectDocType(this)">📋 Debit Note</span>
+                    <span class="upload-type-tag" onclick="selectDocType(this)">🏦 Bank Statement</span>
+                    <span class="upload-type-tag" onclick="selectDocType(this)">💵 Cash Statement</span>
+                  </div>
+                  <div style="margin-top:0.6rem;padding:0.4rem;background:rgba(124,58,237,0.08);border:1px solid rgba(124,58,237,0.2);border-radius:8px;font-size:0.55rem;color:rgba(255,255,255,0.4);text-align:center;">
+                    ⚡ AI processes your document in &lt;24 hours
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="fs-content fade-up" style="--d:0.2s">
+      <div class="fs-number">04</div>
+      <div class="fs-tag" style="background:rgba(168,85,247,0.2);border-color:rgba(168,85,247,0.4);color:#d8b4fe;">⭐ Main Feature</div>
+      <h2 class="fs-h3">Upload once. Your accounting is done.</h2>
+      <p class="fs-body">This is the heart of TaxNest. Simply photograph or upload your business documents and our AI — backed by expert accountants — records everything automatically in your books within 24 hours.</p>
+      <div class="interactive-hint">📤 Tap the upload zone or select a document type on the phone!</div>
+      <ul class="fs-bullets">
+        <li>Sales & Purchase bills — photo or PDF</li>
+        <li>Credit notes and Debit notes</li>
+        <li>Bank & Cash statements</li>
+        <li>AI extracts amounts, GST, and party details</li>
+        <li>Reflected in your books within 24 hours</li>
+        <li>All documents stored securely for 7 years</li>
+      </ul>
+      <div class="fs-note" style="border-color:rgba(168,85,247,0.3);background:rgba(168,85,247,0.08);"><strong style="color:#d8b4fe;">Preview note:</strong> The upload animation is a demo. Actual file upload and AI processing happens in the live app. No real files are uploaded here.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     FEATURE 5 — Ledger Search (INTERACTIVE)
+     Phone LEFT | Content RIGHT
+════════════════════════════════════════════ -->
+<section class="feature-showcase">
+  <div class="fs-container fade-up" style="--d:0.1s">
+    <div class="phone-scene">
+      <div class="phone-glow"></div>
+      <div class="phone-wrap">
+        <div class="phone-3d">
+          <div class="phone-btn-r"></div><div class="phone-btn-l1"></div><div class="phone-btn-l2"></div>
+          <div class="phone-screen">
+            <div class="app-ui">
+              <div class="flash-bar">📊 Ledgers — Search Below · No Downloads in Demo</div>
+              <div class="app-topbar">
+                <img src="taxnest-logo.webp" class="app-logo-img" onerror="this.outerHTML='<div class=\'app-logo-fallback\'>₹</div>';" />
+                <div class="app-name-sm">Ledgers</div>
+                <div class="app-profile-sm">👤</div>
+              </div>
+              <div class="app-cards-scroll">
+                <div class="app-cards-title">All Ledgers — FY 2025-26</div>
+                <div class="screen-ledger">
+                  <div class="ledger-search-wrap">
+                    <span class="ledger-search-icon">🔍</span>
+                    <input class="ledger-search-input" id="ledger-search" placeholder="Search ledger by name…" oninput="filterLedgers(this.value)" />
+                  </div>
+                  <div id="ledger-list"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="fs-content fade-up" style="--d:0.2s">
+      <div class="fs-number">05</div>
+      <div class="fs-tag">Ledger Search</div>
+      <h2 class="fs-h3">Search any ledger — instantly, by name</h2>
+      <p class="fs-body">Need your sales ledger for a bank loan? Want to check a debtor balance instantly? Every ledger of your company is searchable directly from the app — live, real-time balances updated daily.</p>
+      <div class="interactive-hint">🔍 Try typing "sales", "gst", or "raj" in the search box on the phone!</div>
+      <ul class="fs-bullets">
+        <li>All account ledgers updated in real-time</li>
+        <li>Search any ledger by party name or account</li>
+        <li>Download as formatted PDF (live app only)</li>
+        <li>Date range filter — custom periods</li>
+        <li>Complete FY-wise history maintained</li>
+      </ul>
+      <div class="fs-note"><strong>Preview note:</strong> Search and browse are fully interactive in this demo. PDF download is available only in the live app after login.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     SUGGESTION SECTION
+════════════════════════════════════════════ -->
+<section class="suggestion-section">
+  <div class="suggestion-inner">
+    <div class="suggestion-tag">
+      💡 Help Us Build Better
+    </div>
+    <h2 class="suggestion-h2">How can we make TaxNest<br />more useful for you?</h2>
+    <p class="suggestion-sub">You're experiencing an early preview of our app. Your feedback directly shapes what we build next. Tell us what features would make your accounting life easier — we read every single response.</p>
+
+    <div class="suggestion-form" id="suggestion-form">
+      <div class="sf-row">
+        <div class="sf-group">
+          <label class="sf-label">Your Name (optional)</label>
+          <input class="sf-input" id="sf-name" placeholder="e.g. Raj Patel" maxlength="60" />
+        </div>
+        <div class="sf-group">
+          <label class="sf-label">Business Type</label>
+          <select class="sf-select" id="sf-biz">
+            <option value="">Select your business</option>
+            <option>Retail / Trading</option>
+            <option>Manufacturing</option>
+            <option>Services / Consulting</option>
+            <option>Restaurant / Food</option>
+            <option>Import / Export</option>
+            <option>Freelancer / Professional</option>
+            <option>Other</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="sf-group">
+        <label class="sf-label">Which feature excites you most?</label>
+        <select class="sf-select" id="sf-feature">
+          <option value="">Select a feature</option>
+          <option>Document Upload & AI Processing</option>
+          <option>Ledger Search & Download</option>
+          <option>GST Returns History</option>
+          <option>Credential Vault</option>
+          <option>Document Vault</option>
+          <option>Team Chat with Accountant</option>
+          <option>All of them!</option>
+        </select>
+      </div>
+
+      <div class="sf-group">
+        <label class="sf-label">What feature would you most like us to add?</label>
+        <textarea class="sf-textarea" id="sf-suggestion" placeholder="e.g. I'd love to see instant TDS certificate downloads, or a feature where I can see all pending invoices from debtors…" maxlength="600" oninput="updateCharCount(this)"></textarea>
+        <div class="sf-char-count" id="sf-char">0 / 600</div>
+      </div>
+
+      <div class="sf-group">
+        <label class="sf-label">Rate this demo experience</label>
+        <div class="sf-stars" id="sf-stars">
+          <span class="sf-star" data-v="1" onclick="rateStar(1)" onmouseover="hoverStar(1)" onmouseout="unHoverStar()">⭐</span>
+          <span class="sf-star" data-v="2" onclick="rateStar(2)" onmouseover="hoverStar(2)" onmouseout="unHoverStar()">⭐</span>
+          <span class="sf-star" data-v="3" onclick="rateStar(3)" onmouseover="hoverStar(3)" onmouseout="unHoverStar()">⭐</span>
+          <span class="sf-star" data-v="4" onclick="rateStar(4)" onmouseover="hoverStar(4)" onmouseout="unHoverStar()">⭐</span>
+          <span class="sf-star" data-v="5" onclick="rateStar(5)" onmouseover="hoverStar(5)" onmouseout="unHoverStar()">⭐</span>
+        </div>
+      </div>
+
+      <button class="sf-submit" onclick="submitSuggestion()">
+        Send My Suggestion →
+      </button>
+    </div>
+
+    <div class="suggestion-success" id="suggestion-success">
+      <div class="suggestion-success-icon">🎉</div>
+      <h3>Thank you so much!</h3>
+      <p>Your suggestion has been recorded and will be reviewed by the TaxNest team. We genuinely appreciate every piece of feedback — it helps us build an app that truly works for Indian businesses like yours.</p>
+    </div>
+  </div>
+</section>
+
+<!-- Bottom CTA -->
+<div class="demo-bottom-cta fade-up" style="--d:0.1s">
+  <div style="display:inline-block;background:rgba(124,58,237,0.1);border:1px solid rgba(124,58,237,0.25);border-radius:12px;padding:3rem 4rem;position:relative;overflow:hidden;max-width:700px;width:100%;">
+    <div class="price-glow" style="opacity:0.4"></div>
+    <h2>Ready to simplify your accounting?</h2>
+    <p>Contact TaxNest today and get started for just ₹1,000/month.</p>
+    <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;">
+      <a href="index.html#contact" class="btn btn-primary">Contact Now</a>
+      <a href="index.html#pricing" class="btn btn-ghost">See Pricing</a>
+    </div>
+  </div>
+</div>
+
+<!-- Footer -->
+<footer class="site-footer">
+  <div class="footer-inner container">
+    <a href="index.html" class="footer-logo">
+      <img src="taxnest-logo.webp" alt="TaxNest" style="width:28px;height:28px;border-radius:50%;object-fit:cover;" onerror="this.style.display='none';" />
+      <span>TaxNest</span>
+    </a>
+    <p class="footer-tagline">Smart Accounting with AI Automation</p>
+    <div class="footer-links">
+      <a href="mailto:taxnest.info@gmail.com">Email</a>
+      <a href="tel:8320222643">Phone</a>
+      <a href="https://www.instagram.com/taxnest_2026" target="_blank" rel="noopener">Instagram</a>
+    </div>
+    <p class="footer-copy">© 2026 TaxNest. All rights reserved. | Ahmedabad, Gujarat</p>
+  </div>
+</footer>
+
+<script>
+/* ═══════════════════════════════════════════
+   LEDGER SEARCH DATA & LOGIC
+═══════════════════════════════════════════ */
+const LEDGERS = [
+  {name:'Sales Account',            amt:'₹18,45,200', group:'Revenue'},
+  {name:'Purchase Account',         amt:'₹12,80,500', group:'Expenses'},
+  {name:'GST Output Tax A/c',       amt:'₹2,82,600',  group:'GST'},
+  {name:'GST Input Tax A/c (ITC)',  amt:'₹1,94,200',  group:'GST'},
+  {name:'Cash In Hand',             amt:'₹45,800',    group:'Cash & Bank'},
+  {name:'HDFC Bank A/c',            amt:'₹3,12,000',  group:'Cash & Bank'},
+  {name:'Raj Traders (Debtor)',     amt:'₹3,20,000',  group:'Debtors'},
+  {name:'Shyam & Sons (Creditor)',  amt:'₹1,55,000',  group:'Creditors'},
+  {name:'TDS Payable A/c',          amt:'₹28,400',    group:'TDS'},
+  {name:'Salary Expense A/c',       amt:'₹6,00,000',  group:'Expenses'},
+  {name:'Rent Expense A/c',         amt:'₹1,80,000',  group:'Expenses'},
+  {name:'Sundry Debtors — Others',  amt:'₹88,000',    group:'Debtors'},
+];
+
+function renderLedgers(list) {
+  const el = document.getElementById('ledger-list');
+  if (!list.length) {
+    el.innerHTML = '<div class="ledger-no-results">No ledgers found</div>';
+    return;
+  }
+  el.innerHTML = list.map((l,i) => `
+    <div class="ledger-item" onclick="selectLedger(this)" style="animation:slideDown ${0.05*i+0.05}s ease both;">
+      <div>
+        <div class="ledger-name">${l.name}</div>
+        <div class="ledger-pdf">PDF · ${l.group}</div>
+      </div>
+      <div class="ledger-amt">${l.amt}</div>
+    </div>`).join('');
+}
+
+function filterLedgers(q) {
+  const filtered = q.trim() === ''
+    ? LEDGERS
+    : LEDGERS.filter(l => l.name.toLowerCase().includes(q.toLowerCase()) || l.group.toLowerCase().includes(q.toLowerCase()));
+  renderLedgers(filtered);
+}
+
+function selectLedger(el) {
+  document.querySelectorAll('.ledger-item').forEach(e => e.classList.remove('active'));
+  el.classList.add('active');
+  showTooltip('Ledger selected! Download available in live app.', 3000);
+}
+
+renderLedgers(LEDGERS);
+
+/* ═══════════════════════════════════════════
+   CREDENTIALS REVEAL
+═══════════════════════════════════════════ */
+const credState = {};
+const credPasswords = {
+  cr1: {shown:'29ABCDE1234F1ZQ', hidden:'29ABCDE1234F1ZQ'},
+  cr2: {shown:'Demo@GST#2026',   hidden:'••••••••'},
+  cr3: {shown:'ABCDE1234F',      hidden:'ABCDE1234F'},
+  cr4: {shown:'ITR@Demo#26',     hidden:'••••••••'},
+  cr5: {shown:'29ABCDE1234F1ZQ', hidden:'29ABCDE1234F1ZQ'},
+  cr6: {shown:'Eway@Demo2026',   hidden:'••••••••'},
+};
+
+function toggleCred(id, shown, password) {
+  const val = document.getElementById(id + '-val');
+  const item = document.getElementById(id);
+  credState[id] = !credState[id];
+  if (credState[id]) {
+    val.textContent = credPasswords[id].shown;
+    item.classList.add('cred-revealed');
+    showCredToast();
+  } else {
+    val.textContent = credPasswords[id].hidden;
+    item.classList.remove('cred-revealed');
+  }
+}
+
+function showCredToast() {
+  const t = document.getElementById('cred-toast');
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+/* ═══════════════════════════════════════════
+   GST RETURNS LIST
+═══════════════════════════════════════════ */
+const GST_RETURNS = [
+  {form:'GSTR-3B', period:'Apr 2026', status:'pending', taxPaid:'₹32,400', itcClaimed:'₹18,200', arn:'—', due:'20 May 2026'},
+  {form:'GSTR-1',  period:'Apr 2026', status:'filed',   taxPaid:'—',       itcClaimed:'—',        arn:'AA1234567890123', due:'11 May 2026'},
+  {form:'GSTR-3B', period:'Mar 2026', status:'filed',   taxPaid:'₹29,800', itcClaimed:'₹16,400', arn:'AA0987654321098', due:'20 Apr 2026'},
+  {form:'GSTR-1',  period:'Mar 2026', status:'filed',   taxPaid:'—',       itcClaimed:'—',        arn:'AA1122334455667', due:'11 Apr 2026'},
+  {form:'GSTR-3B', period:'Feb 2026', status:'filed',   taxPaid:'₹27,200', itcClaimed:'₹15,100', arn:'AA9988776655443', due:'20 Mar 2026'},
+];
+
+let gstExpanded = null;
+
+function renderGST() {
+  const el = document.getElementById('gst-screen');
+  el.innerHTML = GST_RETURNS.map((r,i) => `
+    <div class="gst-return-item ${gstExpanded===i?'active':''}" onclick="toggleGST(${i})" style="animation:slideDown ${0.06*i+0.05}s ease both;">
+      <div>
+        <div class="gst-name">${r.form} — ${r.period}</div>
+        <div class="gst-period">${r.status==='filed' ? 'ARN: '+r.arn.substring(0,12)+'…' : 'Due: '+r.due}</div>
+      </div>
+      <div class="gst-status ${r.status}">${r.status==='filed'?'FILED':'PENDING'}</div>
+    </div>
+    ${gstExpanded===i ? `<div class="gst-detail-panel">
+      <div class="gst-detail-row"><span class="gst-detail-label">Tax Paid</span><span class="gst-detail-val">${r.taxPaid}</span></div>
+      <div class="gst-detail-row"><span class="gst-detail-label">ITC Claimed</span><span class="gst-detail-val">${r.itcClaimed}</span></div>
+      <div class="gst-detail-row"><span class="gst-detail-label">Due Date</span><span class="gst-detail-val">${r.due}</span></div>
+      ${r.status==='filed'?`<div class="gst-detail-row"><span class="gst-detail-label">ARN</span><span class="gst-detail-val" style="font-size:0.48rem;">${r.arn}</span></div>`:''}
+    </div>` : ''}
+  `).join('');
+}
+
+function toggleGST(i) {
+  gstExpanded = gstExpanded === i ? null : i;
+  renderGST();
+}
+
+renderGST();
+
+/* ═══════════════════════════════════════════
+   DOCUMENT PREVIEW TOAST
+═══════════════════════════════════════════ */
+let docToastTimer;
+function showDocToast(el, name) {
+  el.style.background = 'rgba(124,58,237,0.18)';
+  el.style.borderColor = 'rgba(124,58,237,0.5)';
+  showTooltip(`Preview: ${name} — Download available in live app`, 2800);
+  clearTimeout(docToastTimer);
+  docToastTimer = setTimeout(() => {
+    el.style.background = '';
+    el.style.borderColor = '';
+  }, 1800);
+}
+
+/* ═══════════════════════════════════════════
+   UPLOAD DEMO
+═══════════════════════════════════════════ */
+let uploadRunning = false;
+function startUploadDemo() {
+  if (uploadRunning) return;
+  uploadRunning = true;
+  const zone = document.getElementById('upload-zone');
+  const icon = document.getElementById('upload-icon');
+  const title = document.getElementById('upload-title');
+  const sub = document.getElementById('upload-sub');
+  const prog = document.getElementById('upload-progress');
+  const bar = document.getElementById('upload-bar');
+  const msg = document.getElementById('upload-msg');
+
+  icon.textContent = '⏳'; title.textContent = 'Uploading…'; sub.textContent = 'Please wait';
+  prog.classList.add('show'); msg.classList.remove('show');
+  bar.style.width = '0%';
+
+  let pct = 0;
+  const interval = setInterval(() => {
+    pct += Math.random() * 8 + 4;
+    if (pct >= 100) { pct = 100; clearInterval(interval); uploadComplete(); }
+    bar.style.width = pct + '%';
+  }, 120);
+}
+
+function uploadComplete() {
+  const icon = document.getElementById('upload-icon');
+  const title = document.getElementById('upload-title');
+  const sub = document.getElementById('upload-sub');
+  const msg = document.getElementById('upload-msg');
+  icon.textContent = '✅'; title.textContent = 'Upload Complete!'; sub.textContent = 'AI processing started';
+  msg.classList.add('show');
+  setTimeout(() => {
+    icon.textContent = '📤'; title.textContent = 'Tap to Experience Upload'; sub.textContent = 'Photo, PDF, or Camera';
+    msg.classList.remove('show');
+    document.getElementById('upload-progress').classList.remove('show');
+    document.getElementById('upload-bar').style.width = '0%';
+    uploadRunning = false;
+  }, 4000);
+}
+
+function selectDocType(el) {
+  document.querySelectorAll('.upload-type-tag').forEach(t => {
+    t.style.background = ''; t.style.borderColor = ''; t.style.color = '';
+  });
+  el.style.background = 'rgba(124,58,237,0.2)';
+  el.style.borderColor = 'rgba(124,58,237,0.5)';
+  el.style.color = '#c084fc';
+  showTooltip('Document type selected! Now tap the upload zone.', 2500);
+}
+
+/* ═══════════════════════════════════════════
+   GLOBAL TOOLTIP
+═══════════════════════════════════════════ */
+let tooltipTimer;
+function showTooltip(msg, dur=2500) {
+  const t = document.getElementById('tooltip');
+  t.textContent = msg;
+  t.style.left = '50%'; t.style.top = '90px'; t.style.transform = 'translateX(-50%)';
+  t.classList.add('show');
+  clearTimeout(tooltipTimer);
+  tooltipTimer = setTimeout(() => t.classList.remove('show'), dur);
+}
+
+/* ═══════════════════════════════════════════
+   SUGGESTION FORM
+═══════════════════════════════════════════ */
+let starRating = 0;
+
+function updateCharCount(el) {
+  document.getElementById('sf-char').textContent = `${el.value.length} / 600`;
+}
+
+function rateStar(n) {
+  starRating = n;
+  document.querySelectorAll('.sf-star').forEach((s,i) => {
+    s.classList.toggle('active', i < n);
+  });
+}
+
+function hoverStar(n) {
+  document.querySelectorAll('.sf-star').forEach((s,i) => {
+    s.classList.toggle('hover', i < n);
+  });
+}
+
+function unHoverStar() {
+  document.querySelectorAll('.sf-star').forEach(s => s.classList.remove('hover'));
+}
+
+function submitSuggestion() {
+  const suggestion = document.getElementById('sf-suggestion').value.trim();
+  if (!suggestion) {
+    document.getElementById('sf-suggestion').focus();
+    document.getElementById('sf-suggestion').style.borderColor = 'rgba(239,68,68,0.6)';
+    setTimeout(() => document.getElementById('sf-suggestion').style.borderColor = '', 2000);
+    return;
+  }
+  const btn = document.querySelector('.sf-submit');
+  btn.textContent = 'Sending…'; btn.disabled = true;
+  setTimeout(() => {
+    document.getElementById('suggestion-form').style.display = 'none';
+    document.getElementById('suggestion-success').style.display = 'block';
+  }, 1200);
+}
+
+/* ═══════════════════════════════════════════
+   FADE-UP OBSERVER
+═══════════════════════════════════════════ */
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if(e.isIntersecting) { e.target.style.animationPlayState = 'running'; observer.unobserve(e.target); }});
+}, {threshold:0.12});
+document.querySelectorAll('.fade-up').forEach(el => {
+  el.style.animationPlayState = 'paused';
+  observer.observe(el);
+});
+</script>
+</body>
+</html>
