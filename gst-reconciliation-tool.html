@@ -1,0 +1,2294 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TaxNest — Free GSTR-2A Reconciliation Tool</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════════════════
+   TAXNEST GST RECON TOOL — matches taxnest website theme
+   Dark · Purple · Glassmorphism · Syne + DM Sans
+═══════════════════════════════════════════════════════ */
+:root {
+  --bg:          #060812;
+  --bg2:         #0a0d1f;
+  --surface:     rgba(255,255,255,0.04);
+  --surface-2:   rgba(255,255,255,0.06);
+  --border:      rgba(255,255,255,0.07);
+  --border-hi:   rgba(168,85,247,0.35);
+  --purple:      #7c3aed;
+  --purple-mid:  #a855f7;
+  --purple-light:#c084fc;
+  --accent:      #8b5cf6;
+  --muted:       rgba(255,255,255,0.45);
+  --muted2:      rgba(255,255,255,0.28);
+  --text:        rgba(255,255,255,0.88);
+  --gold:        #ffd000;
+  --gold2:       #e89a00;
+  --green:       #4ade80;
+  --green-bg:    rgba(74,222,128,0.1);
+  --red:         #f87171;
+  --red-bg:      rgba(248,113,113,0.12);
+  --amber:       #fbbf24;
+  --amber-bg:    rgba(251,191,36,0.12);
+  --blue:        #60a5fa;
+  --blue-bg:     rgba(96,165,250,0.12);
+  --violet:      #a78bfa;
+  --radius:      16px;
+  --radius-lg:   22px;
+  --radius-sm:   8px;
+  --transition:  0.3s cubic-bezier(0.25,0.46,0.45,0.94);
+  --sidebar-w:   252px;
+}
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{
+  font-family:'DM Sans',sans-serif;
+  font-size:14px;line-height:1.6;
+  color:var(--text);background:var(--bg);
+  -webkit-font-smoothing:antialiased;
+  min-height:100vh;overflow-x:hidden;
+}
+a{text-decoration:none;color:inherit;}
+button{font:inherit;color:inherit;cursor:pointer;border:0;background:0;}
+input,select{font:inherit;color:inherit;}
+img{display:block;max-width:100%;}
+input:focus-visible,button:focus-visible,select:focus-visible{
+  outline:2px solid var(--purple-mid);outline-offset:2px;
+}
+::selection{background:var(--purple);color:#fff;}
+
+/* ── Rupee rain (same as main site) ── */
+.rupee-rain{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0;overflow:hidden;}
+.rupee{position:absolute;top:-60px;font-size:1.2rem;font-weight:800;font-family:'Syne',sans-serif;
+  color:rgba(124,58,237,0.4);animation:rupFall linear infinite;
+  filter:drop-shadow(0 0 4px rgba(124,58,237,0.6));}
+.r1{left:5%;animation-duration:8s;animation-delay:0s;font-size:1.5rem;opacity:.5;}
+.r2{left:18%;animation-duration:11s;animation-delay:1.5s;font-size:1rem;opacity:.3;}
+.r3{left:35%;animation-duration:7s;animation-delay:3s;font-size:1.8rem;opacity:.4;}
+.r4{left:55%;animation-duration:13s;animation-delay:0.8s;font-size:1.1rem;opacity:.25;}
+.r5{left:70%;animation-duration:9s;animation-delay:4s;font-size:1.4rem;opacity:.35;}
+.r6{left:88%;animation-duration:10s;animation-delay:2s;font-size:0.9rem;opacity:.3;}
+@keyframes rupFall{
+  0%{top:-60px;opacity:0;transform:rotateY(0deg);}
+  5%{opacity:1;}95%{opacity:1;}
+  100%{top:110vh;opacity:0;transform:rotateY(360deg);}
+}
+
+/* Grid overlay */
+.grid-overlay{
+  position:fixed;inset:0;pointer-events:none;z-index:0;
+  background-image:linear-gradient(rgba(139,92,246,0.03) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(139,92,246,0.03) 1px,transparent 1px);
+  background-size:60px 60px;
+}
+
+/* Orbs */
+.orb{position:fixed;border-radius:50%;filter:blur(100px);pointer-events:none;z-index:0;}
+.orb-1{width:500px;height:500px;top:-15%;left:-10%;
+  background:radial-gradient(circle,rgba(124,58,237,0.2) 0%,transparent 70%);
+  animation:orbDrift1 20s ease-in-out infinite;}
+.orb-2{width:400px;height:400px;bottom:-10%;right:-10%;
+  background:radial-gradient(circle,rgba(168,85,247,0.14) 0%,transparent 70%);
+  animation:orbDrift2 25s ease-in-out infinite;}
+@keyframes orbDrift1{0%,100%{transform:translate(0,0)}50%{transform:translate(5%,8%)}}
+@keyframes orbDrift2{0%,100%{transform:translate(0,0)}50%{transform:translate(-6%,-5%)}}
+
+/* ── Animations ── */
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
+@keyframes fade{from{opacity:0;}to{opacity:1;}}
+@keyframes slideRight{from{opacity:0;transform:translateX(-8px);}to{opacity:1;transform:translateX(0);}}
+@keyframes scaleIn{from{opacity:0;transform:scale(0.96);}to{opacity:1;transform:scale(1);}}
+@keyframes spin{to{transform:rotate(360deg);}}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.45;}}
+@keyframes glowPulse{0%,100%{opacity:0.7;}50%{opacity:1;}}
+@keyframes shimmer{0%{background-position:200% 0;}100%{background-position:-100% 0;}}
+
+/* ── State visibility ── */
+.upload-screen,.app-screen{display:none;}
+body.state-upload .upload-screen{display:flex;}
+body.state-app .app-screen{display:grid;}
+
+/* ══════════════════════════════════════════════
+   NAVBAR
+══════════════════════════════════════════════ */
+.navbar{
+  position:fixed;top:0;left:0;right:0;z-index:200;
+  backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
+  background:rgba(6,8,18,0.85);
+  border-bottom:1px solid rgba(139,92,246,0.12);
+  box-shadow:0 4px 40px rgba(0,0,0,0.5);
+}
+.nav-inner{
+  max-width:1280px;margin:0 auto;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0.75rem 2rem;
+}
+.nav-logo{
+  display:flex;align-items:center;gap:0.65rem;
+  font-family:'Syne',sans-serif;font-weight:800;font-size:1.25rem;
+  color:#fff;letter-spacing:-0.01em;transition:opacity .2s;
+}
+.nav-logo:hover{opacity:0.85;}
+.nav-logo-img{
+  width:38px;height:38px;border-radius:50%;object-fit:cover;
+  box-shadow:0 4px 20px rgba(212,160,0,0.4);
+  animation:logoPulse 4s ease-in-out infinite;
+}
+@keyframes logoPulse{
+  0%,100%{box-shadow:0 4px 20px rgba(212,160,0,0.4);}
+  50%{box-shadow:0 4px 32px rgba(255,200,0,0.7),0 0 16px rgba(255,180,0,0.3);}
+}
+.nav-logo-fallback{
+  width:38px;height:38px;border-radius:50%;
+  background:linear-gradient(135deg,var(--purple),var(--purple-mid));
+  display:flex;align-items:center;justify-content:center;
+  font-size:1rem;font-weight:800;
+  box-shadow:0 4px 20px rgba(124,58,237,0.5);
+}
+.nav-back{
+  display:inline-flex;align-items:center;gap:0.5rem;
+  padding:0.45rem 1rem;border-radius:30px;
+  background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);
+  color:var(--muted);font-size:0.82rem;font-weight:500;
+  transition:all .25s;
+}
+.nav-back:hover{background:rgba(255,255,255,0.09);color:#fff;transform:translateX(-2px);}
+.nav-tool-badge{
+  display:inline-flex;align-items:center;gap:0.4rem;
+  background:var(--green-bg);border:1px solid rgba(74,222,128,0.3);
+  border-radius:30px;padding:0.3rem 0.85rem;
+  font-size:0.72rem;font-weight:700;color:var(--green);
+  letter-spacing:.07em;text-transform:uppercase;
+}
+.nav-tool-badge .pulse{width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 2s ease-in-out infinite;}
+.nav-right{display:flex;align-items:center;gap:0.75rem;}
+
+/* ══════════════════════════════════════════════
+   UPLOAD SCREEN
+══════════════════════════════════════════════ */
+.upload-screen{
+  min-height:100vh;width:100%;
+  flex-direction:column;align-items:center;justify-content:flex-start;
+  padding:7rem 1.5rem 4rem;
+  position:relative;z-index:1;
+}
+
+.upload-hero{
+  max-width:820px;width:100%;margin:0 auto 3rem;
+  text-align:center;
+  animation:fadeUp 0.7s ease both;
+}
+
+.upload-badge{
+  display:inline-flex;align-items:center;gap:0.5rem;
+  background:rgba(74,222,128,0.1);border:1px solid rgba(74,222,128,0.28);
+  border-radius:30px;padding:0.4rem 1rem;
+  font-size:0.78rem;color:var(--green);font-weight:700;
+  letter-spacing:.06em;text-transform:uppercase;margin-bottom:1.8rem;
+}
+.upload-badge .bdot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 1.8s ease-in-out infinite;}
+
+.upload-h1{
+  font-family:'Syne',sans-serif;
+  font-size:clamp(2.2rem,5vw,4rem);
+  font-weight:800;line-height:1.06;
+  letter-spacing:-0.025em;color:#fff;margin-bottom:1rem;
+}
+.upload-h1 .grad{
+  background:linear-gradient(135deg,#a855f7,#7c3aed,#c084fc);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-clip:text;background-size:200% 200%;
+  animation:gradShift 4s ease infinite;
+}
+@keyframes gradShift{0%,100%{background-position:0% 50%;}50%{background-position:100% 50%;}}
+
+.upload-tagline{
+  font-size:0.95rem;color:var(--purple-light);font-weight:600;
+  margin-bottom:0.7rem;letter-spacing:.02em;
+}
+.upload-sub{
+  font-size:1rem;color:var(--muted);line-height:1.75;
+  max-width:580px;margin:0 auto 2rem;
+}
+.upload-sub strong{color:rgba(255,255,255,0.72);font-weight:500;}
+
+/* Feature pills */
+.feat-pills{
+  display:flex;flex-wrap:wrap;gap:0.5rem;
+  justify-content:center;margin-bottom:2.5rem;
+}
+.feat-pill{
+  display:flex;align-items:center;gap:0.35rem;
+  padding:0.35rem 0.85rem;
+  background:rgba(124,58,237,0.1);border:1px solid rgba(124,58,237,0.22);
+  border-radius:30px;font-size:0.78rem;color:var(--purple-light);font-weight:500;
+  transition:all .25s;
+}
+.feat-pill:hover{background:rgba(124,58,237,0.18);transform:translateY(-2px);}
+.feat-pill i{font-size:0.7rem;opacity:0.8;}
+
+/* ── Upload card ── */
+.upload-card-wrap{
+  max-width:820px;width:100%;margin:0 auto;
+  animation:fadeUp 0.8s 0.1s ease both;
+}
+
+.upload-card{
+  background:rgba(255,255,255,0.04);
+  backdrop-filter:blur(28px);-webkit-backdrop-filter:blur(28px);
+  border:1px solid rgba(255,255,255,0.09);
+  border-radius:var(--radius-lg);
+  box-shadow:0 0 0 1px rgba(168,85,247,0.12),0 24px 80px rgba(0,0,0,0.6),inset 0 1px 0 rgba(255,255,255,0.07);
+  overflow:hidden;
+}
+
+.upload-card-top{
+  padding:2rem 2rem 1.5rem;
+  border-bottom:1px solid rgba(255,255,255,0.06);
+  background:linear-gradient(135deg,rgba(124,58,237,0.08),rgba(168,85,247,0.04));
+}
+.upload-card-title{
+  font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:700;color:#fff;
+  margin-bottom:0.4rem;
+}
+.upload-card-sub{font-size:0.85rem;color:var(--muted);}
+
+/* Client info row */
+.client-row{
+  display:grid;grid-template-columns:1fr 1fr;gap:1rem;
+  padding:1.5rem 2rem;border-bottom:1px solid rgba(255,255,255,0.06);
+}
+@media(max-width:600px){.client-row{grid-template-columns:1fr;}}
+
+.field-group{display:flex;flex-direction:column;gap:0.4rem;}
+.field-label{
+  font-size:0.72rem;font-weight:700;color:var(--purple-light);
+  text-transform:uppercase;letter-spacing:.09em;
+}
+.field-input{
+  padding:0.65rem 0.9rem;
+  background:rgba(255,255,255,0.05);
+  border:1px solid rgba(255,255,255,0.1);
+  border-radius:var(--radius-sm);
+  color:#fff;font-size:0.88rem;
+  transition:all .2s;
+}
+.field-input:focus{outline:none;border-color:rgba(168,85,247,0.5);background:rgba(124,58,237,0.08);box-shadow:0 0 0 3px rgba(124,58,237,0.12);}
+.field-input::placeholder{color:rgba(255,255,255,0.2);}
+
+/* Tolerance row */
+.tolerance-row{
+  display:flex;align-items:center;gap:1rem;flex-wrap:wrap;
+  padding:1rem 2rem;
+  border-bottom:1px solid rgba(255,255,255,0.06);
+  background:rgba(251,191,36,0.03);
+}
+.tol-label{display:flex;align-items:center;gap:0.5rem;font-size:0.84rem;color:var(--muted);font-weight:500;white-space:nowrap;}
+.tol-label i{color:var(--amber);}
+.tol-input{
+  width:90px;padding:0.5rem 0.7rem;
+  background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);
+  border-radius:var(--radius-sm);color:#fff;
+  font-size:0.88rem;font-family:'DM Mono',monospace;
+  transition:all .2s;
+}
+.tol-input:focus{outline:none;border-color:rgba(251,191,36,0.4);box-shadow:0 0 0 3px rgba(251,191,36,0.1);}
+.tol-hint{font-size:0.78rem;color:rgba(255,255,255,0.25);flex:1;}
+
+/* Dropzone */
+.dropzone-area{padding:2rem;}
+.dropzone{
+  border:2px dashed rgba(124,58,237,0.3);
+  border-radius:var(--radius);
+  padding:3rem 2rem;text-align:center;
+  transition:all .3s ease;
+  position:relative;overflow:hidden;
+  background:rgba(124,58,237,0.03);
+}
+.dropzone::before{
+  content:'';position:absolute;inset:0;border-radius:inherit;
+  background:linear-gradient(135deg,rgba(124,58,237,0.06),rgba(168,85,247,0.04),transparent 60%);
+  opacity:0;transition:opacity .3s;pointer-events:none;
+}
+.dropzone:hover,.dropzone.dragover{
+  border-color:rgba(168,85,247,0.6);
+  background:rgba(124,58,237,0.07);
+  transform:translateY(-3px);
+  box-shadow:0 12px 40px rgba(124,58,237,0.2);
+}
+.dropzone:hover::before,.dropzone.dragover::before{opacity:1;}
+
+.dz-icon{
+  width:64px;height:64px;margin:0 auto 1.2rem;border-radius:20px;
+  background:linear-gradient(135deg,var(--purple),var(--purple-mid));
+  display:grid;place-items:center;font-size:1.6rem;
+  box-shadow:0 8px 32px rgba(124,58,237,0.4);
+  animation:floatIcon 4s ease-in-out infinite;
+}
+@keyframes floatIcon{0%,100%{transform:translateY(0);}50%{transform:translateY(-6px);}}
+
+.dz-title{font-family:'Syne',sans-serif;font-size:1.3rem;font-weight:700;color:#fff;margin-bottom:0.4rem;}
+.dz-sub{color:var(--muted);font-size:0.88rem;margin-bottom:1.5rem;}
+
+.btn-upload{
+  display:inline-flex;align-items:center;gap:0.55rem;
+  padding:0.75rem 2rem;border-radius:50px;
+  font-family:'Syne',sans-serif;font-weight:700;font-size:0.92rem;
+  background:linear-gradient(135deg,var(--purple),var(--purple-mid));
+  color:#fff;box-shadow:0 8px 28px rgba(124,58,237,0.4);
+  transition:all .3s ease;border:none;cursor:pointer;
+}
+.btn-upload:hover{transform:translateY(-2px);box-shadow:0 14px 40px rgba(124,58,237,0.55);}
+
+#fileInput{display:none;}
+
+.file-confirm{
+  margin-top:1rem;padding:0.7rem 1rem;
+  background:rgba(74,222,128,0.1);border:1px solid rgba(74,222,128,0.25);
+  border-radius:var(--radius-sm);
+  font-size:0.84rem;color:var(--green);font-weight:600;
+  display:none;align-items:center;gap:0.6rem;justify-content:center;
+}
+.file-confirm.show{display:flex;animation:fade .3s ease;}
+
+/* Upload card footer */
+.upload-card-foot{
+  padding:1.2rem 2rem;
+  border-top:1px solid rgba(255,255,255,0.05);
+  display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;
+}
+.foot-meta{font-family:'DM Mono',monospace;font-size:0.72rem;color:rgba(255,255,255,0.25);line-height:1.7;}
+.foot-meta strong{color:rgba(255,255,255,0.5);}
+.foot-meta .ai-chip{
+  display:inline-flex;align-items:center;gap:0.3rem;
+  background:linear-gradient(135deg,rgba(124,58,237,0.3),rgba(99,102,241,0.2));
+  border:1px solid rgba(168,85,247,0.3);
+  border-radius:20px;padding:0.15rem 0.6rem;
+  font-size:0.65rem;font-weight:700;color:var(--purple-light);
+  vertical-align:middle;margin-left:0.3rem;letter-spacing:.04em;
+}
+
+.btn-sample{
+  display:inline-flex;align-items:center;gap:0.5rem;
+  padding:0.55rem 1.2rem;border-radius:30px;
+  background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);
+  color:rgba(255,255,255,0.6);font-size:0.82rem;font-weight:600;
+  transition:all .25s;cursor:pointer;
+}
+.btn-sample:hover{background:rgba(255,255,255,0.09);color:#fff;border-color:rgba(255,255,255,0.18);}
+
+/* Spec table */
+.spec-wrap{
+  max-width:820px;width:100%;margin:2rem auto 0;
+  animation:fadeUp 0.8s 0.2s ease both;
+}
+.spec-card{
+  background:rgba(255,255,255,0.03);
+  border:1px solid rgba(255,255,255,0.07);
+  border-radius:var(--radius);overflow:hidden;
+}
+.spec-head{
+  padding:0.9rem 1.5rem;
+  display:flex;justify-content:space-between;align-items:center;
+  background:linear-gradient(90deg,rgba(124,58,237,0.25),rgba(168,85,247,0.12));
+  border-bottom:1px solid rgba(255,255,255,0.06);
+}
+.spec-head-title{font-family:'Syne',sans-serif;font-size:0.88rem;font-weight:700;color:#fff;}
+.spec-head-meta{font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--muted);}
+.spec-cols{display:grid;grid-template-columns:1fr 1fr;}
+@media(max-width:560px){.spec-cols{grid-template-columns:1fr;}}
+.spec-col{padding:1.2rem 1.5rem;}
+.spec-col:first-child{border-right:1px solid rgba(255,255,255,0.05);}
+.spec-sheet-label{font-family:'DM Mono',monospace;font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--purple-light);margin-bottom:0.5rem;}
+.spec-col h4{font-family:'Syne',sans-serif;font-size:0.92rem;font-weight:700;color:#fff;margin-bottom:0.8rem;}
+.spec-fields{display:flex;flex-wrap:wrap;gap:0.4rem;}
+.spec-field{
+  padding:0.25rem 0.6rem;font-family:'DM Mono',monospace;font-size:0.7rem;
+  color:rgba(255,255,255,0.55);
+  background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:5px;
+}
+
+/* Footer (upload screen) */
+.upload-foot{
+  max-width:820px;width:100%;margin:2rem auto 0;
+  padding:1.5rem 0 0;border-top:1px solid rgba(255,255,255,0.06);
+  display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:1.2rem;
+  animation:fadeUp 0.8s 0.3s ease both;
+}
+.foot-info{font-family:'DM Mono',monospace;font-size:0.72rem;color:rgba(255,255,255,0.25);line-height:1.8;}
+.foot-info strong{color:rgba(255,255,255,0.4);}
+.foot-contacts{font-size:0.82rem;color:var(--muted);line-height:1.8;text-align:right;}
+.foot-contacts a{color:var(--purple-light);transition:color .2s;}
+.foot-contacts a:hover{color:#fff;}
+.foot-socials{display:flex;gap:0.6rem;margin-top:0.6rem;justify-content:flex-end;flex-wrap:wrap;}
+.foot-soc{
+  display:inline-flex;align-items:center;gap:0.4rem;
+  padding:0.35rem 0.8rem;border-radius:30px;font-size:0.76rem;font-weight:600;
+  background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.09);
+  color:rgba(255,255,255,0.5);transition:all .2s;
+}
+.foot-soc:hover{background:rgba(124,58,237,0.15);border-color:rgba(168,85,247,0.35);color:var(--purple-light);}
+.foot-soc.ig:hover{background:rgba(225,48,108,0.1);border-color:rgba(225,48,108,0.3);color:#f472b6;}
+
+/* ══════════════════════════════════════════════
+   APP SCREEN
+══════════════════════════════════════════════ */
+.app-screen{
+  grid-template-columns:var(--sidebar-w) 1fr;
+  min-height:100vh;
+}
+
+/* ── Sidebar ── */
+.sidebar{
+  background:rgba(6,8,18,0.95);
+  backdrop-filter:blur(24px);
+  border-right:1px solid rgba(255,255,255,0.06);
+  display:flex;flex-direction:column;
+  position:sticky;top:0;height:100vh;
+  overflow-y:auto;overflow-x:hidden;z-index:50;
+  flex-shrink:0;
+}
+.sidebar::-webkit-scrollbar{width:0;}
+
+.sb-brand{
+  padding:1.3rem 1.2rem 1rem;
+  border-bottom:1px solid rgba(255,255,255,0.06);
+  display:flex;align-items:center;gap:0.65rem;
+}
+.sb-logo-img{
+  width:34px;height:34px;border-radius:50%;object-fit:cover;
+  box-shadow:0 0 0 2px rgba(212,160,0,0.4),0 4px 16px rgba(0,0,0,0.4);
+}
+.sb-logo-fallback{
+  width:34px;height:34px;border-radius:50%;
+  background:linear-gradient(135deg,var(--purple),var(--purple-mid));
+  display:flex;align-items:center;justify-content:center;
+  font-size:0.85rem;font-weight:800;
+}
+.sb-brand-name{font-family:'Syne',sans-serif;font-weight:800;font-size:1.1rem;color:#fff;}
+.sb-brand-sub{font-size:0.65rem;color:var(--muted2);text-transform:uppercase;letter-spacing:.07em;margin-top:1px;}
+
+.sb-section{
+  padding:1.1rem 1.2rem 0.35rem;
+  font-family:'DM Mono',monospace;font-size:0.65rem;font-weight:700;
+  text-transform:uppercase;letter-spacing:.13em;color:rgba(255,255,255,0.25);
+}
+
+.nav-list{list-style:none;padding:0 0.6rem;}
+.nav-item{
+  display:flex;align-items:center;gap:0.65rem;
+  padding:0.65rem 0.75rem;border-radius:10px;margin-bottom:2px;
+  cursor:pointer;font-size:0.88rem;color:rgba(255,255,255,0.55);
+  transition:all .2s;position:relative;
+}
+.nav-item:hover{background:rgba(255,255,255,0.05);color:#fff;}
+.nav-item.active{
+  background:linear-gradient(135deg,rgba(124,58,237,0.22),rgba(168,85,247,0.12));
+  color:#fff;border:1px solid rgba(168,85,247,0.25);
+}
+.nav-icon{width:15px;text-align:center;font-size:0.82rem;flex-shrink:0;opacity:0.75;}
+.nav-label{flex:1;font-weight:500;}
+.nav-count{
+  min-width:20px;height:16px;padding:0 4px;
+  background:rgba(255,255,255,0.09);border-radius:100px;
+  font-family:'DM Mono',monospace;font-size:0.65rem;font-weight:600;
+  display:flex;align-items:center;justify-content:center;
+  color:rgba(255,255,255,0.6);
+}
+.nav-item.active .nav-count{background:rgba(168,85,247,0.3);color:var(--purple-light);}
+
+.sb-foot{margin-top:auto;border-top:1px solid rgba(255,255,255,0.06);padding:1rem 1.2rem;}
+.sb-meta{font-family:'DM Mono',monospace;font-size:0.7rem;color:rgba(255,255,255,0.3);line-height:1.7;margin-bottom:0.75rem;}
+.sb-meta strong{color:rgba(255,255,255,0.6);}
+.sb-actions{display:flex;gap:0.4rem;}
+.icon-btn{
+  width:32px;height:32px;border-radius:8px;
+  display:grid;place-items:center;font-size:0.82rem;
+  color:rgba(255,255,255,0.4);
+  background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.09);
+  transition:all .2s;cursor:pointer;
+}
+.icon-btn:hover{background:rgba(124,58,237,0.2);border-color:rgba(168,85,247,0.35);color:var(--purple-light);}
+
+.sb-links{
+  padding:0.75rem 1.2rem;
+  border-top:1px solid rgba(255,255,255,0.04);
+}
+.sb-link{
+  display:flex;align-items:center;gap:0.6rem;
+  font-size:0.76rem;color:rgba(255,255,255,0.3);
+  padding:0.3rem 0;transition:color .2s;text-decoration:none;
+}
+.sb-link:hover{color:var(--purple-light);}
+.sb-link i{width:13px;text-align:center;font-size:0.75rem;}
+
+/* ── Workspace ── */
+.workspace{display:flex;flex-direction:column;min-height:100vh;overflow-x:hidden;}
+
+/* Topbar */
+.topbar{
+  display:flex;align-items:center;gap:0.75rem;
+  height:56px;padding:0 1.5rem;
+  background:rgba(6,8,18,0.9);
+  backdrop-filter:blur(16px);
+  border-bottom:1px solid rgba(255,255,255,0.06);
+  position:sticky;top:0;z-index:40;flex-shrink:0;
+}
+.topbar-bc{display:flex;align-items:center;gap:0.5rem;font-size:0.82rem;color:var(--muted);flex:1;min-width:0;}
+.bc-item{color:rgba(255,255,255,0.45);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.bc-sep{color:rgba(255,255,255,0.2);font-size:0.65rem;}
+.bc-current{color:#fff;font-weight:700;}
+.topbar-cmd{
+  display:flex;align-items:center;gap:0.6rem;padding:0.5rem 1rem;
+  border-radius:30px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);
+  color:var(--muted);font-size:0.82rem;cursor:pointer;transition:all .2s;min-width:190px;
+}
+.topbar-cmd:hover{border-color:rgba(168,85,247,0.3);color:#fff;}
+.cmd-key{
+  margin-left:auto;font-family:'DM Mono',monospace;font-size:0.68rem;
+  padding:0.1rem 0.45rem;background:rgba(255,255,255,0.08);border-radius:4px;
+  color:rgba(255,255,255,0.35);
+}
+.topbar-actions{display:flex;gap:0.4rem;}
+.sb-toggle{display:none;}
+
+/* Canvas */
+.canvas{flex:1;padding:2rem 2rem 4rem;overflow-x:hidden;}
+.page{display:none;animation:fadeUp .25s ease;}
+.page.active{display:block;}
+
+/* Page header */
+.page-eyebrow{
+  font-family:'DM Mono',monospace;font-size:0.68rem;font-weight:700;
+  text-transform:uppercase;letter-spacing:.12em;color:var(--purple-light);margin-bottom:0.5rem;
+}
+.page-title{
+  font-family:'Syne',sans-serif;font-weight:700;
+  font-size:clamp(1.6rem,2.5vw,2.5rem);line-height:1.1;
+  letter-spacing:-0.02em;color:#fff;margin-bottom:0.6rem;
+}
+.page-title em{font-style:italic;background:linear-gradient(135deg,#a855f7,#7c3aed,#c084fc);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.page-deck{font-size:0.9rem;color:var(--muted);max-width:58ch;line-height:1.65;margin-bottom:2rem;}
+
+/* ── Stats grid ── */
+.stat-grid{
+  display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:1.2rem;
+}
+@media(max-width:1100px){.stat-grid{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:600px){.stat-grid{grid-template-columns:1fr;}}
+
+.stat-card{
+  background:rgba(255,255,255,0.04);
+  backdrop-filter:blur(16px);
+  border:1px solid rgba(255,255,255,0.07);
+  border-radius:var(--radius);padding:1.2rem 1.2rem 1rem;
+  cursor:pointer;transition:all .3s ease;position:relative;overflow:hidden;
+}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;border-radius:var(--radius) var(--radius) 0 0;}
+.stat-card.pos::before{background:var(--green);}
+.stat-card.warn::before{background:var(--amber);}
+.stat-card.neg::before{background:var(--red);}
+.stat-card.info::before{background:var(--blue);}
+.stat-card.violet::before{background:var(--violet);}
+.stat-card:hover{transform:translateY(-4px);border-color:rgba(168,85,247,0.25);box-shadow:0 16px 50px rgba(0,0,0,0.5);}
+
+.stat-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:0.8rem;}
+.stat-ico{width:32px;height:32px;border-radius:8px;display:grid;place-items:center;font-size:0.82rem;}
+.stat-card.pos .stat-ico{background:rgba(74,222,128,0.12);color:var(--green);}
+.stat-card.warn .stat-ico{background:rgba(251,191,36,0.12);color:var(--amber);}
+.stat-card.neg .stat-ico{background:rgba(248,113,113,0.12);color:var(--red);}
+.stat-card.info .stat-ico{background:rgba(96,165,250,0.12);color:var(--blue);}
+.stat-card.violet .stat-ico{background:rgba(167,139,250,0.12);color:var(--violet);}
+.stat-arrow{color:rgba(255,255,255,0.2);font-size:0.65rem;}
+.stat-label{font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:rgba(255,255,255,0.4);margin-bottom:0.3rem;}
+.stat-value-row{display:flex;align-items:baseline;gap:0.5rem;margin-bottom:0.15rem;}
+.stat-value{font-family:'DM Mono',monospace;font-size:2rem;font-weight:600;color:#fff;line-height:1;}
+.stat-pct{font-family:'DM Mono',monospace;font-size:0.75rem;color:rgba(255,255,255,0.3);}
+.stat-amt{font-family:'DM Mono',monospace;font-size:0.8rem;color:var(--muted);margin-bottom:0.7rem;}
+.stat-bar{height:3px;background:rgba(255,255,255,0.08);border-radius:100px;overflow:hidden;}
+.stat-bar-fill{height:100%;border-radius:100px;transition:width .9s cubic-bezier(.4,0,.2,1);}
+.stat-card.pos .stat-bar-fill{background:var(--green);}
+.stat-card.warn .stat-bar-fill{background:var(--amber);}
+.stat-card.neg .stat-bar-fill{background:var(--red);}
+.stat-card.info .stat-bar-fill{background:var(--blue);}
+.stat-card.violet .stat-bar-fill{background:var(--violet);}
+
+/* ── Hero panel ── */
+.hero-panel{display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;margin-bottom:1.2rem;}
+@media(max-width:900px){.hero-panel{grid-template-columns:1fr;}}
+
+.hero-card{
+  background:rgba(255,255,255,0.03);
+  border:1px solid rgba(255,255,255,0.07);
+  border-radius:var(--radius);padding:1.5rem;
+  backdrop-filter:blur(12px);
+}
+.hc-eyebrow{display:flex;justify-content:space-between;align-items:center;font-family:'DM Mono',monospace;font-size:0.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:.09em;margin-bottom:0.9rem;}
+.hc-eyebrow strong{color:var(--purple-light);}
+.hc-title{font-family:'Syne',sans-serif;font-weight:700;font-size:1.1rem;color:#fff;margin-bottom:0.4rem;line-height:1.2;}
+.hc-title em{font-style:italic;color:var(--purple-light);}
+.hc-sub{font-size:0.82rem;color:var(--muted);margin-bottom:1.2rem;line-height:1.6;}
+
+/* Gauge */
+.gauge-wrap{display:grid;grid-template-columns:120px 1fr;gap:1.2rem;align-items:center;}
+.gauge{position:relative;width:110px;height:110px;margin:0 auto;}
+.gauge svg{width:100%;height:100%;transform:rotate(-90deg);}
+.gauge-track{fill:none;stroke:rgba(255,255,255,0.08);stroke-width:10;}
+.gauge-fill{fill:none;stroke:url(#gaugeGrad);stroke-width:10;stroke-linecap:round;transition:stroke-dashoffset 1s cubic-bezier(.4,0,.2,1);}
+.gauge-center{position:absolute;inset:0;display:grid;place-items:center;text-align:center;}
+.gauge-num{font-family:'DM Mono',monospace;font-size:1.3rem;font-weight:600;color:#fff;line-height:1;}
+.gauge-lbl{font-size:0.6rem;color:var(--muted);margin-top:2px;}
+.gauge-rows{display:flex;flex-direction:column;gap:0.6rem;}
+.gauge-row{display:flex;align-items:center;gap:0.6rem;font-size:0.82rem;}
+.g-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.g-lbl{flex:1;color:rgba(255,255,255,0.55);font-weight:500;}
+.g-val{font-family:'DM Mono',monospace;font-size:0.82rem;color:#fff;font-weight:600;}
+
+/* Net diff */
+.net-num{font-family:'DM Mono',monospace;font-size:2.2rem;font-weight:600;line-height:1;margin-bottom:0.4rem;}
+.net-num.pos{color:var(--green);}
+.net-num.neg{color:var(--red);}
+.net-desc{font-size:0.82rem;color:var(--muted);margin-bottom:1rem;}
+.ledger{display:flex;flex-direction:column;gap:0.4rem;}
+.ledger-row{display:flex;align-items:center;gap:0.7rem;padding:0.7rem 0.9rem;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:8px;}
+.ledger-tag{font-family:'DM Mono',monospace;font-size:0.65rem;font-weight:700;padding:0.15rem 0.5rem;border-radius:4px;background:linear-gradient(135deg,var(--purple),var(--purple-mid));color:#fff;}
+.ledger-cap{flex:1;font-size:0.82rem;font-weight:500;color:rgba(255,255,255,0.6);}
+.ledger-recs{font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--muted2);}
+.ledger-amt{font-family:'DM Mono',monospace;font-size:0.82rem;font-weight:600;color:#fff;}
+
+/* ITC bar */
+.itc-bar{
+  background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);
+  border-radius:var(--radius);padding:1.5rem;margin-bottom:1.2rem;
+  backdrop-filter:blur(12px);
+}
+.itc-bar-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:1.2rem;flex-wrap:wrap;gap:0.5rem;}
+.itc-bar-title{font-family:'Syne',sans-serif;font-weight:700;font-size:1rem;color:#fff;}
+.itc-bar-meta{font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--muted);}
+.itc-cells{display:grid;grid-template-columns:repeat(4,1fr);gap:0.8rem;}
+@media(max-width:780px){.itc-cells{grid-template-columns:repeat(2,1fr);}}
+.itc-cell{padding:1rem;border-radius:10px;border:1px solid rgba(255,255,255,0.06);background:rgba(255,255,255,0.03);}
+.itc-cell-label{font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:0.4rem;}
+.itc-cell-val{font-family:'DM Mono',monospace;font-size:1.2rem;font-weight:600;line-height:1;margin-bottom:0.3rem;color:#fff;}
+.itc-cell-sub{font-size:0.7rem;color:var(--muted2);}
+.itc-cell.eligible .itc-cell-val{color:var(--green);}
+.itc-cell.review .itc-cell-val{color:var(--amber);}
+.itc-cell.risk .itc-cell-val{color:var(--red);}
+.itc-cell.unclaimed .itc-cell-val{color:var(--blue);}
+
+/* Charts */
+.chart-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;margin-bottom:1.2rem;}
+@media(max-width:860px){.chart-grid{grid-template-columns:1fr;}}
+.chart-tile{
+  background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);
+  border-radius:var(--radius);padding:1.2rem;backdrop-filter:blur(12px);
+}
+.chart-tile-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:0.8rem;}
+.chart-tile-title{font-family:'Syne',sans-serif;font-weight:700;font-size:0.9rem;color:#fff;}
+.chart-tile-sub{font-family:'DM Mono',monospace;font-size:0.68rem;color:var(--muted);}
+.chart-canvas-wrap{height:190px;position:relative;}
+.chart-canvas-tall{height:230px;position:relative;}
+
+/* ── Table cards ── */
+.table-card{
+  background:rgba(255,255,255,0.03);
+  border:1px solid rgba(255,255,255,0.07);
+  border-radius:var(--radius);overflow:hidden;backdrop-filter:blur(12px);
+}
+.table-head{
+  padding:1rem 1.2rem;border-bottom:1px solid rgba(255,255,255,0.06);
+  display:flex;align-items:center;gap:0.8rem;flex-wrap:wrap;
+}
+.table-title{font-family:'Syne',sans-serif;font-size:0.95rem;font-weight:700;color:#fff;flex:1;}
+.table-meta{font-family:'DM Mono',monospace;font-size:0.75rem;color:var(--muted);}
+.table-actions{display:flex;align-items:center;gap:0.5rem;}
+.t-search{
+  padding:0.45rem 0.8rem;background:rgba(255,255,255,0.05);
+  border:1px solid rgba(255,255,255,0.08);border-radius:30px;
+  color:#fff;font-size:0.8rem;width:170px;transition:all .2s;
+}
+.t-search:focus{outline:none;border-color:rgba(168,85,247,0.4);width:210px;}
+.t-search::placeholder{color:rgba(255,255,255,0.2);}
+.btn-export{
+  display:inline-flex;align-items:center;gap:0.4rem;
+  padding:0.4rem 0.9rem;border-radius:30px;font-size:0.76rem;font-weight:600;
+  background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);
+  color:rgba(255,255,255,0.6);cursor:pointer;transition:all .2s;
+}
+.btn-export:hover{background:rgba(255,255,255,0.09);color:#fff;}
+.ai-match-chip{
+  display:inline-flex;align-items:center;gap:0.35rem;
+  padding:0.28rem 0.7rem;border-radius:30px;font-size:0.68rem;font-weight:700;
+  background:linear-gradient(135deg,rgba(124,58,237,0.2),rgba(99,102,241,0.12));
+  border:1px solid rgba(168,85,247,0.25);color:var(--purple-light);
+  font-family:'DM Mono',monospace;
+}
+
+.t-wrap{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;font-size:0.84rem;}
+thead{background:rgba(255,255,255,0.03);}
+th{
+  padding:0.7rem 1rem;text-align:left;font-size:0.68rem;font-weight:700;
+  text-transform:uppercase;letter-spacing:.08em;color:rgba(255,255,255,0.35);
+  border-bottom:1px solid rgba(255,255,255,0.06);white-space:nowrap;
+  cursor:pointer;user-select:none;transition:color .2s;
+}
+th:hover{color:rgba(255,255,255,0.7);}
+th i{margin-left:4px;font-size:0.6rem;opacity:0.5;}
+td{
+  padding:0.8rem 1rem;border-bottom:1px solid rgba(255,255,255,0.04);
+  color:rgba(255,255,255,0.75);vertical-align:middle;
+}
+tr:last-child td{border-bottom:0;}
+tr:hover td{background:rgba(255,255,255,0.025);}
+.col-mono{font-family:'DM Mono',monospace;font-size:0.78rem;}
+.col-supplier{max-width:170px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:500;}
+.col-r{text-align:right;}
+.col-c{text-align:center;}
+.col-pos{color:var(--green);font-weight:600;font-family:'DM Mono',monospace;}
+.col-neg{color:var(--red);font-weight:600;font-family:'DM Mono',monospace;}
+.col-warn{color:var(--amber);font-weight:600;font-family:'DM Mono',monospace;}
+.col-info{color:var(--blue);font-weight:600;font-family:'DM Mono',monospace;}
+.col-num{font-family:'DM Mono',monospace;}
+
+.pill-tag{
+  display:inline-flex;align-items:center;gap:0.3rem;
+  padding:0.2rem 0.6rem;border-radius:20px;font-size:0.7rem;font-weight:600;
+}
+.pill-pos{background:rgba(74,222,128,0.12);color:var(--green);border:1px solid rgba(74,222,128,0.2);}
+.pill-neg{background:rgba(248,113,113,0.12);color:var(--red);border:1px solid rgba(248,113,113,0.2);}
+.pill-warn{background:rgba(251,191,36,0.12);color:var(--amber);border:1px solid rgba(251,191,36,0.2);}
+.pill-violet{background:rgba(167,139,250,0.12);color:var(--violet);border:1px solid rgba(167,139,250,0.2);}
+.pill-ghost{background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.5);border:1px solid rgba(255,255,255,0.1);}
+
+.gstn-diff-tag{
+  display:inline-flex;align-items:center;gap:0.25rem;
+  padding:0.15rem 0.5rem;border-radius:5px;font-size:0.65rem;font-weight:700;
+  background:rgba(167,139,250,0.15);color:var(--violet);
+  font-family:'DM Mono',monospace;margin-left:4px;
+}
+
+.dn-tag{
+  display:inline-flex;align-items:center;gap:0.3rem;
+  padding:0.2rem 0.6rem;border-radius:5px;font-size:0.7rem;font-weight:700;
+  background:rgba(248,113,113,0.12);color:var(--red);
+  font-family:'DM Mono',monospace;
+}
+
+.table-foot{
+  padding:0.8rem 1.2rem;border-top:1px solid rgba(255,255,255,0.05);
+  display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.7rem;
+  background:rgba(255,255,255,0.015);
+  font-family:'DM Mono',monospace;font-size:0.74rem;color:rgba(255,255,255,0.3);
+}
+.pgn{display:flex;align-items:center;gap:0.4rem;}
+.pgn-btn{
+  width:26px;height:26px;border-radius:6px;display:grid;place-items:center;
+  font-size:0.68rem;border:1px solid rgba(255,255,255,0.1);
+  background:rgba(255,255,255,0.04);color:rgba(255,255,255,0.4);
+  cursor:pointer;transition:all .15s;
+}
+.pgn-btn:hover{border-color:rgba(168,85,247,0.35);color:var(--purple-light);}
+.pgn-page{font-size:0.74rem;padding:0 0.5rem;color:rgba(255,255,255,0.5);}
+.pgn-select{
+  padding:0.3rem 0.5rem;border:1px solid rgba(255,255,255,0.09);
+  border-radius:6px;background:rgba(255,255,255,0.05);
+  font-family:'DM Mono',monospace;font-size:0.72rem;color:rgba(255,255,255,0.5);
+  cursor:pointer;
+}
+
+.empty-state{text-align:center;padding:3rem 1.5rem;}
+.empty-icon{font-size:2rem;margin-bottom:0.8rem;color:rgba(255,255,255,0.15);}
+.empty-state h4{font-family:'Syne',sans-serif;font-size:0.95rem;font-weight:700;color:rgba(255,255,255,0.4);margin-bottom:0.3rem;}
+.empty-state p{font-size:0.82rem;color:rgba(255,255,255,0.25);}
+
+/* ── Vendor PDF modal ── */
+.modal-overlay{
+  position:fixed;inset:0;background:rgba(6,8,18,0.75);
+  backdrop-filter:blur(8px);display:none;
+  justify-content:center;align-items:center;padding:1.5rem;z-index:300;
+  animation:fade .15s ease;
+}
+.modal-overlay.show{display:flex;}
+.modal-box{
+  background:rgba(15,12,30,0.98);
+  border:1px solid rgba(168,85,247,0.3);
+  border-radius:var(--radius-lg);
+  box-shadow:0 0 0 1px rgba(168,85,247,0.12),0 40px 100px rgba(0,0,0,0.8);
+  width:100%;max-width:640px;max-height:85vh;overflow-y:auto;
+  animation:scaleIn .2s ease;
+}
+.modal-head{
+  padding:1.5rem 1.5rem 1.2rem;
+  background:linear-gradient(135deg,rgba(124,58,237,0.2),rgba(168,85,247,0.1));
+  border-bottom:1px solid rgba(255,255,255,0.06);
+  display:flex;align-items:flex-start;justify-content:space-between;gap:0.8rem;
+  border-radius:var(--radius-lg) var(--radius-lg) 0 0;
+}
+.modal-title{font-family:'Syne',sans-serif;font-size:1.15rem;font-weight:700;color:#fff;}
+.modal-sub{font-size:0.8rem;color:var(--muted);margin-top:0.2rem;}
+.modal-close{
+  background:rgba(255,255,255,0.08);border:none;color:rgba(255,255,255,0.6);
+  width:28px;height:28px;border-radius:50%;display:grid;place-items:center;
+  cursor:pointer;flex-shrink:0;font-size:0.82rem;transition:all .15s;
+}
+.modal-close:hover{background:rgba(255,255,255,0.15);color:#fff;}
+.modal-body{padding:1.2rem 1.5rem;}
+.modal-foot{padding:1rem 1.5rem;border-top:1px solid rgba(255,255,255,0.05);display:flex;gap:0.6rem;justify-content:flex-end;}
+
+.vendor-item{
+  border:1px solid rgba(255,255,255,0.07);border-radius:10px;margin-bottom:0.6rem;overflow:hidden;
+}
+.vendor-item-head{
+  display:flex;align-items:center;gap:0.8rem;padding:0.85rem 1rem;
+  background:rgba(255,255,255,0.03);cursor:default;
+}
+.v-info{flex:1;}
+.v-name{font-weight:700;font-size:0.88rem;color:#fff;}
+.v-gstn{font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--muted);margin-top:1px;}
+.v-counts{font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--muted);display:flex;gap:0.7rem;flex-wrap:wrap;margin-top:4px;}
+.v-pdf-btns{display:flex;gap:0.5rem;flex-wrap:wrap;}
+.btn-vpdf{
+  display:inline-flex;align-items:center;gap:0.35rem;
+  padding:0.35rem 0.75rem;border-radius:20px;font-size:0.72rem;font-weight:600;
+  background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);
+  color:rgba(255,255,255,0.6);cursor:pointer;transition:all .2s;
+}
+.btn-vpdf:hover{background:rgba(124,58,237,0.15);border-color:rgba(168,85,247,0.3);color:var(--purple-light);}
+.btn-vpdf.not-on-portal:hover{background:rgba(248,113,113,0.1);border-color:rgba(248,113,113,0.3);color:var(--red);}
+.btn-vpdf.not-in-books:hover{background:rgba(96,165,250,0.1);border-color:rgba(96,165,250,0.3);color:var(--blue);}
+
+/* ── Command palette ── */
+.cmd-overlay{
+  position:fixed;inset:0;background:rgba(6,8,18,0.7);backdrop-filter:blur(6px);
+  display:none;justify-content:center;align-items:flex-start;padding-top:16vh;z-index:400;
+}
+.cmd-overlay.show{display:flex;animation:fade .15s ease;}
+.cmd-modal{
+  width:100%;max-width:560px;
+  background:rgba(12,10,25,0.98);border:1px solid rgba(168,85,247,0.25);
+  border-radius:var(--radius-lg);box-shadow:0 40px 100px rgba(0,0,0,0.8);
+  overflow:hidden;animation:scaleIn .2s ease;
+}
+.cmd-input-wrap{display:flex;align-items:center;gap:0.8rem;padding:1rem 1.2rem;border-bottom:1px solid rgba(255,255,255,0.06);}
+.cmd-input-wrap i{color:var(--muted);font-size:0.88rem;}
+.cmd-input{border:0;background:transparent;outline:0;font-size:0.95rem;font-family:'DM Sans',sans-serif;color:#fff;width:100%;font-weight:500;}
+.cmd-input::placeholder{color:rgba(255,255,255,0.2);}
+.cmd-list{max-height:340px;overflow-y:auto;padding:0.4rem;}
+.cmd-section{padding:0.7rem 0.9rem 0.25rem;font-family:'DM Mono',monospace;font-size:0.62rem;color:var(--muted2);text-transform:uppercase;letter-spacing:.12em;font-weight:700;}
+.cmd-item{display:flex;align-items:center;gap:0.75rem;padding:0.65rem 0.9rem;border-radius:8px;cursor:pointer;font-size:0.88rem;color:rgba(255,255,255,0.6);transition:all .1s;}
+.cmd-item.active{background:linear-gradient(135deg,rgba(124,58,237,0.3),rgba(168,85,247,0.15));color:#fff;border:1px solid rgba(168,85,247,0.25);}
+.cmd-item i{color:currentColor;opacity:0.65;width:14px;text-align:center;font-size:0.78rem;}
+.cmd-item-label{flex:1;}
+.cmd-key{margin-left:auto;font-family:'DM Mono',monospace;font-size:0.65rem;padding:0.1rem 0.4rem;background:rgba(255,255,255,0.08);border-radius:3px;opacity:0.6;}
+.cmd-foot{padding:0.65rem 1rem;border-top:1px solid rgba(255,255,255,0.05);font-family:'DM Mono',monospace;font-size:0.7rem;color:rgba(255,255,255,0.25);display:flex;justify-content:space-between;background:rgba(255,255,255,0.02);}
+.cmd-foot kbd{display:inline-block;padding:0.05rem 0.4rem;margin:0 1px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:3px;font-family:'DM Mono',monospace;font-size:0.65rem;}
+
+/* Toast */
+.toast-host{position:fixed;bottom:1.2rem;right:1.2rem;z-index:500;display:flex;flex-direction:column;gap:0.5rem;pointer-events:none;}
+.toast{
+  display:flex;align-items:center;gap:0.7rem;padding:0.8rem 1rem;
+  background:rgba(12,10,25,0.98);border:1px solid rgba(255,255,255,0.1);
+  border-radius:10px;box-shadow:0 8px 40px rgba(0,0,0,0.6);
+  font-size:0.88rem;font-weight:500;min-width:220px;max-width:360px;
+  pointer-events:all;animation:slideRight .25s ease;color:#fff;
+  backdrop-filter:blur(16px);
+}
+.toast.success{border-color:rgba(74,222,128,0.3);}
+.toast.warn{border-color:rgba(251,191,36,0.3);}
+.toast.error{border-color:rgba(248,113,113,0.3);}
+.toast.info{border-color:rgba(168,85,247,0.3);}
+.toast.success i{color:var(--green);}
+.toast.warn i{color:var(--amber);}
+.toast.error i{color:var(--red);}
+.toast.info i{color:var(--purple-light);}
+
+/* Loading */
+.loading{position:fixed;inset:0;background:rgba(6,8,18,0.9);backdrop-filter:blur(8px);z-index:600;display:none;place-items:center;}
+.loading.show{display:grid;}
+.loading-inner{text-align:center;}
+.spinner{width:38px;height:38px;margin:0 auto 1rem;border:2.5px solid rgba(255,255,255,0.08);border-top-color:var(--purple-mid);border-radius:50%;animation:spin .7s linear infinite;}
+.loading-text{font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.12em;font-weight:600;}
+
+/* Info alert */
+.info-alert{
+  padding:0.8rem 1rem;border-radius:8px;margin-bottom:1rem;
+  font-size:0.82rem;display:flex;align-items:flex-start;gap:0.6rem;line-height:1.5;
+}
+.info-alert.neg{background:rgba(248,113,113,0.08);border:1px solid rgba(248,113,113,0.18);color:var(--red);}
+.info-alert i{flex-shrink:0;margin-top:1px;}
+
+/* Mobile */
+.sb-backdrop{display:none;position:fixed;inset:0;background:rgba(6,8,18,0.65);z-index:45;}
+.sb-backdrop.show{display:block;}
+@media(max-width:900px){
+  .app-screen{grid-template-columns:1fr;}
+  .sidebar{position:fixed;left:0;top:0;bottom:0;width:260px;transform:translateX(-100%);transition:transform .25s ease;box-shadow:0 0 80px rgba(0,0,0,0.8);z-index:60;}
+  .sidebar.open{transform:translateX(0);}
+  .sb-toggle{display:grid;}
+  .topbar{padding:0 1rem;}
+  .canvas{padding:1.5rem 1rem 3rem;}
+  .topbar-cmd{display:none;}
+  .stat-value{font-size:1.6rem;}
+}
+@media print{
+  .sidebar,.topbar,.table-actions,.table-foot,.cmd-overlay,.toast-host{display:none!important;}
+  .app-screen{grid-template-columns:1fr;}
+  .canvas{padding:1rem;}
+  .page{display:block!important;page-break-before:always;}
+  .page:first-of-type{page-break-before:auto;}
+}
+</style>
+</head>
+<body class="state-upload">
+
+<!-- Background elements (same as main site) -->
+<div class="rupee-rain" aria-hidden="true">
+  <span class="rupee r1">₹</span><span class="rupee r2">₹</span>
+  <span class="rupee r3">₹</span><span class="rupee r4">₹</span>
+  <span class="rupee r5">₹</span><span class="rupee r6">₹</span>
+</div>
+<div class="grid-overlay"></div>
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <linearGradient id="gaugeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#a855f7"/>
+      <stop offset="100%" stop-color="#7c3aed"/>
+    </linearGradient>
+  </defs>
+</svg>
+
+<!-- NAVBAR -->
+<header class="navbar">
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo">
+      <img src="taxnest-logo.webp" alt="TaxNest" class="nav-logo-img"
+        onerror="this.style.display='none';document.getElementById('nbfb').style.display='flex'">
+      <div id="nbfb" class="nav-logo-fallback" style="display:none;">₹</div>
+      <span>TaxNest</span>
+    </a>
+    <div class="nav-tool-badge">
+      <span class="pulse"></span>
+      Free GST Reconciliation Tool
+    </div>
+    <div class="nav-right">
+      <a href="index.html" class="nav-back"><i class="fas fa-arrow-left"></i> Back to site</a>
+    </div>
+  </div>
+</header>
+
+<!-- ============================================================
+     UPLOAD SCREEN
+     ============================================================ -->
+<div class="upload-screen">
+
+  <div class="upload-hero">
+    <div class="upload-badge"><span class="bdot"></span> Free Forever · AI Powered</div>
+    <h1 class="upload-h1">GSTR-2A Reconciliation<br>with <span class="grad">TaxNest AI</span></h1>
+    <p class="upload-tagline">We Handle Your Books, GST &amp; TDS — You Handle Your Business</p>
+    <p class="upload-sub">
+      Upload your <strong>Purchase Register</strong> &amp; <strong>GSTR-2A</strong> file — our AI matches every invoice by GST No. and Invoice No. in seconds. Get vendor-wise PDF letters, debit note analysis, and full Excel reports. <strong>100% free, zero login.</strong>
+    </p>
+
+    <div class="feat-pills">
+      <div class="feat-pill"><i class="fas fa-check"></i> GSTN + Invoice AI matching</div>
+      <div class="feat-pill"><i class="fas fa-check"></i> GST No. mismatch detection</div>
+      <div class="feat-pill"><i class="fas fa-check"></i> Vendor-wise PDF letters</div>
+      <div class="feat-pill"><i class="fas fa-check"></i> Custom tolerance setting</div>
+      <div class="feat-pill"><i class="fas fa-check"></i> Debit note pair analysis</div>
+      <div class="feat-pill"><i class="fas fa-check"></i> Consolidated Excel export</div>
+    </div>
+  </div>
+
+  <div class="upload-card-wrap">
+    <div class="upload-card">
+
+      <!-- Title -->
+      <div class="upload-card-top">
+        <div class="upload-card-title">Upload your reconciliation file</div>
+        <div class="upload-card-sub">Enter client details below for vendor PDF letters, then upload your Excel file</div>
+      </div>
+
+      <!-- Client GSTN inputs -->
+      <div class="client-row">
+        <div class="field-group">
+          <div class="field-label">Client GSTN</div>
+          <input type="text" id="clientGSTN" class="field-input" placeholder="e.g. 24XXXXX1234A1ZE" maxlength="15" style="text-transform:uppercase">
+        </div>
+        <div class="field-group">
+          <div class="field-label">Client Firm Name</div>
+          <input type="text" id="clientName" class="field-input" placeholder="e.g. ABC Traders Pvt Ltd">
+        </div>
+        <div class="field-group">
+          <div class="field-label">Alt. GSTN (optional)</div>
+          <input type="text" id="clientGSTN2" class="field-input" placeholder="Secondary GSTN" maxlength="15" style="text-transform:uppercase">
+        </div>
+        <div class="field-group">
+          <div class="field-label">Alt. Firm Name (optional)</div>
+          <input type="text" id="clientName2" class="field-input" placeholder="Alt. firm name">
+        </div>
+      </div>
+
+      <!-- Tolerance -->
+      <div class="tolerance-row">
+        <div class="tol-label"><i class="fas fa-sliders"></i> Mismatch Tolerance (₹)</div>
+        <input type="number" id="toleranceInput" class="tol-input" value="1" min="0" max="99999" step="1">
+        <div class="tol-hint">Differences within this amount are treated as matched</div>
+      </div>
+
+      <!-- Drop zone -->
+      <div class="dropzone-area">
+        <div class="dropzone" id="dropZone">
+          <div class="dz-icon">📂</div>
+          <div class="dz-title">Drop your Excel file here</div>
+          <div class="dz-sub">.xlsx or .xls · PR sheet + GSTR-2A sheet</div>
+          <button class="btn-upload" onclick="document.getElementById('fileInput').click()">
+            <i class="fas fa-arrow-up-from-bracket"></i> Choose File
+          </button>
+          <input type="file" id="fileInput" accept=".xlsx,.xls">
+          <div class="file-confirm" id="fileConfirm">
+            <i class="fas fa-circle-check"></i> <span id="fileName">File ready</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer row -->
+      <div class="upload-card-foot">
+        <div class="foot-meta">
+          Matching: <strong>GSTN + Invoice No.</strong> <span class="ai-chip">🤖 AI</span><br>
+          Tolerance: <strong id="footTol">±₹1</strong> · Automated &amp; secure · No data stored
+        </div>
+        <button class="btn-sample" onclick="downloadSampleTemplate()">
+          <i class="fas fa-file-arrow-down"></i> Download Sample Template
+        </button>
+      </div>
+    </div>
+
+    <!-- Spec card -->
+    <div class="spec-wrap">
+      <div class="spec-card">
+        <div class="spec-head">
+          <div class="spec-head-title"><i class="fas fa-table-columns" style="margin-right:6px;opacity:0.7;"></i> Required File Structure</div>
+          <div class="spec-head-meta">2 sheets · 9 columns each</div>
+        </div>
+        <div class="spec-cols">
+          <div class="spec-col">
+            <div class="spec-sheet-label">Sheet 01</div>
+            <h4>Purchase Register (PR)</h4>
+            <div class="spec-fields">
+              <span class="spec-field">PR GSTN No.</span>
+              <span class="spec-field">PR Name of Supplier</span>
+              <span class="spec-field">PR Invoice No.</span>
+              <span class="spec-field">PR Invoice Date</span>
+              <span class="spec-field">PR Rate</span>
+              <span class="spec-field">PR Taxable</span>
+              <span class="spec-field">PR IGST</span>
+              <span class="spec-field">PR CGST</span>
+              <span class="spec-field">PR SGST</span>
+            </div>
+          </div>
+          <div class="spec-col">
+            <div class="spec-sheet-label">Sheet 02</div>
+            <h4>GSTR-2A Statement</h4>
+            <div class="spec-fields">
+              <span class="spec-field">2A GSTN No.</span>
+              <span class="spec-field">2A Name of Supplier</span>
+              <span class="spec-field">2A Invoice No.</span>
+              <span class="spec-field">2A Invoice Date</span>
+              <span class="spec-field">2A Rate</span>
+              <span class="spec-field">2A Taxable</span>
+              <span class="spec-field">2A IGST</span>
+              <span class="spec-field">2A CGST</span>
+              <span class="spec-field">2A SGST</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom footer -->
+    <div class="upload-foot">
+      <div class="foot-info">
+        Matching GST No. &amp; Invoice No. wise with <strong>best-in-class AI</strong><br>
+        Fully automated &amp; secure · No data leaves your session<br>
+        © 2026 <strong>TaxNest</strong> · Free tool for GST professionals
+      </div>
+      <div class="foot-contacts">
+        <div><i class="fas fa-phone" style="color:var(--purple-light);margin-right:5px;width:14px;"></i><a href="tel:+918320222643">+91 83202 22643</a></div>
+        <div><i class="fas fa-envelope" style="color:var(--purple-light);margin-right:5px;width:14px;"></i><a href="mailto:taxnest.info@gmail.com">taxnest.info@gmail.com</a></div>
+        <div class="foot-socials">
+          <a href="index.html" class="foot-soc"><i class="fas fa-globe"></i> Website</a>
+          <a href="https://instagram.com/taxnest_2026" target="_blank" class="foot-soc ig"><i class="fab fa-instagram"></i> @taxnest_2026</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     APP SCREEN
+     ============================================================ -->
+<div class="app-screen">
+  <div class="sb-backdrop" id="sbBackdrop" onclick="closeSidebar()"></div>
+
+  <aside class="sidebar" id="sidebar">
+    <div class="sb-brand">
+      <img src="taxnest-logo.webp" alt="TaxNest" class="sb-logo-img"
+        onerror="this.style.display='none';document.getElementById('sbfb').style.display='flex'">
+      <div id="sbfb" class="sb-logo-fallback" style="display:none;font-family:'Syne',sans-serif;font-weight:800;font-size:0.9rem;color:#fff;">₹</div>
+      <div>
+        <div class="sb-brand-name">TaxNest</div>
+        <div class="sb-brand-sub">GST · TDS · Bookkeeping</div>
+      </div>
+    </div>
+
+    <div class="sb-section">Workspace</div>
+    <ul class="nav-list">
+      <li class="nav-item active" data-nav="overview"><i class="nav-icon fas fa-gauge-high"></i><span class="nav-label">Overview</span></li>
+      <li class="nav-item" data-nav="match"><i class="nav-icon fas fa-circle-check"></i><span class="nav-label">Matched</span><span class="nav-count" id="navMatchCount">0</span></li>
+      <li class="nav-item" data-nav="mismatch"><i class="nav-icon fas fa-triangle-exclamation"></i><span class="nav-label">Mismatches</span><span class="nav-count" id="navMismatchCount">0</span></li>
+      <li class="nav-item" data-nav="pr-only"><i class="nav-icon fas fa-circle-xmark"></i><span class="nav-label">Not in 2A</span><span class="nav-count" id="navPrOnlyCount">0</span></li>
+      <li class="nav-item" data-nav="gstr2a-only"><i class="nav-icon fas fa-file-invoice"></i><span class="nav-label">Not in Books</span><span class="nav-count" id="navG2aOnlyCount">0</span></li>
+      <li class="nav-item" data-nav="gstn-mismatch"><i class="nav-icon fas fa-id-card"></i><span class="nav-label">GSTN Mismatch</span><span class="nav-count" id="navGstnCount">0</span></li>
+      <li class="nav-item" data-nav="debit-notes"><i class="nav-icon fas fa-receipt"></i><span class="nav-label">Debit Notes</span><span class="nav-count" id="navDNCount">0</span></li>
+    </ul>
+
+    <div class="sb-section">Actions</div>
+    <ul class="nav-list">
+      <li class="nav-item" onclick="exportFullReport()"><i class="nav-icon fas fa-file-excel"></i><span class="nav-label">Export Excel</span></li>
+      <li class="nav-item" onclick="openVendorModal()"><i class="nav-icon fas fa-file-pdf"></i><span class="nav-label">Vendor PDFs</span></li>
+      <li class="nav-item" onclick="window.print()"><i class="nav-icon fas fa-print"></i><span class="nav-label">Print / PDF</span></li>
+      <li class="nav-item" onclick="resetApp()"><i class="nav-icon fas fa-rotate-left"></i><span class="nav-label">Upload New File</span></li>
+    </ul>
+
+    <div class="sb-foot">
+      <div class="sb-meta" id="sbMeta"><div><strong>—</strong></div><div>Awaiting data</div></div>
+      <div class="sb-actions">
+        <button class="icon-btn" onclick="openCmd()" title="Search ⌘K"><i class="fas fa-magnifying-glass"></i></button>
+        <button class="icon-btn" onclick="openVendorModal()" title="Vendor PDFs"><i class="fas fa-file-pdf"></i></button>
+        <button class="icon-btn" onclick="exportFullReport()" title="Export Excel"><i class="fas fa-file-export"></i></button>
+      </div>
+    </div>
+    <div class="sb-links">
+      <a href="index.html" class="sb-link"><i class="fas fa-globe"></i> taxnest2026.github.io</a>
+      <a href="tel:+918320222643" class="sb-link"><i class="fas fa-phone"></i> +91 83202 22643</a>
+      <a href="https://instagram.com/taxnest_2026" target="_blank" class="sb-link"><i class="fab fa-instagram"></i> @taxnest_2026</a>
+    </div>
+  </aside>
+
+  <main class="workspace">
+    <header class="topbar">
+      <button class="icon-btn sb-toggle" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+      <nav class="topbar-bc">
+        <span class="bc-item">TaxNest · GST Recon</span>
+        <span class="bc-sep"><i class="fas fa-chevron-right"></i></span>
+        <span class="bc-item bc-current" id="bcCurrent">Overview</span>
+      </nav>
+      <button class="topbar-cmd" onclick="openCmd()">
+        <i class="fas fa-magnifying-glass"></i>
+        <span>Search invoices, GSTNs…</span>
+        <span class="cmd-key">⌘K</span>
+      </button>
+      <div class="topbar-actions">
+        <button class="btn-export" onclick="openVendorModal()" style="color:var(--red);border-color:rgba(248,113,113,0.25);">
+          <i class="fas fa-file-pdf"></i> Vendor PDFs
+        </button>
+        <button class="icon-btn" onclick="exportFullReport()" title="Export"><i class="fas fa-file-export"></i></button>
+        <button class="icon-btn" onclick="window.print()"><i class="fas fa-print"></i></button>
+      </div>
+    </header>
+
+    <div class="canvas">
+
+      <!-- ════ OVERVIEW ════ -->
+      <section class="page active" id="page-overview">
+        <div class="page-eyebrow">TaxNest · AI Reconciliation Dashboard</div>
+        <h1 class="page-title">Your ITC position, <em>at a glance</em>.</h1>
+        <p class="page-deck">Matching GST No. &amp; Invoice No. wise with best-in-class AI. Tolerance applied: <strong id="tolDisplay">±₹1</strong>. Click any card to drill down.</p>
+
+        <div class="stat-grid">
+          <div class="stat-card pos" onclick="navigate('match')">
+            <div class="stat-head"><div class="stat-ico"><i class="fas fa-circle-check"></i></div><i class="stat-arrow fas fa-arrow-up-right-from-square"></i></div>
+            <div class="stat-label">Matched</div>
+            <div class="stat-value-row"><div class="stat-value" id="matchCount">0</div><div class="stat-pct" id="matchPct">0%</div></div>
+            <div class="stat-amt" id="matchAmt">₹0</div>
+            <div class="stat-bar"><div class="stat-bar-fill" id="matchBar" style="width:0%"></div></div>
+          </div>
+          <div class="stat-card warn" onclick="navigate('mismatch')">
+            <div class="stat-head"><div class="stat-ico"><i class="fas fa-triangle-exclamation"></i></div><i class="stat-arrow fas fa-arrow-up-right-from-square"></i></div>
+            <div class="stat-label">Amount Mismatch</div>
+            <div class="stat-value-row"><div class="stat-value" id="mismatchCount">0</div><div class="stat-pct" id="mismatchPct">0%</div></div>
+            <div class="stat-amt" id="mismatchAmt">₹0</div>
+            <div class="stat-bar"><div class="stat-bar-fill" id="mismatchBar" style="width:0%"></div></div>
+          </div>
+          <div class="stat-card neg" onclick="navigate('pr-only')">
+            <div class="stat-head"><div class="stat-ico"><i class="fas fa-circle-xmark"></i></div><i class="stat-arrow fas fa-arrow-up-right-from-square"></i></div>
+            <div class="stat-label">Not on Portal</div>
+            <div class="stat-value-row"><div class="stat-value" id="prOnlyCount">0</div><div class="stat-pct" id="prOnlyPct">0%</div></div>
+            <div class="stat-amt" id="prOnlyAmt">₹0</div>
+            <div class="stat-bar"><div class="stat-bar-fill" id="prOnlyBar" style="width:0%"></div></div>
+          </div>
+          <div class="stat-card info" onclick="navigate('gstr2a-only')">
+            <div class="stat-head"><div class="stat-ico"><i class="fas fa-file-invoice"></i></div><i class="stat-arrow fas fa-arrow-up-right-from-square"></i></div>
+            <div class="stat-label">Not in Books</div>
+            <div class="stat-value-row"><div class="stat-value" id="g2aOnlyCount">0</div><div class="stat-pct" id="g2aOnlyPct">0%</div></div>
+            <div class="stat-amt" id="g2aOnlyAmt">₹0</div>
+            <div class="stat-bar"><div class="stat-bar-fill" id="g2aOnlyBar" style="width:0%"></div></div>
+          </div>
+        </div>
+
+        <!-- Extra stats -->
+        <div class="stat-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:1.2rem;">
+          <div class="stat-card violet" onclick="navigate('gstn-mismatch')" style="cursor:pointer;">
+            <div class="stat-head"><div class="stat-ico" style="background:rgba(167,139,250,0.12);color:var(--violet);"><i class="fas fa-id-card"></i></div><i class="stat-arrow fas fa-arrow-up-right-from-square"></i></div>
+            <div class="stat-label">GSTN Mismatch</div>
+            <div class="stat-value-row"><div class="stat-value" id="gstnMismatchCount" style="color:var(--violet);font-size:1.8rem;">0</div></div>
+            <div class="stat-amt" id="gstnMismatchAmt">₹0</div>
+            <div class="stat-bar"><div class="stat-bar-fill" id="gstnMismatchBar" style="width:0%;background:var(--violet);"></div></div>
+          </div>
+          <div class="stat-card neg" onclick="navigate('debit-notes')" style="cursor:pointer;">
+            <div class="stat-head"><div class="stat-ico"><i class="fas fa-receipt"></i></div><i class="stat-arrow fas fa-arrow-up-right-from-square"></i></div>
+            <div class="stat-label">Debit Note Pairs</div>
+            <div class="stat-value-row"><div class="stat-value" id="dnCount" style="color:var(--red);font-size:1.8rem;">0</div></div>
+            <div class="stat-amt">Supplier error reversals</div>
+            <div class="stat-bar"><div class="stat-bar-fill" id="dnBar" style="width:0%;"></div></div>
+          </div>
+          <div class="stat-card warn">
+            <div class="stat-head"><div class="stat-ico"><i class="fas fa-sliders"></i></div></div>
+            <div class="stat-label">Tolerance</div>
+            <div class="stat-value-row"><div class="stat-value" id="tolCard" style="color:var(--amber);font-size:1.5rem;">±₹1</div></div>
+            <div class="stat-amt">Adjustable on upload screen</div>
+            <div class="stat-bar"><div class="stat-bar-fill" style="width:100%;"></div></div>
+          </div>
+        </div>
+
+        <div class="hero-panel">
+          <div class="hero-card">
+            <div class="hc-eyebrow"><span>Match Rate</span><strong id="reconMeta">—</strong></div>
+            <h2 class="hc-title">How much ITC <em>matches</em>?</h2>
+            <p class="hc-sub">GSTN + Invoice No. AI matching. Records within tolerance count as full match.</p>
+            <div class="gauge-wrap">
+              <div class="gauge">
+                <svg viewBox="0 0 120 120">
+                  <circle class="gauge-track" cx="60" cy="60" r="52"></circle>
+                  <circle class="gauge-fill" id="gaugeFill" cx="60" cy="60" r="52" stroke-dasharray="326.7" stroke-dashoffset="326.7"></circle>
+                </svg>
+                <div class="gauge-center">
+                  <div><div class="gauge-num" id="gaugeNum">0%</div><div class="gauge-lbl">Match Rate</div></div>
+                </div>
+              </div>
+              <div class="gauge-rows">
+                <div class="gauge-row"><span class="g-dot" style="background:var(--green);"></span><span class="g-lbl">Matched</span><span class="g-val" id="gMatchCount">0</span></div>
+                <div class="gauge-row"><span class="g-dot" style="background:var(--amber);"></span><span class="g-lbl">Need review</span><span class="g-val" id="gReviewCount">0</span></div>
+                <div class="gauge-row"><span class="g-dot" style="background:rgba(255,255,255,0.2);"></span><span class="g-lbl">Total records</span><span class="g-val" id="gTotalCount">0</span></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="hero-card">
+            <div class="hc-eyebrow"><span>Net Tax Difference</span><strong id="netDesc">—</strong></div>
+            <div class="net-num" id="netDiff">₹0</div>
+            <div class="net-desc">Purchase Register total minus GSTR-2A total tax.</div>
+            <div class="ledger">
+              <div class="ledger-row">
+                <span class="ledger-tag">PR</span>
+                <span class="ledger-cap">Purchase Register</span>
+                <span class="ledger-recs" id="prRecs">0 recs</span>
+                <span class="ledger-amt" id="prTotal">₹0</span>
+              </div>
+              <div class="ledger-row">
+                <span class="ledger-tag">2A</span>
+                <span class="ledger-cap">GSTR-2A Statement</span>
+                <span class="ledger-recs" id="g2aRecs">0 recs</span>
+                <span class="ledger-amt" id="g2aTotal">₹0</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="itc-bar">
+          <div class="itc-bar-head">
+            <div class="itc-bar-title">ITC Impact Summary</div>
+            <div class="itc-bar-meta" id="itcMeta">Match rate: 0%</div>
+          </div>
+          <div class="itc-cells">
+            <div class="itc-cell eligible"><div class="itc-cell-label">Eligible ITC</div><div class="itc-cell-val" id="itcEligible">₹0</div><div class="itc-cell-sub">Fully matched</div></div>
+            <div class="itc-cell review"><div class="itc-cell-label">Under Review</div><div class="itc-cell-val" id="itcReview">₹0</div><div class="itc-cell-sub">Amount mismatch</div></div>
+            <div class="itc-cell risk"><div class="itc-cell-label">At Risk</div><div class="itc-cell-val" id="itcRisk">₹0</div><div class="itc-cell-sub">Not on portal</div></div>
+            <div class="itc-cell unclaimed"><div class="itc-cell-label">To Record</div><div class="itc-cell-val" id="itcUnclaimed">₹0</div><div class="itc-cell-sub">In 2A, not in books</div></div>
+          </div>
+        </div>
+
+        <div class="chart-grid">
+          <div class="chart-tile">
+            <div class="chart-tile-head"><div class="chart-tile-title">Reconciliation Status</div><div class="chart-tile-sub">Distribution</div></div>
+            <div class="chart-canvas-wrap"><canvas id="statusChart"></canvas></div>
+          </div>
+          <div class="chart-tile">
+            <div class="chart-tile-head"><div class="chart-tile-title">Tax Comparison</div><div class="chart-tile-sub">PR vs 2A (₹ Lakhs)</div></div>
+            <div class="chart-canvas-wrap"><canvas id="taxChart"></canvas></div>
+          </div>
+          <div class="chart-tile">
+            <div class="chart-tile-head"><div class="chart-tile-title">Mismatch Breakdown</div><div class="chart-tile-sub">By tax type</div></div>
+            <div class="chart-canvas-wrap"><canvas id="misTypeChart"></canvas></div>
+          </div>
+          <div class="chart-tile">
+            <div class="chart-tile-head"><div class="chart-tile-title">Top Vendors by Difference</div></div>
+            <div class="chart-canvas-tall"><canvas id="vendorChart"></canvas></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ════ MATCHED ════ -->
+      <section class="page" id="page-match">
+        <div class="page-eyebrow">Full Match</div>
+        <h1 class="page-title">Records that <em>match</em> perfectly.</h1>
+        <p class="page-deck">GSTN + Invoice found in both PR and 2A with tax within tolerance. Safe to claim ITC.</p>
+        <div class="table-card">
+          <div class="table-head">
+            <div class="table-title">Matched Invoices</div>
+            <div class="table-meta" id="matchTableAmt">₹0</div>
+            <div class="table-actions">
+              <input class="t-search" id="matchSearch" placeholder="Search…" type="text">
+              <button class="btn-export" onclick="exportTable('match')"><i class="fas fa-download"></i> Export</button>
+            </div>
+          </div>
+          <div class="t-wrap">
+            <table id="matchTable">
+              <thead><tr>
+                <th onclick="sortTable('match',0)">GSTN <i class="fas fa-sort"></i></th>
+                <th onclick="sortTable('match',1)">Supplier <i class="fas fa-sort"></i></th>
+                <th onclick="sortTable('match',2)">Invoice No. <i class="fas fa-sort"></i></th>
+                <th onclick="sortTable('match',3)">Date <i class="fas fa-sort"></i></th>
+                <th class="col-r" onclick="sortTable('match',4)">IGST <i class="fas fa-sort"></i></th>
+                <th class="col-r" onclick="sortTable('match',5)">CGST <i class="fas fa-sort"></i></th>
+                <th class="col-r" onclick="sortTable('match',6)">SGST <i class="fas fa-sort"></i></th>
+                <th class="col-r" onclick="sortTable('match',7)">Total <i class="fas fa-sort"></i></th>
+                <th class="col-c">Status</th>
+              </tr></thead>
+              <tbody id="matchTbody"></tbody>
+            </table>
+          </div>
+          <div class="table-foot">
+            <div id="matchPaginInfo">Showing 0 of 0</div>
+            <div class="pgn">
+              <select class="pgn-select" onchange="changePerPage('match',this.value)"><option value="10">10/pg</option><option value="25">25/pg</option><option value="50">50/pg</option><option value="100">100/pg</option></select>
+              <button class="pgn-btn" onclick="changePage('match',-1)"><i class="fas fa-chevron-left"></i></button>
+              <span class="pgn-page" id="matchPageInd">1/1</span>
+              <button class="pgn-btn" onclick="changePage('match',1)"><i class="fas fa-chevron-right"></i></button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ════ MISMATCH ════ -->
+      <section class="page" id="page-mismatch">
+        <div class="page-eyebrow">Amount Mismatch</div>
+        <h1 class="page-title">Invoices with <em>tax differences</em>.</h1>
+        <p class="page-deck">Invoice found in both PR and 2A (GSTN + Invoice No. matched) but tax amounts differ beyond tolerance.</p>
+        <div class="table-card">
+          <div class="table-head">
+            <div class="table-title">Amount Mismatched</div>
+            <div class="table-meta" id="mismatchTableAmt">₹0</div>
+            <div class="table-actions">
+              <span class="ai-match-chip"><i class="fas fa-robot"></i> AI Matched GSTN+Inv</span>
+              <input class="t-search" id="mismatchSearch" placeholder="Search…" type="text">
+              <button class="btn-export" onclick="exportTable('mismatch')"><i class="fas fa-download"></i> Export</button>
+            </div>
+          </div>
+          <div class="t-wrap">
+            <table id="mismatchTable">
+              <thead><tr>
+                <th onclick="sortTable('mismatch',0)">GSTN <i class="fas fa-sort"></i></th>
+                <th onclick="sortTable('mismatch',1)">Supplier <i class="fas fa-sort"></i></th>
+                <th onclick="sortTable('mismatch',2)">Invoice No. <i class="fas fa-sort"></i></th>
+                <th class="col-r" onclick="sortTable('mismatch',3)">PR Total <i class="fas fa-sort"></i></th>
+                <th class="col-r" onclick="sortTable('mismatch',4)">2A Total <i class="fas fa-sort"></i></th>
+                <th class="col-r" onclick="sortTable('mismatch',5)">Difference <i class="fas fa-sort"></i></th>
+              </tr></thead>
+              <tbody id="mismatchTbody"></tbody>
+            </table>
+          </div>
+          <div class="table-foot">
+            <div id="mismatchPaginInfo">Showing 0 of 0</div>
+            <div class="pgn">
+              <select class="pgn-select" onchange="changePerPage('mismatch',this.value)"><option value="10">10/pg</option><option value="25">25/pg</option><option value="50">50/pg</option><option value="100">100/pg</option></select>
+              <button class="pgn-btn" onclick="changePage('mismatch',-1)"><i class="fas fa-chevron-left"></i></button>
+              <span class="pgn-page" id="mismatchPageInd">1/1</span>
+              <button class="pgn-btn" onclick="changePage('mismatch',1)"><i class="fas fa-chevron-right"></i></button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ════ PR ONLY ════ -->
+      <section class="page" id="page-pr-only">
+        <div class="page-eyebrow">Not on GST Portal</div>
+        <h1 class="page-title">In books, <em>not on portal</em>.</h1>
+        <p class="page-deck">Recorded in your Purchase Register but supplier has NOT uploaded on GST portal. Use Vendor PDF letters to follow up.</p>
+        <div class="table-card">
+          <div class="table-head">
+            <div class="table-title">Not in GSTR-2A</div>
+            <div class="table-meta" id="prOnlyTableAmt">₹0</div>
+            <div class="table-actions">
+              <span class="ai-match-chip"><i class="fas fa-robot"></i> AI Matched</span>
+              <input class="t-search" id="prOnlySearch" placeholder="Search…" type="text">
+              <button class="btn-export" onclick="exportTable('prOnly')"><i class="fas fa-download"></i> Export</button>
+            </div>
+          </div>
+          <div class="t-wrap">
+            <table id="prOnlyTable">
+              <thead><tr>
+                <th onclick="sortTable('prOnly',0)">GSTN <i class="fas fa-sort"></i></th>
+                <th onclick="sortTable('prOnly',1)">Supplier <i class="fas fa-sort"></i></th>
+                <th onclick="sortTable('prOnly',2)">Invoice No. <i class="fas fa-sort"></i></th>
+                <th onclick="sortTable('prOnly',3)">Date <i class="fas fa-sort"></i></th>
+                <th class="col-r" onclick="sortTable('prOnly',4)">IGST <i class="fas fa-sort"></i></th>
+                <th class="col-r" onclick="sortTable('prOnly',5)">CGST <i class="fas fa-sort"></i></th>
+                <th class="col-r" onclick="sortTable('prOnly',6)">SGST <i class="fas fa-sort"></i></th>
+                <th class="col-r" onclick="sortTable('prOnly',7)">Total <i class="fas fa-sort"></i></th>
+              </tr></thead>
+              <tbody id="prOnlyTbody"></tbody>
+            </table>
+          </div>
+          <div class="table-foot">
+            <div id="prOnlyPaginInfo">Showing 0 of 0</div>
+            <div class="pgn">
+              <select class="pgn-select" onchange="changePerPage('prOnly',this.value)"><option value="10">10/pg</option><option value="25">25/pg</option><option value="50">50/pg</option></select>
+              <button class="pgn-btn" onclick="changePage('prOnly',-1)"><i class="fas fa-chevron-left"></i></button>
+              <span class="pgn-page" id="prOnlyPageInd">1/1</span>
+              <button class="pgn-btn" onclick="changePage('prOnly',1)"><i class="fas fa-chevron-right"></i></button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ════ GSTR2A ONLY ════ -->
+      <section class="page" id="page-gstr2a-only">
+        <div class="page-eyebrow">Not Recorded in Books</div>
+        <h1 class="page-title">On portal, <em>not in books</em>.</h1>
+        <p class="page-deck">Supplier has uploaded on GST portal but invoices are NOT recorded in your Purchase Register. Collect physical invoices from supplier.</p>
+        <div class="table-card">
+          <div class="table-head">
+            <div class="table-title">In 2A, Not in Books</div>
+            <div class="table-meta" id="g2aOnlyTableAmt">₹0</div>
+            <div class="table-actions">
+              <input class="t-search" id="g2aOnlySearch" placeholder="Search…" type="text">
+              <button class="btn-export" onclick="exportTable('g2aOnly')"><i class="fas fa-download"></i> Export</button>
+            </div>
+          </div>
+          <div class="t-wrap">
+            <table id="g2aOnlyTable">
+              <thead><tr>
+                <th onclick="sortTable('g2aOnly',0)">GSTN <i class="fas fa-sort"></i></th>
+                <th onclick="sortTable('g2aOnly',1)">Supplier <i class="fas fa-sort"></i></th>
+                <th onclick="sortTable('g2aOnly',2)">Invoice No. <i class="fas fa-sort"></i></th>
+                <th onclick="sortTable('g2aOnly',3)">Date <i class="fas fa-sort"></i></th>
+                <th class="col-r" onclick="sortTable('g2aOnly',4)">IGST <i class="fas fa-sort"></i></th>
+                <th class="col-r" onclick="sortTable('g2aOnly',5)">CGST <i class="fas fa-sort"></i></th>
+                <th class="col-r" onclick="sortTable('g2aOnly',6)">SGST <i class="fas fa-sort"></i></th>
+                <th class="col-r" onclick="sortTable('g2aOnly',7)">Total <i class="fas fa-sort"></i></th>
+              </tr></thead>
+              <tbody id="g2aOnlyTbody"></tbody>
+            </table>
+          </div>
+          <div class="table-foot">
+            <div id="g2aOnlyPaginInfo">Showing 0 of 0</div>
+            <div class="pgn">
+              <select class="pgn-select" onchange="changePerPage('g2aOnly',this.value)"><option value="10">10/pg</option><option value="25">25/pg</option><option value="50">50/pg</option></select>
+              <button class="pgn-btn" onclick="changePage('g2aOnly',-1)"><i class="fas fa-chevron-left"></i></button>
+              <span class="pgn-page" id="g2aOnlyPageInd">1/1</span>
+              <button class="pgn-btn" onclick="changePage('g2aOnly',1)"><i class="fas fa-chevron-right"></i></button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ════ GSTN MISMATCH ════ -->
+      <section class="page" id="page-gstn-mismatch">
+        <div class="page-eyebrow">GST Number Mismatch</div>
+        <h1 class="page-title">Same invoice, <em>different GSTN</em>.</h1>
+        <p class="page-deck">Invoices recorded in books but supplier filed under a different GST number. All bills are recorded correctly — only the GSTN differs.</p>
+        <div class="table-card">
+          <div class="table-head">
+            <div class="table-title">GSTN Mismatch Cases</div>
+            <div class="table-meta" id="gstnMismatchTableAmt">₹0</div>
+            <div class="table-actions">
+              <span class="ai-match-chip" style="color:var(--violet);border-color:rgba(167,139,250,0.3);"><i class="fas fa-id-card"></i> GSTN Mismatch</span>
+              <input class="t-search" id="gstnSearch" placeholder="Search…" type="text">
+              <button class="btn-export" onclick="exportTable('gstnMismatch')"><i class="fas fa-download"></i> Export</button>
+            </div>
+          </div>
+          <div class="t-wrap">
+            <table id="gstnTable">
+              <thead><tr>
+                <th>PR GSTN</th><th>2A GSTN</th>
+                <th>Supplier</th><th>Invoice No.</th>
+                <th class="col-r">PR Total</th><th class="col-r">2A Total</th>
+                <th class="col-c">Status</th>
+              </tr></thead>
+              <tbody id="gstnTbody"></tbody>
+            </table>
+          </div>
+          <div class="table-foot">
+            <div id="gstnPaginInfo">Showing 0 of 0</div>
+            <div class="pgn">
+              <select class="pgn-select" onchange="changePerPage('gstnMismatch',this.value)"><option value="10">10/pg</option><option value="25">25/pg</option></select>
+              <button class="pgn-btn" onclick="changePage('gstnMismatch',-1)"><i class="fas fa-chevron-left"></i></button>
+              <span class="pgn-page" id="gstnPageInd">1/1</span>
+              <button class="pgn-btn" onclick="changePage('gstnMismatch',1)"><i class="fas fa-chevron-right"></i></button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ════ DEBIT NOTES ════ -->
+      <section class="page" id="page-debit-notes">
+        <div class="page-eyebrow">Supplier Debit Notes Analysis</div>
+        <h1 class="page-title">Invoice + debit note <em>pairs</em>.</h1>
+        <p class="page-deck">Supplier uploaded an invoice AND a debit note for the same transaction in 2A, but neither is in your books. Likely a supplier-side error and reversal.</p>
+        <div class="info-alert neg">
+          <i class="fas fa-info-circle"></i>
+          <span><strong>Note:</strong> These appear in GSTR-2A but not your books. The supplier likely uploaded by mistake and reversed via debit note. Verify with supplier before recording.</span>
+        </div>
+        <div class="table-card">
+          <div class="table-head">
+            <div class="table-title">Invoice + Debit Note Pairs</div>
+            <div class="table-meta"><span class="dn-tag"><i class="fas fa-receipt"></i> Debit Note Pairs</span></div>
+            <div class="table-actions">
+              <input class="t-search" id="dnSearch" placeholder="Search…" type="text">
+              <button class="btn-export" onclick="exportTable('debitNotes')"><i class="fas fa-download"></i> Export</button>
+            </div>
+          </div>
+          <div class="t-wrap">
+            <table id="dnTable">
+              <thead><tr>
+                <th>Supplier GSTN</th><th>Supplier Name</th><th>Invoice No.</th>
+                <th>Debit Note No.</th>
+                <th class="col-r">Invoice Tax</th><th class="col-r">DN Tax</th>
+                <th class="col-c">Net Effect</th>
+              </tr></thead>
+              <tbody id="dnTbody"></tbody>
+            </table>
+          </div>
+          <div class="table-foot">
+            <div id="dnPaginInfo">Showing 0 of 0</div>
+            <div class="pgn">
+              <select class="pgn-select" onchange="changePerPage('debitNotes',this.value)"><option value="10">10/pg</option><option value="25">25/pg</option></select>
+              <button class="pgn-btn" onclick="changePage('debitNotes',-1)"><i class="fas fa-chevron-left"></i></button>
+              <span class="pgn-page" id="dnPageInd">1/1</span>
+              <button class="pgn-btn" onclick="changePage('debitNotes',1)"><i class="fas fa-chevron-right"></i></button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div><!-- /canvas -->
+  </main>
+</div><!-- /app-screen -->
+
+<!-- Vendor PDF Modal -->
+<div class="modal-overlay" id="vendorModal" onclick="if(event.target===this)closeVendorModal()">
+  <div class="modal-box">
+    <div class="modal-head">
+      <div>
+        <div class="modal-title">Vendor-wise PDF Letters</div>
+        <div class="modal-sub">Formal reconciliation letters for each supplier</div>
+      </div>
+      <button class="modal-close" onclick="closeVendorModal()"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-body">
+      <div style="background:rgba(251,191,36,0.07);border:1px solid rgba(251,191,36,0.2);border-radius:8px;padding:0.8rem 1rem;margin-bottom:1rem;font-size:0.82rem;color:var(--amber);display:flex;align-items:flex-start;gap:0.5rem;">
+        <i class="fas fa-lightbulb" style="flex-shrink:0;margin-top:1px;"></i>
+        <span>Each letter is generated on behalf of your client. "Not on Portal" letters request the supplier to file GST-1. "Not in Books" letters request physical invoices.</span>
+      </div>
+      <div id="vendorList"><div class="empty-state"><div class="empty-icon"><i class="fas fa-folder-open"></i></div><h4>No data</h4><p>Upload and reconcile first.</p></div></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-export" onclick="closeVendorModal()">Close</button>
+      <button class="btn-upload" style="padding:0.55rem 1.2rem;font-size:0.84rem;" onclick="exportFullReport();closeVendorModal()"><i class="fas fa-file-excel"></i> Download Consolidated Excel</button>
+    </div>
+  </div>
+</div>
+
+<!-- Command Palette -->
+<div class="cmd-overlay" id="cmdOverlay" onclick="if(event.target===this)closeCmd()">
+  <div class="cmd-modal">
+    <div class="cmd-input-wrap">
+      <i class="fas fa-magnifying-glass"></i>
+      <input class="cmd-input" id="cmdInput" placeholder="Search invoices, GSTNs, suppliers or actions…" autocomplete="off">
+    </div>
+    <div class="cmd-list" id="cmdList"></div>
+    <div class="cmd-foot">
+      <span><kbd>↑</kbd><kbd>↓</kbd> Navigate · <kbd>↵</kbd> Select · <kbd>Esc</kbd> Close</span>
+      <span id="cmdCount">—</span>
+    </div>
+  </div>
+</div>
+
+<div class="toast-host" id="toastHost"></div>
+<div class="loading" id="loading">
+  <div class="loading-inner">
+    <div class="spinner"></div>
+    <div class="loading-text" id="loadingText">Reading file…</div>
+  </div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════
+   STATE
+═══════════════════════════════════════════════════════════ */
+let recoData = null, charts = {}, currentPage = 'overview', toleranceVal = 1;
+let td = {
+  match:       {data:[],page:1,perPage:10,sortCol:-1,sortDir:1},
+  mismatch:    {data:[],page:1,perPage:10,sortCol:-1,sortDir:1},
+  prOnly:      {data:[],page:1,perPage:10,sortCol:-1,sortDir:1},
+  g2aOnly:     {data:[],page:1,perPage:10,sortCol:-1,sortDir:1},
+  gstnMismatch:{data:[],page:1,perPage:10,sortCol:-1,sortDir:1},
+  debitNotes:  {data:[],page:1,perPage:10,sortCol:-1,sortDir:1}
+};
+
+/* ── Helpers ── */
+const fc = (v) => v===undefined||v===null||isNaN(v)?'₹0':new Intl.NumberFormat('en-IN',{style:'currency',currency:'INR',minimumFractionDigits:0,maximumFractionDigits:0}).format(v);
+const fn = (v) => v===undefined||v===null||isNaN(v)?'0':new Intl.NumberFormat('en-IN').format(v);
+const fd = (v) => {if(!v)return'—';const d=new Date(v);return isNaN(d.getTime())?v:d.toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});};
+const fcp = (v) => {if(!v)return'₹0';const a=Math.abs(v),s=v<0?'-':'';if(a>=10000000)return`${s}₹${(a/10000000).toFixed(2)} Cr`;if(a>=100000)return`${s}₹${(a/100000).toFixed(2)} L`;if(a>=1000)return`${s}₹${(a/1000).toFixed(1)}K`;return fc(v);};
+const esc = (s) => {if(s==null)return'';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');};
+function normInv(s){return String(s||'').replace(/[\s\-_\/\\\.]/g,'').toUpperCase();}
+function animVal(el,tgt,dur=700){if(!el)return;const st=performance.now();function step(now){const p=Math.min((now-st)/dur,1),e=1-Math.pow(1-p,3);el.textContent=fn(Math.round(tgt*e));if(p<1)requestAnimationFrame(step);else el.textContent=fn(tgt);}requestAnimationFrame(step);}
+
+/* ── Toast ── */
+function toast(msg,type='info',dur=2800){const h=document.getElementById('toastHost');const t=document.createElement('div');t.className=`toast ${type}`;const ic={success:'fa-circle-check',warn:'fa-triangle-exclamation',error:'fa-circle-xmark',info:'fa-circle-info'};t.innerHTML=`<i class="fas ${ic[type]||ic.info}"></i><span>${msg}</span>`;h.appendChild(t);setTimeout(()=>{t.style.transition='opacity .25s,transform .25s';t.style.opacity='0';t.style.transform='translateX(12px)';setTimeout(()=>t.remove(),260);},dur);}
+
+/* ── Sidebar / Nav ── */
+function toggleSidebar(){document.getElementById('sidebar').classList.toggle('open');document.getElementById('sbBackdrop').classList.toggle('show');}
+function closeSidebar(){document.getElementById('sidebar').classList.remove('open');document.getElementById('sbBackdrop').classList.remove('show');}
+
+/* ── File upload ── */
+var dropZone=document.getElementById('dropZone');
+dropZone.addEventListener('dragover',function(e){e.preventDefault();dropZone.classList.add('dragover');});
+dropZone.addEventListener('dragleave',function(){dropZone.classList.remove('dragover');});
+dropZone.addEventListener('drop',function(e){e.preventDefault();dropZone.classList.remove('dragover');var f=e.dataTransfer.files[0];if(f)processFile(f);});
+document.getElementById('fileInput').addEventListener('change',function(e){var f=e.target.files[0];if(f)processFile(f);});
+
+/* Tolerance live sync */
+document.getElementById('toleranceInput').addEventListener('input',function(){const v=parseFloat(this.value);if(!isNaN(v)&&v>=0){toleranceVal=v;const ft=document.getElementById('footTol');if(ft)ft.textContent=`±₹${v}`;}});
+
+/* ── Sample template ── */
+function downloadSampleTemplate(){
+  try{
+    const wb=XLSX.utils.book_new();
+    const pr=[
+      {'PR GSTN No.':'27AAACR1234A1Z5','PR Name of Supplier':'ABC Traders Pvt Ltd','PR Invoice No.':'INV-001','PR Invoice Date':'2024-04-15','PR Rate':18,'PR Taxable':100000,'PR IGST':18000,'PR CGST':0,'PR SGST':0},
+      {'PR GSTN No.':'27AAACR1234A1Z5','PR Name of Supplier':'ABC Traders Pvt Ltd','PR Invoice No.':'INV-002','PR Invoice Date':'2024-04-20','PR Rate':18,'PR Taxable':50000,'PR IGST':0,'PR CGST':4500,'PR SGST':4500},
+      {'PR GSTN No.':'24BBBCD5678B2Z7','PR Name of Supplier':'XYZ Suppliers Ltd','PR Invoice No.':'XYZ-101','PR Invoice Date':'2024-04-25','PR Rate':12,'PR Taxable':75000,'PR IGST':9000,'PR CGST':0,'PR SGST':0},
+      {'PR GSTN No.':'29CCCDE9012C3Z3','PR Name of Supplier':'PQR Goods Co','PR Invoice No.':'PQR-55','PR Invoice Date':'2024-05-01','PR Rate':5,'PR Taxable':30000,'PR IGST':0,'PR CGST':750,'PR SGST':750}
+    ];
+    const g2a=[
+      {'2A GSTN No.':'27AAACR1234A1Z5','2A Name of Supplier':'ABC Traders Pvt Ltd','2A Invoice No.':'INV-001','2A Invoice Date':'2024-04-15','2A Rate':18,'2A Taxable':100000,'2A IGST':18000,'2A CGST':0,'2A SGST':0},
+      {'2A GSTN No.':'27AAACR1234A1Z5','2A Name of Supplier':'ABC Traders Pvt Ltd','2A Invoice No.':'INV-002','2A Invoice Date':'2024-04-20','2A Rate':18,'2A Taxable':50000,'2A IGST':0,'2A CGST':4600,'2A SGST':4600},
+      {'2A GSTN No.':'29CCCDE9012C3Z3','2A Name of Supplier':'PQR Goods Co','2A Invoice No.':'PQR-55','2A Invoice Date':'2024-05-01','2A Rate':5,'2A Taxable':30000,'2A IGST':0,'2A CGST':750,'2A SGST':750},
+      {'2A GSTN No.':'36DDDFE1234D4Z1','2A Name of Supplier':'New Vendor Co','2A Invoice No.':'NV-88','2A Invoice Date':'2024-05-10','2A Rate':18,'2A Taxable':20000,'2A IGST':3600,'2A CGST':0,'2A SGST':0}
+    ];
+    const ws1=XLSX.utils.json_to_sheet(pr);const ws2=XLSX.utils.json_to_sheet(g2a);
+    ws1['!cols']=ws2['!cols']=[{wch:18},{wch:28},{wch:14},{wch:14},{wch:8},{wch:12},{wch:12},{wch:12},{wch:12}];
+    XLSX.utils.book_append_sheet(wb,ws1,'PR');XLSX.utils.book_append_sheet(wb,ws2,'GSTR-2A');
+    var _wb1=XLSX.write(wb,{bookType:'xlsx',type:'array'});var _bl1=new Blob([_wb1],{type:'application/octet-stream'});var _u1=URL.createObjectURL(_bl1);var _a1=document.createElement('a');_a1.href=_u1;_a1.download='TaxNest_GST_Reconciliation_Sample.xlsx';document.body.appendChild(_a1);_a1.click();setTimeout(function(){URL.revokeObjectURL(_u1);document.body.removeChild(_a1);},1000);
+    toast('Sample template downloaded','success');
+  }catch(e){toast('Failed to generate sample','error');}
+}
+
+/* ── Process file ── */
+function processFile(file){
+  if(!/\.(xlsx|xls)$/i.test(file.name)){toast('Please upload .xlsx or .xls','error');return;}
+  const tol=parseFloat(document.getElementById('toleranceInput').value);
+  toleranceVal=(!isNaN(tol)&&tol>=0)?tol:1;
+  document.getElementById('loading').classList.add('show');
+  document.getElementById('loadingText').textContent='Reading file…';
+  document.getElementById('fileName').textContent=file.name;
+  document.getElementById('fileConfirm').classList.add('show');
+  const r=new FileReader();
+  r.onload=function(e){
+    try{
+      document.getElementById('loadingText').textContent='AI reconciling…';
+      const data=new Uint8Array(e.target.result);
+      const wb=XLSX.read(data,{type:'array',cellDates:true});
+      const prSheet=wb.Sheets['PR']||wb.Sheets[wb.SheetNames[0]];
+      const prData=XLSX.utils.sheet_to_json(prSheet);
+      const g2aSheet=wb.Sheets['GSTR-2A']||wb.Sheets[wb.SheetNames[1]];
+      const g2aData=XLSX.utils.sheet_to_json(g2aSheet);
+      if(!prData.length&&!g2aData.length)throw new Error('Both sheets empty');
+      recoData=performRecon(prData,g2aData,toleranceVal);
+      updateDashboard();
+      document.body.classList.remove('state-upload');
+      document.body.classList.add('state-app');
+      const sm=document.getElementById('sbMeta');
+      if(sm)sm.innerHTML=`<div><strong>${fn(prData.length)}</strong> PR · <strong>${fn(g2aData.length)}</strong> 2A</div><div>Tol. ±₹${toleranceVal}</div>`;
+      const td2=document.getElementById('tolCard');if(td2)td2.textContent=`±₹${toleranceVal}`;
+      const td3=document.getElementById('tolDisplay');if(td3)td3.textContent=`±₹${toleranceVal}`;
+      toast(`Reconciled ${fn(prData.length+g2aData.length)} records`,'success');
+    }catch(err){console.error(err);toast('Could not process file. Check PR and GSTR-2A sheets exist.','error',5000);}
+    document.getElementById('loading').classList.remove('show');
+  };
+  r.onerror=()=>{document.getElementById('loading').classList.remove('show');toast('Could not read file','error');};
+  r.readAsArrayBuffer(file);
+}
+
+/* ── Reset ── */
+function resetApp(){
+  if(!confirm('Upload new file? Current data will be cleared.'))return;
+  try{Object.values(charts).forEach(c=>{try{c.destroy();}catch(e){}});charts={};}catch(e){}
+  recoData=null;
+  td={match:{data:[],page:1,perPage:10,sortCol:-1,sortDir:1},mismatch:{data:[],page:1,perPage:10,sortCol:-1,sortDir:1},prOnly:{data:[],page:1,perPage:10,sortCol:-1,sortDir:1},g2aOnly:{data:[],page:1,perPage:10,sortCol:-1,sortDir:1},gstnMismatch:{data:[],page:1,perPage:10,sortCol:-1,sortDir:1},debitNotes:{data:[],page:1,perPage:10,sortCol:-1,sortDir:1}};
+  document.body.classList.remove('state-app');document.body.classList.add('state-upload');
+  document.getElementById('fileInput').value='';document.getElementById('fileConfirm').classList.remove('show');
+  navigate('overview');window.scrollTo({top:0,behavior:'smooth'});toast('Cleared','info');
+}
+
+/* ═══════════════════════════════════════════════════════════
+   RECONCILIATION ENGINE
+═══════════════════════════════════════════════════════════ */
+function performRecon(prData, g2aData, tol){
+  const prMap=new Map(), prInvMap=new Map();
+  prData.forEach(row=>{
+    const gstn=String(row['PR GSTN No.']||'').trim().toUpperCase();
+    const inv=String(row['PR Invoice No.']||'').trim().toUpperCase();
+    const ni=normInv(inv), key=`${gstn}|${inv}`;
+    const igst=parseFloat(row['PR IGST'])||0,cgst=parseFloat(row['PR CGST'])||0,sgst=parseFloat(row['PR SGST'])||0;
+    const obj={gstn,supplier:row['PR Name of Supplier']||'',invoice:row['PR Invoice No.']||'',date:row['PR Invoice Date'],rate:row['PR Rate'],taxable:parseFloat(row['PR Taxable'])||0,igst,cgst,sgst,totalTax:igst+cgst+sgst};
+    prMap.set(key,obj);
+    if(!prInvMap.has(ni))prInvMap.set(ni,[]);
+    prInvMap.get(ni).push({key,gstn,obj});
+  });
+  const g2aMap=new Map(), g2aInvMap=new Map();
+  g2aData.forEach(row=>{
+    const gstn=String(row['2A GSTN No.']||'').trim().toUpperCase();
+    const inv=String(row['2A Invoice No.']||'').trim().toUpperCase();
+    const ni=normInv(inv), key=`${gstn}|${inv}`;
+    const igst=parseFloat(row['2A IGST'])||0,cgst=parseFloat(row['2A CGST'])||0,sgst=parseFloat(row['2A SGST'])||0;
+    const obj={gstn,supplier:row['2A Name of Supplier']||'',invoice:row['2A Invoice No.']||'',date:row['2A Invoice Date'],rate:row['2A Rate'],taxable:parseFloat(row['2A Taxable'])||0,igst,cgst,sgst,totalTax:igst+cgst+sgst};
+    g2aMap.set(key,obj);
+    if(!g2aInvMap.has(ni))g2aInvMap.set(ni,[]);
+    g2aInvMap.get(ni).push({key,gstn,obj});
+  });
+
+  const res={fullMatch:[],mismatch:[],prOnly:[],g2aOnly:[],gstnMismatch:[],debitNotes:[],
+    summary:{totalPR:prData.length,totalG2A:g2aData.length,totalPRTax:0,totalG2ATax:0,
+      matchCount:0,matchTax:0,mismatchCount:0,mismatchPRTax:0,mismatchG2ATax:0,
+      prOnlyCount:0,prOnlyTax:0,g2aOnlyCount:0,g2aOnlyTax:0,
+      gstnMismatchCount:0,gstnMismatchTax:0,dnCount:0,
+      igstMis:0,cgstMis:0,sgstMis:0},topSuppliers:[],tolerance:tol};
+  prMap.forEach(r=>res.summary.totalPRTax+=r.totalTax);
+  g2aMap.forEach(r=>res.summary.totalG2ATax+=r.totalTax);
+
+  const matchedPR=new Set(),matchedG2A=new Set();
+  const supDiffs={};
+
+  // Step 1: exact match GSTN+Invoice
+  prMap.forEach((pr,key)=>{
+    if(g2aMap.has(key)){
+      const g2=g2aMap.get(key);
+      const di=Math.round((pr.igst-g2.igst)*100)/100;
+      const dc=Math.round((pr.cgst-g2.cgst)*100)/100;
+      const ds=Math.round((pr.sgst-g2.sgst)*100)/100;
+      const dt=Math.round((pr.totalTax-g2.totalTax)*100)/100;
+      if(Math.abs(di)<=tol&&Math.abs(dc)<=tol&&Math.abs(ds)<=tol){
+        res.fullMatch.push({pr,g2a:g2});
+        res.summary.matchCount++;res.summary.matchTax+=pr.totalTax;
+      }else{
+        res.mismatch.push({pr,g2a:g2,diff:{igst:di,cgst:dc,sgst:ds,total:dt}});
+        res.summary.mismatchCount++;res.summary.mismatchPRTax+=pr.totalTax;res.summary.mismatchG2ATax+=g2.totalTax;
+        if(di!==0)res.summary.igstMis++;if(dc!==0)res.summary.cgstMis++;if(ds!==0)res.summary.sgstMis++;
+        const sup=pr.supplier;if(!supDiffs[sup])supDiffs[sup]={count:0,diff:0};supDiffs[sup].count++;supDiffs[sup].diff+=dt;
+      }
+      matchedPR.add(key);matchedG2A.add(key);
+    }
+  });
+
+  // Step 2: GSTN mismatch – same invoice, different GSTN
+  prMap.forEach((pr,prKey)=>{
+    if(matchedPR.has(prKey))return;
+    const ni=normInv(pr.invoice);
+    const g2aMatches=g2aInvMap.get(ni)||[];
+    for(const ga of g2aMatches){
+      if(matchedG2A.has(ga.key))continue;
+      if(ga.gstn!==pr.gstn){
+        res.gstnMismatch.push({pr,g2a:ga.obj});
+        res.summary.gstnMismatchCount++;res.summary.gstnMismatchTax+=pr.totalTax;
+        matchedPR.add(prKey);matchedG2A.add(ga.key);break;
+      }
+    }
+  });
+
+  // Step 3: PR only
+  prMap.forEach((pr,key)=>{if(!matchedPR.has(key)){res.prOnly.push(pr);res.summary.prOnlyCount++;res.summary.prOnlyTax+=pr.totalTax;}});
+
+  // Step 4: 2A remaining — detect debit note pairs, then g2a only
+  const rem2A=[];
+  g2aMap.forEach((r,key)=>{if(!matchedG2A.has(key))rem2A.push({key,row:r});});
+  const isDN=r=>{const inv=String(r.invoice||'').toUpperCase();return inv.startsWith('DN')||inv.startsWith('CDN')||inv.startsWith('CR')||r.totalTax<0;};
+  const usedDN=new Set();
+  rem2A.forEach(({key:ik,row:ir})=>{
+    if(isDN(ir)||usedDN.has(ik))return;
+    const supG=ir.gstn,ni=normInv(ir.invoice);
+    for(const {key:dk,row:dr} of rem2A){
+      if(dk===ik||usedDN.has(dk)||!isDN(dr))continue;
+      if(dr.gstn!==supG)continue;
+      const dni=normInv(dr.invoice);
+      if(dni.includes(ni)||ni.includes(dni)||Math.abs(Math.abs(ir.totalTax)-Math.abs(dr.totalTax))<=tol){
+        res.debitNotes.push({invoice:ir,debitNote:dr});res.summary.dnCount++;
+        usedDN.add(ik);usedDN.add(dk);break;
+      }
+    }
+  });
+  rem2A.forEach(({key,row})=>{if(!usedDN.has(key)){res.g2aOnly.push(row);res.summary.g2aOnlyCount++;res.summary.g2aOnlyTax+=row.totalTax;}});
+
+  res.topSuppliers=Object.entries(supDiffs).map(([name,d])=>({name,...d})).sort((a,b)=>Math.abs(b.diff)-Math.abs(a.diff)).slice(0,10);
+  return res;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   DASHBOARD UPDATE
+═══════════════════════════════════════════════════════════ */
+function updateDashboard(){
+  const s=recoData.summary;
+  const total=s.matchCount+s.mismatchCount+s.prOnlyCount+s.g2aOnlyCount+s.gstnMismatchCount;
+  const safe=total||1;
+
+  const set=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v;};
+
+  animVal(document.getElementById('matchCount'),s.matchCount);
+  set('matchAmt',fcp(s.matchTax));
+  set('matchPct',`${(s.matchCount/safe*100).toFixed(1)}%`);
+  setTimeout(()=>{const el=document.getElementById('matchBar');if(el)el.style.width=`${s.matchCount/safe*100}%`;},80);
+
+  animVal(document.getElementById('mismatchCount'),s.mismatchCount);
+  set('mismatchAmt',fcp(s.mismatchPRTax));set('mismatchPct',`${(s.mismatchCount/safe*100).toFixed(1)}%`);
+  setTimeout(()=>{const el=document.getElementById('mismatchBar');if(el)el.style.width=`${s.mismatchCount/safe*100}%`;},80);
+
+  animVal(document.getElementById('prOnlyCount'),s.prOnlyCount);
+  set('prOnlyAmt',fcp(s.prOnlyTax));set('prOnlyPct',`${(s.prOnlyCount/safe*100).toFixed(1)}%`);
+  setTimeout(()=>{const el=document.getElementById('prOnlyBar');if(el)el.style.width=`${s.prOnlyCount/safe*100}%`;},80);
+
+  animVal(document.getElementById('g2aOnlyCount'),s.g2aOnlyCount);
+  set('g2aOnlyAmt',fcp(s.g2aOnlyTax));set('g2aOnlyPct',`${(s.g2aOnlyCount/safe*100).toFixed(1)}%`);
+  setTimeout(()=>{const el=document.getElementById('g2aOnlyBar');if(el)el.style.width=`${s.g2aOnlyCount/safe*100}%`;},80);
+
+  animVal(document.getElementById('gstnMismatchCount'),s.gstnMismatchCount);
+  set('gstnMismatchAmt',fcp(s.gstnMismatchTax));
+  setTimeout(()=>{const el=document.getElementById('gstnMismatchBar');if(el)el.style.width=`${Math.min(s.gstnMismatchCount/safe*100,100)}%`;},80);
+
+  animVal(document.getElementById('dnCount'),s.dnCount);
+  setTimeout(()=>{const el=document.getElementById('dnBar');if(el)el.style.width=`${Math.min(s.dnCount*10,100)}%`;},80);
+
+  ['navMatchCount','navMismatchCount','navPrOnlyCount','navG2aOnlyCount','navGstnCount','navDNCount'].forEach((id,i)=>{
+    const vals=[s.matchCount,s.mismatchCount,s.prOnlyCount,s.g2aOnlyCount,s.gstnMismatchCount,s.dnCount];
+    set(id,fn(vals[i]));
+  });
+
+  const mr=s.matchCount/safe*100;
+  set('gaugeNum',`${mr.toFixed(1)}%`);
+  const circ=2*Math.PI*52;
+  setTimeout(()=>{const el=document.getElementById('gaugeFill');if(el)el.setAttribute('stroke-dashoffset',circ*(1-mr/100));},200);
+  set('gMatchCount',fn(s.matchCount));set('gReviewCount',fn(s.mismatchCount+s.prOnlyCount+s.g2aOnlyCount));set('gTotalCount',fn(total));set('reconMeta',`${fn(total)} records`);
+
+  const netD=s.totalPRTax-s.totalG2ATax;
+  const netEl=document.getElementById('netDiff');if(netEl){netEl.textContent=(netD>=0?'+':'')+fc(netD);netEl.className='net-num '+(netD>=0?'pos':'neg');}
+  set('netDesc',netD>=0?'Excess in PR':'Excess in 2A');
+  set('prRecs',`${fn(s.totalPR)} recs`);set('prTotal',fc(s.totalPRTax));
+  set('g2aRecs',`${fn(s.totalG2A)} recs`);set('g2aTotal',fc(s.totalG2ATax));
+
+  set('itcEligible',fcp(s.matchTax));set('itcReview',fcp(s.mismatchPRTax));set('itcRisk',fcp(s.prOnlyTax));set('itcUnclaimed',fcp(s.g2aOnlyTax));
+  set('itcMeta',`Match rate: ${mr.toFixed(1)}%`);
+
+  // Table data
+  td.match.data=recoData.fullMatch;td.mismatch.data=recoData.mismatch;
+  td.prOnly.data=recoData.prOnly;td.g2aOnly.data=recoData.g2aOnly;
+  td.gstnMismatch.data=recoData.gstnMismatch;td.debitNotes.data=recoData.debitNotes;
+
+  set('matchTableAmt',fcp(s.matchTax));set('mismatchTableAmt',fcp(s.mismatchPRTax));
+  set('prOnlyTableAmt',fcp(s.prOnlyTax));set('g2aOnlyTableAmt',fcp(s.g2aOnlyTax));
+  set('gstnMismatchTableAmt',fcp(s.gstnMismatchTax));
+
+  ['match','mismatch','prOnly','g2aOnly','gstnMismatch','debitNotes'].forEach(t=>renderTable(t));
+  updateCharts();
+}
+
+/* ═══════════════════════════════════════════════════════════
+   CHARTS
+═══════════════════════════════════════════════════════════ */
+function getCss(n){return getComputedStyle(document.documentElement).getPropertyValue(n).trim();}
+function updateCharts(){
+  if(!recoData)return;
+  const s=recoData.summary;
+  const text=getCss('--muted'),grid='rgba(255,255,255,0.05)',surface=getCss('--bg');
+  Chart.defaults.color=text;Chart.defaults.font.family="'DM Sans',sans-serif";Chart.defaults.font.size=11;
+  Chart.defaults.plugins.tooltip.backgroundColor='rgba(12,10,25,0.98)';
+  Chart.defaults.plugins.tooltip.titleColor='#fff';Chart.defaults.plugins.tooltip.bodyColor='rgba(255,255,255,0.6)';
+  Chart.defaults.plugins.tooltip.padding=10;Chart.defaults.plugins.tooltip.cornerRadius=8;
+  Chart.defaults.plugins.tooltip.borderWidth=1;Chart.defaults.plugins.tooltip.borderColor='rgba(168,85,247,0.2)';
+  Object.values(charts).forEach(c=>{try{c.destroy();}catch(e){}});charts={};
+  const pal=[getCss('--green'),getCss('--amber'),getCss('--red'),getCss('--blue'),'rgba(167,139,250,0.9)'];
+
+  charts.status=new Chart(document.getElementById('statusChart'),{type:'doughnut',data:{labels:['Matched','Mismatch','Not in 2A','Not in Books','GSTN Mismatch'],datasets:[{data:[s.matchCount,s.mismatchCount,s.prOnlyCount,s.g2aOnlyCount,s.gstnMismatchCount],backgroundColor:pal,borderColor:surface,borderWidth:3,hoverOffset:8}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{padding:12,usePointStyle:true,boxWidth:8,boxHeight:8}},tooltip:{callbacks:{label:ctx=>{const total=ctx.dataset.data.reduce((a,b)=>a+b,0);const pct=total?((ctx.parsed/total)*100).toFixed(1):'0';return ` ${ctx.label}: ${fn(ctx.parsed)} (${pct}%)`;}}}},cutout:'68%',animation:{animateRotate:true,duration:800}}});
+
+  charts.tax=new Chart(document.getElementById('taxChart'),{type:'bar',data:{labels:['Match','Mismatch','Not in 2A','Not in Books'],datasets:[{label:'PR',data:[s.matchTax/100000,s.mismatchPRTax/100000,s.prOnlyTax/100000,0],backgroundColor:getCss('--blue'),borderRadius:5,barThickness:'flex',maxBarThickness:24},{label:'2A',data:[s.matchTax/100000,s.mismatchG2ATax/100000,0,s.g2aOnlyTax/100000],backgroundColor:'rgba(167,139,250,0.8)',borderRadius:5,barThickness:'flex',maxBarThickness:24}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{padding:12,usePointStyle:true,boxWidth:8,boxHeight:8}},tooltip:{callbacks:{label:ctx=>` ${ctx.dataset.label}: ₹${ctx.parsed.y.toFixed(2)} L`}}},scales:{y:{beginAtZero:true,grid:{color:grid,drawBorder:false},ticks:{color:text,font:{family:"'DM Mono',monospace",size:10}}},x:{grid:{display:false},ticks:{color:text,font:{size:11,weight:'600'}}}}}});
+
+  charts.misType=new Chart(document.getElementById('misTypeChart'),{type:'bar',data:{labels:['IGST','CGST','SGST'],datasets:[{data:[s.igstMis,s.cgstMis,s.sgstMis],backgroundColor:[getCss('--green'),getCss('--amber'),getCss('--red')],borderRadius:5,barThickness:'flex',maxBarThickness:28}]},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{beginAtZero:true,grid:{color:grid,drawBorder:false},ticks:{color:text,precision:0,font:{family:"'DM Mono',monospace",size:10}}},y:{grid:{display:false},ticks:{color:text,font:{size:11,weight:'600'}}}}}});
+
+  const top=recoData.topSuppliers;
+  charts.vendor=new Chart(document.getElementById('vendorChart'),{type:'bar',data:{labels:top.map(s=>(s.name||'Unknown').substring(0,20)+((s.name||'').length>20?'…':'')),datasets:[{data:top.map(s=>s.diff/1000),backgroundColor:top.map(s=>s.diff>=0?getCss('--green'):getCss('--red')),borderRadius:5,barThickness:'flex',maxBarThickness:14}]},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>` Δ ₹${ctx.parsed.x.toFixed(2)}K`}}},scales:{x:{grid:{color:grid,drawBorder:false},ticks:{color:text,font:{family:"'DM Mono',monospace",size:10}}},y:{grid:{display:false},ticks:{color:text,font:{size:10}}}}}});
+}
+
+/* ═══════════════════════════════════════════════════════════
+   TABLES
+═══════════════════════════════════════════════════════════ */
+const tbodyMap={match:'matchTbody',mismatch:'mismatchTbody',prOnly:'prOnlyTbody',g2aOnly:'g2aOnlyTbody',gstnMismatch:'gstnTbody',debitNotes:'dnTbody'};
+const paginMap={match:'matchPaginInfo',mismatch:'mismatchPaginInfo',prOnly:'prOnlyPaginInfo',g2aOnly:'g2aOnlyPaginInfo',gstnMismatch:'gstnPaginInfo',debitNotes:'dnPaginInfo'};
+const pageIndMap={match:'matchPageInd',mismatch:'mismatchPageInd',prOnly:'prOnlyPageInd',g2aOnly:'g2aOnlyPageInd',gstnMismatch:'gstnPageInd',debitNotes:'dnPageInd'};
+
+function renderTable(type){
+  const cfg=td[type];if(!cfg)return;
+  const tbody=document.getElementById(tbodyMap[type]);if(!tbody)return;
+  const start=(cfg.page-1)*cfg.perPage,end=start+cfg.perPage;
+  const pageData=cfg.data.slice(start,end),total=cfg.data.length,totalPages=Math.max(1,Math.ceil(total/cfg.perPage));
+  tbody.innerHTML='';
+  const colMap={match:9,mismatch:6,prOnly:8,g2aOnly:8,gstnMismatch:7,debitNotes:7};
+  if(total===0){tbody.innerHTML=`<tr><td colspan="${colMap[type]||8}"><div class="empty-state"><div class="empty-icon"><i class="fas fa-folder-open"></i></div><h4>Nothing here</h4><p>No records in this section.</p></div></td></tr>`;return;}
+
+  if(type==='match'){
+    pageData.forEach(item=>{const r=item.pr;tbody.innerHTML+=`<tr>
+      <td class="col-mono">${esc(r.gstn)}</td><td class="col-supplier" title="${esc(r.supplier)}">${esc(r.supplier)}</td>
+      <td>${esc(r.invoice)}</td><td>${fd(r.date)}</td>
+      <td class="col-r col-num">${fc(r.igst)}</td><td class="col-r col-num">${fc(r.cgst)}</td><td class="col-r col-num">${fc(r.sgst)}</td>
+      <td class="col-r col-pos">${fc(r.totalTax)}</td>
+      <td class="col-c"><span class="pill-tag pill-pos"><i class="fas fa-check" style="font-size:8px"></i> Matched</span></td>
+    </tr>`;});
+  }else if(type==='mismatch'){
+    pageData.forEach(row=>{const diff=row.diff.total;tbody.innerHTML+=`<tr>
+      <td class="col-mono">${esc(row.pr.gstn)}</td><td class="col-supplier" title="${esc(row.pr.supplier)}">${esc(row.pr.supplier)}</td>
+      <td>${esc(row.pr.invoice)}</td>
+      <td class="col-r col-num">${fc(row.pr.totalTax)}</td><td class="col-r col-num">${fc(row.g2a.totalTax)}</td>
+      <td class="col-r ${diff>=0?'col-pos':'col-neg'}">${diff>=0?'+':''}${fc(diff)}</td>
+    </tr>`;});
+  }else if(type==='prOnly'){
+    pageData.forEach(row=>{tbody.innerHTML+=`<tr>
+      <td class="col-mono">${esc(row.gstn)}</td><td class="col-supplier" title="${esc(row.supplier)}">${esc(row.supplier)}</td>
+      <td>${esc(row.invoice)}</td><td>${fd(row.date)}</td>
+      <td class="col-r col-num">${fc(row.igst)}</td><td class="col-r col-num">${fc(row.cgst)}</td><td class="col-r col-num">${fc(row.sgst)}</td>
+      <td class="col-r col-neg">${fc(row.totalTax)}</td>
+    </tr>`;});
+  }else if(type==='g2aOnly'){
+    pageData.forEach(row=>{tbody.innerHTML+=`<tr>
+      <td class="col-mono">${esc(row.gstn)}</td><td class="col-supplier" title="${esc(row.supplier)}">${esc(row.supplier)}</td>
+      <td>${esc(row.invoice)}</td><td>${fd(row.date)}</td>
+      <td class="col-r col-num">${fc(row.igst)}</td><td class="col-r col-num">${fc(row.cgst)}</td><td class="col-r col-num">${fc(row.sgst)}</td>
+      <td class="col-r col-info">${fc(row.totalTax)}</td>
+    </tr>`;});
+  }else if(type==='gstnMismatch'){
+    pageData.forEach(item=>{tbody.innerHTML+=`<tr>
+      <td class="col-mono">${esc(item.pr.gstn)}</td>
+      <td class="col-mono"><span class="gstn-diff-tag"><i class="fas fa-id-card"></i> Diff</span> ${esc(item.g2a.gstn)}</td>
+      <td class="col-supplier">${esc(item.pr.supplier||item.g2a.supplier)}</td>
+      <td>${esc(item.pr.invoice)}</td>
+      <td class="col-r col-num">${fc(item.pr.totalTax)}</td><td class="col-r col-num">${fc(item.g2a.totalTax)}</td>
+      <td class="col-c"><span class="pill-tag pill-violet">GSTN Mismatch</span></td>
+    </tr>`;});
+  }else if(type==='debitNotes'){
+    pageData.forEach(item=>{const net=item.invoice.totalTax+item.debitNote.totalTax;tbody.innerHTML+=`<tr>
+      <td class="col-mono">${esc(item.invoice.gstn)}</td>
+      <td class="col-supplier">${esc(item.invoice.supplier)}</td>
+      <td>${esc(item.invoice.invoice)}</td>
+      <td><span class="dn-tag">${esc(item.debitNote.invoice)}</span></td>
+      <td class="col-r col-warn">${fc(item.invoice.totalTax)}</td>
+      <td class="col-r col-neg">${fc(item.debitNote.totalTax)}</td>
+      <td class="col-c">${Math.abs(net)<1?'<span class="pill-tag pill-pos">Cancelled</span>':fc(net)}</td>
+    </tr>`;});
+  }
+
+  const showing=total===0?0:Math.min(end,total);
+  const pi=document.getElementById(paginMap[type]);if(pi)pi.innerHTML=`<strong>${fn(total===0?0:start+1)}</strong>–<strong>${fn(showing)}</strong> of <strong>${fn(total)}</strong>`;
+  const ind=document.getElementById(pageIndMap[type]);if(ind)ind.textContent=`${cfg.page}/${totalPages}`;
+}
+
+function changePage(type,dir){const cfg=td[type];if(!cfg)return;const tp=Math.max(1,Math.ceil(cfg.data.length/cfg.perPage));const np=cfg.page+dir;if(np>=1&&np<=tp){cfg.page=np;renderTable(type);}}
+function changePerPage(type,v){const cfg=td[type];if(!cfg)return;cfg.perPage=parseInt(v,10)||10;cfg.page=1;renderTable(type);}
+function sortTable(type,col){const cfg=td[type];if(!cfg)return;if(cfg.sortCol===col)cfg.sortDir=-cfg.sortDir;else{cfg.sortCol=col;cfg.sortDir=1;}const dir=cfg.sortDir;
+  cfg.data.sort((a,b)=>{let va,vb;
+    if(type==='mismatch'){const k=['pr.gstn','pr.supplier','pr.invoice','pr.totalTax','g2a.totalTax','diff.total'][col];va=k.split('.').reduce((o,k)=>o&&o[k],a);vb=k.split('.').reduce((o,k)=>o&&o[k],b);}
+    else if(type==='match'){const k=['pr.gstn','pr.supplier','pr.invoice','pr.date','pr.igst','pr.cgst','pr.sgst','pr.totalTax'][col]||'pr.gstn';va=k.split('.').reduce((o,k)=>o&&o[k],a);vb=k.split('.').reduce((o,k)=>o&&o[k],b);}
+    else{const k=['gstn','supplier','invoice','date','igst','cgst','sgst','totalTax'][col];va=a[k];vb=b[k];}
+    if(va==null)va='';if(vb==null)vb='';
+    if(typeof va==='string'&&typeof vb==='string')return va.localeCompare(vb)*dir;
+    return((parseFloat(va)||0)-(parseFloat(vb)||0))*dir;
+  });
+  cfg.page=1;renderTable(type);
+}
+
+/* ── Table search ── */
+[['matchSearch','match'],['mismatchSearch','mismatch'],['prOnlySearch','prOnly'],['g2aOnlySearch','g2aOnly'],['gstnSearch','gstnMismatch'],['dnSearch','debitNotes']].forEach(([id,type])=>{
+  const inp=document.getElementById(id);if(!inp)return;
+  inp.addEventListener('input',e=>{
+    if(!recoData)return;
+    const q=e.target.value.toLowerCase().trim();
+    const orig=recoData[type==='match'?'fullMatch':type==='g2aOnly'?'g2aOnly':type]||[];
+    if(q){
+      td[type].data=orig.filter(row=>{
+        let s;
+        if(type==='match'||type==='mismatch')s=`${row.pr.gstn} ${row.pr.supplier} ${row.pr.invoice}`;
+        else if(type==='gstnMismatch')s=`${row.pr.gstn} ${row.g2a.gstn} ${row.pr.supplier} ${row.pr.invoice}`;
+        else if(type==='debitNotes')s=`${row.invoice.gstn} ${row.invoice.supplier} ${row.invoice.invoice} ${row.debitNote.invoice}`;
+        else s=`${row.gstn} ${row.supplier} ${row.invoice}`;
+        return String(s).toLowerCase().includes(q);
+      });
+    }else{td[type].data=orig;}
+    td[type].page=1;renderTable(type);
+  });
+});
+
+/* ═══════════════════════════════════════════════════════════
+   EXPORT
+═══════════════════════════════════════════════════════════ */
+function exportTable(type){
+  const cfg=td[type];if(!cfg.data.length){toast('Nothing to export','warn');return;}
+  let headers=[],rows=[];
+  if(type==='mismatch'){
+    headers=['GSTN','Supplier','Invoice No','PR IGST','PR CGST','PR SGST','PR Total','2A IGST','2A CGST','2A SGST','2A Total','IGST Diff','CGST Diff','SGST Diff','Total Diff'];
+    rows=cfg.data.map(r=>[r.pr.gstn,r.pr.supplier,r.pr.invoice,r.pr.igst,r.pr.cgst,r.pr.sgst,r.pr.totalTax,r.g2a.igst,r.g2a.cgst,r.g2a.sgst,r.g2a.totalTax,r.diff.igst,r.diff.cgst,r.diff.sgst,r.diff.total]);
+  }else if(type==='match'){
+    headers=['GSTN','Supplier','Invoice No','Invoice Date','IGST','CGST','SGST','Total Tax','Status'];
+    rows=cfg.data.map(i=>[i.pr.gstn,i.pr.supplier,i.pr.invoice,i.pr.date,i.pr.igst,i.pr.cgst,i.pr.sgst,i.pr.totalTax,'Matched']);
+  }else if(type==='gstnMismatch'){
+    headers=['PR GSTN','2A GSTN','Supplier','Invoice No','PR Total','2A Total','Remark'];
+    rows=cfg.data.map(r=>[r.pr.gstn,r.g2a.gstn,r.pr.supplier||r.g2a.supplier,r.pr.invoice,r.pr.totalTax,r.g2a.totalTax,'GSTN Mismatch']);
+  }else if(type==='debitNotes'){
+    headers=['Supplier GSTN','Supplier Name','Invoice No','Debit Note No','Invoice Tax','Debit Note Tax','Net Effect'];
+    rows=cfg.data.map(r=>[r.invoice.gstn,r.invoice.supplier,r.invoice.invoice,r.debitNote.invoice,r.invoice.totalTax,r.debitNote.totalTax,r.invoice.totalTax+r.debitNote.totalTax]);
+  }else{
+    headers=['GSTN','Supplier','Invoice No','Invoice Date','IGST','CGST','SGST','Total Tax'];
+    rows=cfg.data.map(r=>[r.gstn,r.supplier,r.invoice,r.date,r.igst,r.cgst,r.sgst,r.totalTax]);
+  }
+  let csv=headers.map(h=>`"${h}"`).join(',')+'\n';
+  rows.forEach(row=>{csv+=row.map(c=>c==null?'""':`"${String(c).replace(/"/g,'""')}"`).join(',')+'\n';});
+  const blob=new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8'});
+  const url=URL.createObjectURL(blob);const a=document.createElement('a');
+  a.href=url;a.download=`TaxNest_GST_${type}_${new Date().toISOString().split('T')[0]}.csv`;
+  document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(url);document.body.removeChild(a);},1000);toast('CSV exported','success');
+}
+
+function exportFullReport(){
+  if(!recoData){toast('No data yet','warn');return;}
+  try{
+    const wb=XLSX.utils.book_new();const s=recoData.summary;
+    const total=s.matchCount+s.mismatchCount+s.prOnlyCount+s.g2aOnlyCount;const safe=total||1;
+    const cn=(document.getElementById('clientName')||{}).value||'';
+    const cg=(document.getElementById('clientGSTN')||{}).value||'';
+    const sumRows=[
+      ['TaxNest — GSTR-2A Reconciliation Report'],
+      ['We Handle Your Books, GST & TDS — You Handle Your Business'],
+      ['Generated',new Date().toLocaleString('en-IN')],
+      ['Client Name',cn],['Client GSTN',cg],['Tolerance',`±₹${recoData.tolerance}`],[],
+      ['Metric','Count','Tax (INR)','%'],
+      ['Full Match',s.matchCount,s.matchTax,((s.matchCount/safe)*100).toFixed(2)+'%'],
+      ['Amount Mismatch',s.mismatchCount,s.mismatchPRTax,((s.mismatchCount/safe)*100).toFixed(2)+'%'],
+      ['Not in 2A',s.prOnlyCount,s.prOnlyTax,((s.prOnlyCount/safe)*100).toFixed(2)+'%'],
+      ['Not in Books',s.g2aOnlyCount,s.g2aOnlyTax,((s.g2aOnlyCount/safe)*100).toFixed(2)+'%'],
+      ['GSTN Mismatch',s.gstnMismatchCount,s.gstnMismatchTax,''],
+      ['Debit Note Pairs',s.dnCount,'',''],[],
+      ['Total PR',s.totalPR,s.totalPRTax,''],['Total 2A',s.totalG2A,s.totalG2ATax,''],
+      ['Net Diff (PR−2A)','',s.totalPRTax-s.totalG2ATax,''],
+      ['Match Rate',((s.matchCount/safe)*100).toFixed(2)+'%'],[],
+      ['TaxNest','taxnest.info@gmail.com | +91 83202 22643 | @taxnest_2026'],
+      ['Website','https://taxnest2026.github.io/TaxNest-india']
+    ];
+    const ws0=XLSX.utils.aoa_to_sheet(sumRows);ws0['!cols']=[{wch:32},{wch:12},{wch:18},{wch:12}];
+    XLSX.utils.book_append_sheet(wb,ws0,'Summary');
+    const mk=i=>({GSTN:i.pr.gstn,Supplier:i.pr.supplier,'Invoice No':i.pr.invoice,'Date':i.pr.date?fd(i.pr.date):'',IGST:i.pr.igst,CGST:i.pr.cgst,SGST:i.pr.sgst,'Total Tax':i.pr.totalTax,Status:'Matched'});
+    XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(recoData.fullMatch.length?recoData.fullMatch.map(mk):[{Note:'No matched records'}]),'Matched');
+    const mr=row=>({GSTN:row.pr.gstn,Supplier:row.pr.supplier,'Invoice No':row.pr.invoice,'PR Total':row.pr.totalTax,'2A Total':row.g2a.totalTax,'Total Diff':row.diff.total});
+    XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(recoData.mismatch.length?recoData.mismatch.map(mr):[{Note:'No mismatches'}]),'Amount Mismatch');
+    const sr=r=>({GSTN:r.gstn,Supplier:r.supplier,'Invoice No':r.invoice,'Date':r.date?fd(r.date):'',IGST:r.igst,CGST:r.cgst,SGST:r.sgst,'Total Tax':r.totalTax});
+    XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(recoData.prOnly.length?recoData.prOnly.map(sr):[{Note:'All invoices on portal'}]),'Not in 2A');
+    XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(recoData.g2aOnly.length?recoData.g2aOnly.map(sr):[{Note:'All portal invoices in books'}]),'Not in Books');
+    const gr=r=>({'PR GSTN':r.pr.gstn,'2A GSTN':r.g2a.gstn,Supplier:r.pr.supplier||r.g2a.supplier,'Invoice No':r.pr.invoice,'PR Total':r.pr.totalTax,'2A Total':r.g2a.totalTax,Remark:'GSTN Mismatch'});
+    XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(recoData.gstnMismatch.length?recoData.gstnMismatch.map(gr):[{Note:'No GSTN mismatches'}]),'GSTN Mismatch');
+    const dr=r=>({'Supplier GSTN':r.invoice.gstn,'Supplier Name':r.invoice.supplier,'Invoice No':r.invoice.invoice,'Debit Note No':r.debitNote.invoice,'Invoice Tax':r.invoice.totalTax,'DN Tax':r.debitNote.totalTax,'Net':r.invoice.totalTax+r.debitNote.totalTax});
+    XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(recoData.debitNotes.length?recoData.debitNotes.map(dr):[{Note:'No debit note pairs'}]),'Debit Notes');
+    var _wb2=XLSX.write(wb,{bookType:'xlsx',type:'array'});var _bl2=new Blob([_wb2],{type:'application/octet-stream'});var _u2=URL.createObjectURL(_bl2);var _a2=document.createElement('a');_a2.href=_u2;_a2.download='TaxNest_GST_Reconciliation_'+new Date().toISOString().split('T')[0]+'.xlsx';document.body.appendChild(_a2);_a2.click();setTimeout(function(){URL.revokeObjectURL(_u2);document.body.removeChild(_a2);},1000);
+    toast('Excel report exported','success');
+  }catch(e){console.error(e);toast('Export failed','error');}
+}
+
+/* ═══════════════════════════════════════════════════════════
+   VENDOR PDF MODAL
+═══════════════════════════════════════════════════════════ */
+function openVendorModal(){document.getElementById('vendorModal').classList.add('show');if(recoData)buildVendorList();}
+function closeVendorModal(){document.getElementById('vendorModal').classList.remove('show');}
+
+function buildVendorList(){
+  const el=document.getElementById('vendorList');if(!recoData)return;
+  const v={};
+  const add=(gstn,name,t)=>{if(!gstn)return;if(!v[gstn])v[gstn]={gstn,name:name||'Unknown',prOnly:[],g2aOnly:[],mismatch:[],gstnMismatch:[],debitNotes:[]};v[gstn][t].push(true);};
+  recoData.prOnly.forEach(r=>add(r.gstn,r.supplier,'prOnly'));
+  recoData.g2aOnly.forEach(r=>add(r.gstn,r.supplier,'g2aOnly'));
+  recoData.mismatch.forEach(r=>add(r.pr.gstn,r.pr.supplier,'mismatch'));
+  recoData.gstnMismatch.forEach(r=>add(r.pr.gstn,r.pr.supplier,'gstnMismatch'));
+  recoData.debitNotes.forEach(r=>add(r.invoice.gstn,r.invoice.supplier,'debitNotes'));
+  const keys=Object.keys(v);
+  if(!keys.length){el.innerHTML='<div class="empty-state"><div class="empty-icon"><i class="fas fa-check-circle" style="color:var(--green)"></i></div><h4>All matched!</h4><p>No vendor discrepancies found.</p></div>';return;}
+  el.innerHTML=keys.map(k=>{
+    const vd=v[k];const counts=[];
+    if(vd.prOnly.length)counts.push(`<span style="color:var(--red)">${vd.prOnly.length} not on portal</span>`);
+    if(vd.g2aOnly.length)counts.push(`<span style="color:var(--blue)">${vd.g2aOnly.length} not in books</span>`);
+    if(vd.mismatch.length)counts.push(`<span style="color:var(--amber)">${vd.mismatch.length} mismatch</span>`);
+    if(vd.gstnMismatch.length)counts.push(`<span style="color:var(--violet)">${vd.gstnMismatch.length} GSTN diff</span>`);
+    if(vd.debitNotes.length)counts.push(`<span style="color:var(--red)">${vd.debitNotes.length} debit note</span>`);
+    return`<div class="vendor-item"><div class="vendor-item-head">
+      <div class="v-info">
+        <div class="v-name">${esc(vd.name)}</div>
+        <div class="v-gstn">${esc(vd.gstn)}</div>
+        <div class="v-counts">${counts.join(' · ')}</div>
+      </div>
+      <div class="v-pdf-btns">
+        ${vd.prOnly.length?`<button class="btn-vpdf not-on-portal" onclick="genVendorPDF('${esc(k)}',false)"><i class="fas fa-file-pdf"></i> Not on Portal</button>`:''}
+        ${vd.g2aOnly.length?`<button class="btn-vpdf not-in-books" onclick="genVendorPDF('${esc(k)}',true)"><i class="fas fa-file-pdf"></i> Not in Books</button>`:''}
+      </div>
+    </div></div>`;
+  }).join('');
+}
+
+function genVendorPDF(gstn,isG2AOnly){
+  const cn=(document.getElementById('clientName')||{}).value||'Our Client';
+  const cg=(document.getElementById('clientGSTN')||{}).value||'';
+  const cg2=(document.getElementById('clientGSTN2')||{}).value||'';
+  const cn2=(document.getElementById('clientName2')||{}).value||'';
+  const today=new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'long',year:'numeric'});
+  let vName='Vendor',rows=[];
+  if(isG2AOnly){recoData.g2aOnly.filter(r=>r.gstn===gstn).forEach(r=>{vName=r.supplier||vName;rows.push(r);});}
+  else{recoData.prOnly.filter(r=>r.gstn===gstn).forEach(r=>{vName=r.supplier||vName;rows.push(r);});}
+  if(!rows.length){toast('No records for this vendor in this category','warn');return;}
+  const clientBlock=cg2?`${cn} (GSTN: ${cg})<br>Also trading as: ${cn2} (GSTN: ${cg2})`:`${cn} (GSTN: ${cg})`;
+  const trows=rows.map(r=>`<tr><td>${esc(r.invoice)}</td><td>${fd(r.date)}</td><td style="text-align:right">${fc(r.igst)}</td><td style="text-align:right">${fc(r.cgst)}</td><td style="text-align:right">${fc(r.sgst)}</td><td style="text-align:right"><strong>${fc(r.totalTax)}</strong></td></tr>`).join('');
+  const body=isG2AOnly?`<p>Dear Sir / Madam,</p><p>Sub: <strong>GSTR-2A Reconciliation – Invoices on GST Portal Not Received by Us</strong></p><p>We, <strong>${clientBlock}</strong>, have conducted a reconciliation of our GSTR-2A data with our Purchase Register for the relevant period, with the assistance of <strong>TaxNest</strong>.</p><p>Upon reconciliation, the following invoice(s) uploaded by you on the GST Portal appear in our GSTR-2A but the <strong>physical invoices have not been received</strong> by us:</p>`:`<p>Dear Sir / Madam,</p><p>Sub: <strong>GSTR-2A Reconciliation – Invoices Not Reflecting on GST Portal</strong></p><p>We, <strong>${clientBlock}</strong>, have conducted a reconciliation of our GSTR-2A data with our Purchase Register for the relevant period, with the assistance of <strong>TaxNest</strong>.</p><p>The following invoice(s) issued by you are recorded in our books but are <strong>not reflecting on the GST Portal</strong> in our GSTR-2A:</p>`;
+  const footer=isG2AOnly?`<p>We request you to kindly provide us with the physical copies of the above invoices at the earliest so we may record them and avail the eligible Input Tax Credit.</p>`:`<p>We request you to:<ol><li>If filed in your GSTR-1, share a screenshot from the GST Portal confirming filing.</li><li>If not filed, kindly file your pending GSTR-1 at the earliest to enable us to avail the ITC.</li></ol><p>Non-reflection may result in reversal of Input Tax Credit, which is a financial impact for us.</p>`;
+  const html=`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>TaxNest – Vendor Letter</title>
+  <style>body{font-family:'Segoe UI',Arial,sans-serif;font-size:13.5px;color:#1a1a2e;max-width:800px;margin:0 auto;padding:32px;}
+  .header{text-align:center;border-bottom:3px solid #7c3aed;padding-bottom:16px;margin-bottom:24px;}
+  .logo{font-family:'Syne',sans-serif;font-size:26px;font-weight:800;color:#1a1a2e;}.logo span{color:#7c3aed;}
+  .tagline{font-size:10px;color:#6b7280;text-transform:uppercase;letter-spacing:.06em;margin-top:4px;}
+  .watermark{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-30deg);font-size:100px;font-weight:900;color:rgba(124,58,237,0.04);pointer-events:none;z-index:-1;}
+  p{line-height:1.7;margin:10px 0;}ol li{margin:6px 0;line-height:1.7;}
+  table{width:100%;border-collapse:collapse;margin:16px 0;font-size:13px;}
+  th{background:#7c3aed;color:#fff;padding:8px 10px;text-align:left;font-size:11px;font-weight:700;}
+  td{padding:8px 10px;border-bottom:1px solid #e5e7eb;}tr:nth-child(even) td{background:#f9fafb;}
+  .footer{margin-top:32px;padding-top:16px;border-top:2px solid #7c3aed;font-size:11px;color:#6b7280;}
+  @media print{.watermark{display:block;}}</style></head>
+  <body><div class="watermark">TaxNest</div>
+  <div class="header"><div class="logo">Tax<span>Nest</span></div><div class="tagline">We Handle Your Books, GST &amp; TDS — You Handle Your Business</div></div>
+  <p><strong>Date:</strong> ${today}</p>
+  <p><strong>To,</strong><br><strong>${esc(vName)}</strong><br>GSTN: <strong>${esc(gstn)}</strong></p>
+  <p><strong>From,</strong><br>${clientBlock}</p>
+  ${body}
+  <table><thead><tr><th>Invoice No.</th><th>Date</th><th>IGST</th><th>CGST</th><th>SGST</th><th>Total Tax</th></tr></thead><tbody>${trows}</tbody></table>
+  ${footer}
+  <div style="margin-top:32px;"><p>Yours faithfully,</p><br><br>
+  <p><strong>For ${esc(cn)}</strong></p>
+  <p style="font-size:11px;color:#9ca3af;">Reconciliation by <strong>TaxNest</strong> | taxnest.info@gmail.com | +91 83202 22643 | @taxnest_2026</p></div>
+  <div class="footer"><strong>TaxNest</strong> · GST · TDS · Bookkeeping · +91 83202 22643 · taxnest.info@gmail.com · @taxnest_2026 · taxnest2026.github.io/TaxNest-india</div>
+  </body></html>`;
+  const w=window.open('','_blank');w.document.write(html);w.document.close();setTimeout(()=>w.print(),500);
+  toast(`Vendor letter generated for ${vName}`,'success');
+}
+
+/* ═══════════════════════════════════════════════════════════
+   NAVIGATION
+═══════════════════════════════════════════════════════════ */
+const navTitles={'overview':'Overview','match':'Matched','mismatch':'Amount Mismatches','pr-only':'Not in 2A','gstr2a-only':'Not in Books','gstn-mismatch':'GSTN Mismatch','debit-notes':'Debit Notes'};
+function navigate(t){
+  currentPage=t;
+  document.querySelectorAll('.nav-item[data-nav]').forEach(i=>i.classList.toggle('active',i.dataset.nav===t));
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  const pg=document.getElementById(`page-${t}`);if(pg)pg.classList.add('active');
+  const bc=document.getElementById('bcCurrent');if(bc)bc.textContent=navTitles[t]||'Overview';
+  window.scrollTo({top:0,behavior:'smooth'});closeSidebar();
+}
+document.querySelectorAll('.nav-item[data-nav]').forEach(i=>i.addEventListener('click',()=>navigate(i.dataset.nav)));
+
+/* ═══════════════════════════════════════════════════════════
+   COMMAND PALETTE
+═══════════════════════════════════════════════════════════ */
+const cmdActions=[
+  {id:'ov',label:'Overview',icon:'fa-gauge-high',section:'Navigate',key:'1',run:()=>navigate('overview')},
+  {id:'ma',label:'Matched Invoices',icon:'fa-circle-check',section:'Navigate',key:'2',run:()=>navigate('match')},
+  {id:'mi',label:'Amount Mismatches',icon:'fa-triangle-exclamation',section:'Navigate',key:'3',run:()=>navigate('mismatch')},
+  {id:'pr',label:'Not in 2A (Portal)',icon:'fa-circle-xmark',section:'Navigate',key:'4',run:()=>navigate('pr-only')},
+  {id:'g2',label:'Not in Books',icon:'fa-file-invoice',section:'Navigate',key:'5',run:()=>navigate('gstr2a-only')},
+  {id:'gm',label:'GSTN Mismatch',icon:'fa-id-card',section:'Navigate',key:'6',run:()=>navigate('gstn-mismatch')},
+  {id:'dn',label:'Debit Notes',icon:'fa-receipt',section:'Navigate',key:'7',run:()=>navigate('debit-notes')},
+  {id:'ex',label:'Export Full Excel',icon:'fa-file-excel',section:'Actions',run:()=>exportFullReport()},
+  {id:'vp',label:'Generate Vendor PDFs',icon:'fa-file-pdf',section:'Actions',run:()=>openVendorModal()},
+  {id:'rs',label:'Upload New File',icon:'fa-rotate-left',section:'Actions',run:()=>resetApp()},
+  {id:'pt',label:'Print / Save PDF',icon:'fa-print',section:'Actions',key:'Ctrl+P',run:()=>window.print()},
+];
+let cmdIdx=0;
+function openCmd(){const ov=document.getElementById('cmdOverlay');ov.classList.add('show');const ci=document.getElementById('cmdInput');ci.value='';setTimeout(()=>ci.focus(),50);renderCmd('');}
+function closeCmd(){document.getElementById('cmdOverlay').classList.remove('show');}
+function renderCmd(q){
+  const list=document.getElementById('cmdList');const qq=q.toLowerCase().trim();
+  let items=cmdActions.map(a=>({...a,type:'action'}));
+  if(qq&&recoData){
+    const targets=[...(recoData.fullMatch||[]).map(r=>({...r.pr,_b:'match'})),...(recoData.mismatch||[]).map(r=>({...r.pr,_b:'mismatch'})),...(recoData.prOnly||[]).map(r=>({...r,_b:'pr-only'})),...(recoData.g2aOnly||[]).map(r=>({...r,_b:'gstr2a-only'}))];
+    const m=targets.filter(r=>`${r.gstn} ${r.supplier} ${r.invoice}`.toLowerCase().includes(qq)).slice(0,6);
+    items=[...m.map((r,i)=>({id:`r${i}`,label:`${r.invoice} · ${(r.supplier||'').substring(0,26)}`,icon:'fa-receipt',section:'Records',bucket:r._b,type:'record'})),...items.filter(a=>a.label.toLowerCase().includes(qq))];
+  }else if(qq){items=items.filter(a=>a.label.toLowerCase().includes(qq));}
+  cmdIdx=0;
+  if(!items.length){list.innerHTML='<div class="cmd-section">No results</div>';document.getElementById('cmdCount').textContent='0';return;}
+  document.getElementById('cmdCount').textContent=`${items.length}`;
+  const secs={};items.forEach((it,i)=>{if(!secs[it.section])secs[it.section]=[];secs[it.section].push({...it,_i:i});});
+  let html='';Object.keys(secs).forEach(s=>{html+=`<div class="cmd-section">${esc(s)}</div>`;secs[s].forEach(it=>{html+=`<div class="cmd-item${it._i===cmdIdx?' active':''}" data-i="${it._i}"><i class="fas ${it.icon}"></i><span class="cmd-item-label">${esc(it.label)}</span>${it.key?`<span class="cmd-key">${it.key}</span>`:''}</div>`;});});
+  list.innerHTML=html;
+  list.querySelectorAll('.cmd-item').forEach(el=>{
+    el.addEventListener('click',()=>{const i=parseInt(el.dataset.i,10);const it=items[i];if(it){if(it.type==='action'&&it.run)it.run();else if(it.type==='record'&&it.bucket)navigate(it.bucket);}closeCmd();});
+    el.addEventListener('mouseenter',()=>{cmdIdx=parseInt(el.dataset.i,10);list.querySelectorAll('.cmd-item').forEach(e=>e.classList.toggle('active',parseInt(e.dataset.i,10)===cmdIdx));});
+  });
+  list._items=items;
+}
+document.getElementById('cmdInput').addEventListener('input',e=>renderCmd(e.target.value));
+document.getElementById('cmdInput').addEventListener('keydown',e=>{
+  const list=document.getElementById('cmdList');const items=list._items||[];if(!items.length)return;
+  if(e.key==='ArrowDown'){e.preventDefault();cmdIdx=(cmdIdx+1)%items.length;}
+  else if(e.key==='ArrowUp'){e.preventDefault();cmdIdx=(cmdIdx-1+items.length)%items.length;}
+  else if(e.key==='Enter'){e.preventDefault();const it=items[cmdIdx];if(it){if(it.type==='action'&&it.run)it.run();else if(it.type==='record'&&it.bucket)navigate(it.bucket);}closeCmd();return;}
+  else if(e.key==='Escape'){closeCmd();return;}
+  list.querySelectorAll('.cmd-item').forEach(el=>el.classList.toggle('active',parseInt(el.dataset.i,10)===cmdIdx));
+  const ac=list.querySelector('.cmd-item.active');if(ac)ac.scrollIntoView({block:'nearest'});
+});
+
+/* Keyboard shortcuts */
+document.addEventListener('keydown',e=>{
+  if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==='k'){e.preventDefault();openCmd();return;}
+  if(e.key==='Escape'){closeCmd();closeSidebar();return;}
+  if(['INPUT','TEXTAREA','SELECT'].includes(e.target.tagName))return;
+  if(e.ctrlKey||e.metaKey||e.altKey)return;
+  if(e.key==='?'){e.preventDefault();openCmd();return;}
+  if(!recoData)return;
+  const map={'1':'overview','2':'match','3':'mismatch','4':'pr-only','5':'gstr2a-only','6':'gstn-mismatch','7':'debit-notes'};
+  if(map[e.key])navigate(map[e.key]);
+});
+
+/* Tolerance footer sync */
+document.getElementById('toleranceInput').addEventListener('input',function(){const ft=document.getElementById('footTol');if(ft)ft.textContent=`±₹${this.value||1}`;});
+</script>
+</body>
+</html>
