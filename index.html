@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TaxNest — GST Invoice Software & Smart Accounting India | Free GST Tools</title>
+  <meta name="description" content="TaxNest: Free GST invoice maker, GSTR-2B reconciliation & smart accounting for Indian businesses. Auto IGST/CGST/SGST detection. Trusted by CA firms in Gujarat." />
+  <meta name="keywords" content="GST invoice software India, free GST invoice maker, GSTR-2B reconciliation, online invoice generator India, GST calculator, accounting software India" />
+  <link rel="canonical" href="https://taxnest.in/" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="TaxNest — Free GST Invoice Maker & Smart Accounting India" />
+  <meta property="og:description" content="Create GST invoices, reconcile GSTR-2B, file TDS — complete accounting for Indian businesses. Free tools, no login required." />
+  <meta property="og:image" content="https://taxnest.in/taxnest-logo.webp" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="TaxNest — Free GST Invoice & Accounting Tools India" />
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"Organization","name":"TaxNest","url":"https://taxnest.in","logo":"https://taxnest.in/taxnest-logo.webp","contactPoint":{"@type":"ContactPoint","telephone":"+91-83202-22643","email":"taxnest.info@gmail.com"},"address":{"@type":"PostalAddress","addressLocality":"Ahmedabad","addressRegion":"Gujarat","addressCountry":"IN"}}</script>
+  <!-- Theme: run before render to prevent flash of wrong theme -->
+  <script>(function(){var t=localStorage.getItem('taxnest-theme')||(window.matchMedia('(prefers-color-scheme:light)').matches?'light':'dark');document.documentElement.setAttribute('data-theme',t);})();</script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    /* ════ 3D GOLDEN RUPEE — core mixin ════ */
+    .golden-rupee {
+      background: linear-gradient(
+        170deg,
+        #fff9d0 0%, #ffe566 12%, #ffd000 25%,
+        #e89a00 38%, #b86800 50%,
+        #e89a00 62%, #ffd000 75%,
+        #ffe566 88%, #fff9d0 100%
+      );
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      filter:
+        drop-shadow(0 2px 0 rgba(100,55,0,0.7))
+        drop-shadow(0 4px 8px rgba(0,0,0,0.5))
+        drop-shadow(0 0 20px rgba(255,185,0,0.5));
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+    }
+
+    /* ════ RUPEE RAIN — override to golden ════ */
+    .rupee {
+      background: linear-gradient(
+        170deg,
+        #fff9d0 0%, #ffe566 15%,
+        #ffd000 30%, #e89a00 50%,
+        #ffd000 70%, #ffe566 85%, #fff9d0 100%
+      );
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      color: transparent;
+      filter:
+        drop-shadow(0 1px 0 rgba(100,55,0,0.6))
+        drop-shadow(0 3px 6px rgba(0,0,0,0.45))
+        drop-shadow(0 0 12px rgba(255,185,0,0.4));
+      opacity: 1 !important;
+    }
+
+    /* ════ NAVBAR LOGO ════ */
+    .nav-logo-img {
+      width: 42px; height: 42px; border-radius: 50%;
+      object-fit: cover;
+      box-shadow: 0 4px 20px rgba(212,160,0,0.45);
+      animation: logoPulse 4s ease-in-out infinite;
+      flex-shrink: 0;
+    }
+    @keyframes logoPulse {
+      0%,100%{box-shadow:0 4px 20px rgba(212,160,0,0.4)}
+      50%{box-shadow:0 4px 32px rgba(255,200,0,0.75), 0 0 20px rgba(255,180,0,0.4)}
+    }
+    .logo-fallback {
+      width:42px;height:42px;border-radius:50%;
+      background:linear-gradient(135deg,#7c3aed,#a855f7);
+      display:flex;align-items:center;justify-content:center;
+      font-size:1.1rem;font-weight:800;
+      box-shadow:0 4px 20px rgba(124,58,237,0.5);
+      animation:logoPulse2 4s ease-in-out infinite;
+    }
+    @keyframes logoPulse2{0%,100%{box-shadow:0 4px 20px rgba(124,58,237,0.5)}50%{box-shadow:0 4px 32px rgba(124,58,237,0.8)}}
+
+    /* ════ BIG HERO RUPEE BG ════ */
+    .hero-rupee-bg {
+      position: absolute; right: 3%; top: 50%;
+      transform: translateY(-50%);
+      font-size: 28vw; font-family: 'Syne',sans-serif; font-weight: 800;
+      background: linear-gradient(170deg,rgba(255,215,0,0.09) 0%,rgba(255,160,0,0.05) 50%,rgba(200,100,0,0.03) 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+      filter: drop-shadow(0 0 60px rgba(255,180,0,0.07));
+      pointer-events: none; z-index: 0; user-select: none;
+      animation: bgRupeePulse 10s ease-in-out infinite;
+    }
+    @keyframes bgRupeePulse{0%,100%{opacity:0.7;transform:translateY(-50%) scale(1)} 50%{opacity:1;transform:translateY(-52%) scale(1.015)}}
+
+    /* ════ PRICE RUPEE GOLDEN ════ */
+    .price-curr { font-family:'Syne',sans-serif; font-size:2.2rem; font-weight:800; padding-top:0.8rem; }
+
+    /* ════ FOOTER LOGO IMG ════ */
+    .footer-logo-img {
+      width:30px;height:30px;border-radius:50%;object-fit:cover;
+    }
+
+    /* ════ ORBS ════ */
+    .orb{position:absolute;border-radius:50%;filter:blur(80px);pointer-events:none;z-index:0;animation:orbDrift 12s ease-in-out infinite;}
+    .orb1{width:500px;height:500px;top:-150px;left:-100px;background:radial-gradient(circle,rgba(124,58,237,0.2),transparent 70%);animation-delay:0s;}
+    .orb2{width:400px;height:400px;bottom:-100px;right:-80px;background:radial-gradient(circle,rgba(168,85,247,0.15),transparent 70%);animation-delay:4s;}
+    .orb3{width:300px;height:300px;top:40%;left:40%;background:radial-gradient(circle,rgba(139,92,246,0.1),transparent 70%);animation-delay:8s;}
+    @keyframes orbDrift{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(30px,-20px) scale(1.05)}66%{transform:translate(-20px,30px) scale(0.95)}}
+    .grid-overlay{position:absolute;inset:0;background-image:linear-gradient(rgba(124,58,237,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(124,58,237,0.04) 1px,transparent 1px);background-size:60px 60px;pointer-events:none;z-index:0;}
+
+    /* ════ HERO ════ */
+    .hero{min-height:100vh;display:flex;align-items:center;padding:9rem 2rem 5rem;position:relative;overflow:hidden;z-index:1;}
+    .hero-inner{position:relative;z-index:2;max-width:620px;}
+    .hero-badge{display:inline-flex;align-items:center;gap:0.6rem;background:rgba(124,58,237,0.1);border:1px solid rgba(124,58,237,0.3);border-radius:30px;padding:0.45rem 1.1rem;font-size:0.8rem;color:var(--purple-light);letter-spacing:.05em;margin-bottom:1.5rem;}
+    .badge-dot{width:7px;height:7px;border-radius:50%;background:#a855f7;animation:blink 2s ease-in-out infinite;}
+    @keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
+    .hero-h1{font-family:'Syne',sans-serif;font-size:clamp(2.8rem,6vw,5rem);font-weight:800;color:#fff;line-height:1.05;letter-spacing:-0.02em;margin-bottom:1.2rem;}
+    .grad-text{background:linear-gradient(135deg,#a855f7,#7c3aed,#c084fc);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+    .hero-sub{font-size:1.1rem;color:var(--muted);line-height:1.75;max-width:500px;margin-bottom:2.2rem;}
+    .hero-ctas{display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:3rem;}
+    .hero-stats{display:flex;align-items:center;gap:2rem;}
+    .stat-pill{display:flex;flex-direction:column;}
+    .stat-num{font-family:'Syne',sans-serif;font-size:1.6rem;font-weight:800;color:#fff;}
+    .stat-lbl{font-size:0.75rem;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;}
+    .stat-divider{width:1px;height:40px;background:rgba(255,255,255,0.1);}
+
+    /* Hero deco cards */
+    .hero-deco{position:absolute;right:5%;top:50%;transform:translateY(-50%);z-index:2;display:flex;flex-direction:column;gap:1rem;}
+    .deco-card{background:rgba(255,255,255,0.04);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.1);border-radius:16px;padding:1.2rem 1.5rem;min-width:200px;animation:cardFloat 6s ease-in-out infinite;}
+    .deco-card.dc2{animation-delay:3s;}
+    @keyframes cardFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+    .dc-icon{font-size:1.5rem;margin-bottom:0.4rem;}
+    .dc-label{font-size:0.72rem;color:var(--muted);margin-bottom:0.3rem;}
+    .dc-val{font-family:'Syne',sans-serif;font-size:0.9rem;font-weight:700;color:#fff;}
+    .dc-val.success{color:#4ade80;}
+
+    /* ════ INTRO STRIP ════ */
+    .intro-strip{padding:6rem 0;position:relative;z-index:1;}
+    .intro-label{font-size:0.75rem;text-transform:uppercase;letter-spacing:.15em;color:var(--purple-light);margin-bottom:1rem;}
+    .intro-h2{font-family:'Syne',sans-serif;font-size:clamp(1.8rem,3.5vw,2.8rem);font-weight:700;color:#fff;line-height:1.2;margin-bottom:1.2rem;}
+    .intro-body{color:var(--muted);line-height:1.8;max-width:780px;margin-bottom:2rem;}
+    .intro-pills{display:flex;flex-wrap:wrap;gap:0.6rem;}
+    .pill{background:rgba(124,58,237,0.1);border:1px solid rgba(124,58,237,0.25);border-radius:30px;padding:0.35rem 1rem;font-size:0.8rem;color:var(--purple-light);font-weight:500;}
+
+    /* ════ SERVICES ════ */
+    .services{padding:6rem 0;position:relative;z-index:1;}
+    .section-header{margin-bottom:3.5rem;}
+    .section-tag{display:inline-block;font-size:0.75rem;text-transform:uppercase;letter-spacing:.15em;color:var(--purple-light);background:rgba(124,58,237,0.1);border:1px solid rgba(124,58,237,0.25);border-radius:20px;padding:0.3rem 0.8rem;margin-bottom:1rem;}
+    .section-h2{font-family:'Syne',sans-serif;font-size:clamp(2rem,4vw,3.2rem);font-weight:700;color:#fff;line-height:1.15;}
+    .section-sub{color:var(--muted);font-size:1rem;margin-top:0.8rem;}
+  </style>
+</head>
+<body>
+
+  <!-- Golden Rupee Rain -->
+  <div class="rupee-rain" aria-hidden="true">
+    <span class="rupee r1">₹</span><span class="rupee r2">₹</span>
+    <span class="rupee r3">₹</span><span class="rupee r4">₹</span>
+    <span class="rupee r5">₹</span><span class="rupee r6">₹</span>
+    <span class="rupee r7">₹</span><span class="rupee r8">₹</span>
+  </div>
+  <div class="rupee-whisper" aria-hidden="true">
+    <span class="wrupee w1">₹</span><span class="wrupee w2">₹</span>
+    <span class="wrupee w3">₹</span><span class="wrupee w4">₹</span>
+  </div>
+
+  <!-- NAVBAR -->
+  <header class="navbar">
+    <div class="nav-inner">
+      <a href="#home" class="nav-logo" style="display:flex;align-items:center;gap:0.7rem;font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem;color:#fff;letter-spacing:-0.01em;">
+        <img src="taxnest-logo.webp" alt="TaxNest" class="nav-logo-img"
+          onerror="this.style.display='none'; document.getElementById('logo-fb').style.display='flex';" />
+        <div id="logo-fb" class="logo-fallback" style="display:none;">
+          <span class="golden-rupee" style="font-size:1rem;">₹</span>
+        </div>
+        <span>TaxNest</span>
+      </a>
+      <nav class="nav-links">
+        <a href="#home">Home</a>
+        <a href="#services">Services</a>
+        <a href="#free-tools" style="color:#4ade80;position:relative;">
+          Free Tools
+          <span style="position:absolute;top:-8px;right:-22px;background:linear-gradient(135deg,#7c3aed,#a855f7);color:#fff;font-size:0.55rem;font-weight:800;padding:1px 5px;border-radius:10px;letter-spacing:.04em;">NEW</span>
+        </a>
+        <a href="#app-section">App</a>
+        <a href="#pricing">Pricing</a>
+        <a href="#contact">Contact</a>
+      </nav>
+      <div style="display:flex;align-items:center;gap:0.75rem;">
+        <button class="theme-toggle-btn" id="themeToggle" aria-label="Switch light/dark theme" title="Toggle light/dark mode">
+          <span class="tt-moon">🌙</span>
+          <span class="tt-sun">☀️</span>
+          <div class="tt-thumb"></div>
+        </button>
+        <a href="app-demo.html" class="nav-cta">Try Demo</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- HERO -->
+  <section id="home" class="hero">
+    <div class="orb orb1"></div>
+    <div class="orb orb2"></div>
+    <div class="orb orb3"></div>
+    <div class="grid-overlay"></div>
+    <div class="hero-rupee-bg" aria-hidden="true">₹</div>
+
+    <div class="hero-inner">
+      <div class="hero-badge fade-up" style="--d:0.1s">
+        <span class="badge-dot"></span>
+        AI-Powered Accounting Platform
+      </div>
+      <h1 class="hero-h1 fade-up" style="--d:0.25s">
+        Smart Accounting<br />
+        <span class="grad-text">with AI Automation</span>
+      </h1>
+      <p class="hero-sub fade-up" style="--d:0.4s">
+        Upload your bills, statements, and documents.<br />
+        Get your accounting done within <strong>24 hours</strong>.
+      </p>
+      <div class="hero-ctas fade-up" style="--d:0.55s">
+        <a href="#contact" class="btn btn-primary">Contact Now</a>
+        <a href="#services" class="btn btn-ghost">View Services</a>
+        <a href="gst-reconciliation-tool.html" class="btn btn-ghost" style="border-color:rgba(74,222,128,0.35);color:#4ade80;background:rgba(74,222,128,0.07);">
+          <span style="font-size:0.75rem;">✦</span> Free GST Tool
+        </a>
+      </div>
+      <div class="hero-stats fade-up" style="--d:0.7s">
+        <div class="stat-pill">
+          <span class="stat-num">24h</span>
+          <span class="stat-lbl">Turnaround</span>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat-pill">
+          <span class="stat-num">100%</span>
+          <span class="stat-lbl">Compliance</span>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat-pill">
+          <span class="stat-num">AI</span>
+          <span class="stat-lbl">Powered</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="hero-deco fade-up" style="--d:0.6s" aria-hidden="true">
+      <div class="deco-card dc1" style="display:flex;align-items:center;gap:0.8rem;">
+        <img src="taxnest-logo.webp" alt="" style="width:38px;height:38px;border-radius:50%;object-fit:cover;"
+          onerror="this.style.display='none';" />
+        <div>
+          <div class="dc-label">TaxNest</div>
+          <div class="dc-val success">✓ GSTR-2B Matched</div>
+        </div>
+      </div>
+      <div class="deco-card dc2">
+        <div class="dc-icon">💰</div>
+        <div class="dc-label">TDS Filed</div>
+        <div class="dc-val">Q4 FY 25-26</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- WHAT WE DO -->
+  <section class="intro-strip fade-up" style="--d:0.1s">
+    <div class="container">
+      <div class="intro-label">What We Do</div>
+      <h2 class="intro-h2">End-to-end financial compliance<br />so you can focus on growth</h2>
+      <p class="intro-body">
+        TaxNest is a full-service accounting and tax firm built for Indian businesses. We combine expert human accountants with an AI-powered mobile platform to deliver GST filing, TDS compliance, GSTR-2B reconciliation, and complete bookkeeping — all under one monthly plan. No hidden fees. No deadlines missed. Just clean books and zero tax anxiety, every single month.
+      </p>
+      <div class="intro-pills">
+        <span class="pill">GST Filing</span>
+        <span class="pill">TDS Compliance</span>
+        <span class="pill">Bookkeeping</span>
+        <span class="pill">GSTR-2B Matching</span>
+        <span class="pill">ITR Filing</span>
+        <span class="pill">AI Document Processing</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- SERVICES -->
+  <section id="services" class="services">
+    <div class="container">
+      <div class="section-header fade-up" style="--d:0.1s">
+        <div class="section-tag">Our Services</div>
+        <h2 class="section-h2">Everything your business<br />needs, handled.</h2>
+      </div>
+      <div class="services-grid">
+        <div class="svc-card fade-up" style="--d:0.1s">
+          <div class="svc-icon-wrap"><div class="svc-icon">📒</div></div>
+          <h3>Accounting & Bookkeeping</h3>
+          <p>Daily ledger maintenance, bank reconciliation, and P&L statements — all maintained in real time using your uploaded documents.</p>
+          <ul class="svc-list">
+            <li>Sales & Purchase Ledgers</li><li>Bank Reconciliation</li><li>Trial Balance & P&L</li>
+          </ul>
+        </div>
+        <div class="svc-card fade-up" style="--d:0.2s">
+          <div class="svc-icon-wrap"><div class="svc-icon">🧾</div></div>
+          <h3>GST Filing & Payment</h3>
+          <p>Timely GSTR-1, GSTR-3B filing with complete ITC management and liability computation every month without fail.</p>
+          <ul class="svc-list">
+            <li>GSTR-1 & GSTR-3B</li><li>ITC Reconciliation</li><li>GST Payment Computation</li>
+          </ul>
+        </div>
+        <div class="svc-card fade-up highlight-card" style="--d:0.3s">
+          <div class="svc-icon-wrap"><div class="svc-icon">🔗</div></div>
+          <h3>GSTR-2B Matching</h3>
+          <p>Automated reconciliation of your purchase data against GSTR-2B to ensure you claim every rupee of eligible ITC.</p>
+          <ul class="svc-list">
+            <li>ITC vs 2B Gap Analysis</li><li>Vendor Follow-up Reports</li><li>Monthly Reconciliation</li>
+          </ul>
+          <div class="card-badge">Most Popular</div>
+          <a href="gst-reconciliation-tool.html" style="display:inline-flex;align-items:center;gap:0.4rem;margin-top:1.4rem;padding:0.5rem 1rem;background:rgba(74,222,128,0.12);border:1px solid rgba(74,222,128,0.3);border-radius:30px;font-size:0.75rem;font-weight:700;color:#4ade80;letter-spacing:.05em;text-decoration:none;transition:all .25s;" onmouseover="this.style.background='rgba(74,222,128,0.2)'" onmouseout="this.style.background='rgba(74,222,128,0.12)'">
+            ✦ Try Free AI Tool →
+          </a>
+        </div>
+        <div class="svc-card fade-up" style="--d:0.4s">
+          <div class="svc-icon-wrap"><div class="svc-icon">📝</div></div>
+          <h3>TDS Filing & Payment</h3>
+          <p>Quarterly TDS return filing (24Q, 26Q), challan payment, and 16A/16B generation — fully managed, zero penalties.</p>
+          <ul class="svc-list">
+            <li>26Q & 24Q Returns</li><li>TDS Challan Payment</li><li>Form 16 / 16A Generation</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- APP SECTION -->
+  <section id="app-section" class="app-section">
+    <div class="container">
+      <div class="section-header fade-up" style="--d:0.1s">
+        <div class="section-tag">Mobile App</div>
+        <h2 class="section-h2">Your accountant<br />in your pocket</h2>
+        <p class="section-sub">Upload once. We handle the rest — in under 24 hours.</p>
+      </div>
+      <div class="app-features-list">
+        <div class="app-feat fade-up" style="--d:0.1s">
+          <div class="app-feat-icon">📤</div>
+          <div class="app-feat-body"><h4>Smart Document Upload</h4><p>Snap a photo or upload PDFs of sales bills, purchase bills, credit/debit notes, bank statements, and cash statements. Our AI reads and records everything automatically.</p></div>
+        </div>
+        <div class="app-feat fade-up" style="--d:0.2s">
+          <div class="app-feat-icon">🤖</div>
+          <div class="app-feat-body"><h4>AI-Powered Data Entry</h4><p>No manual entry. The AI extracts invoice numbers, amounts, GST details, and party names — then posts them directly into your accounting software.</p></div>
+        </div>
+        <div class="app-feat fade-up" style="--d:0.3s">
+          <div class="app-feat-icon">🗄️</div>
+          <div class="app-feat-body"><h4>Secure Document Vault</h4><p>Your GST certificates, filed returns, KYC documents, login credentials, and last 3 years of financials — stored securely and accessible anytime.</p></div>
+        </div>
+        <div class="app-feat fade-up" style="--d:0.4s">
+          <div class="app-feat-icon">⚡</div>
+          <div class="app-feat-body"><h4>Max 1-Day Turnaround</h4><p>All uploaded documents are processed and reflected in your books within 24 hours. Compliance deadlines are tracked and you're notified well in advance.</p></div>
+        </div>
+      </div>
+      <div class="demo-cta-card fade-up" style="--d:0.5s">
+        <div class="demo-cta-inner">
+          <div class="demo-label">🚀 Interactive Demo — Try It Now</div>
+          <h3>Experience the TaxNest App</h3>
+          <p>Search ledgers, view demo GST credentials, browse filed returns, and experience the document upload flow — all interactive, right in your browser.</p>
+          <a href="app-demo.html" class="btn btn-primary demo-btn">Explore Interactive Demo →</a>
+          <div class="demo-note">No sign-up required · Fully interactive preview</div>
+        </div>
+        <div class="demo-cta-glow"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FREE TOOLS -->
+  <section id="free-tools" class="free-tools-section">
+    <div class="container">
+      <div class="section-header fade-up" style="--d:0.1s">
+        <div class="section-tag">Free AI Tools</div>
+        <h2 class="section-h2">Powerful GST tools,<br />completely free.</h2>
+        <p class="section-sub">No login. No charges. Built for Indian businesses and CA professionals.</p>
+      </div>
+
+      <div class="tools-divider fade-up" style="--d:0.15s">
+        Powered by TaxNest AI — accurate, instant, free
+      </div>
+
+      <div class="free-tools-grid">
+
+        <!-- ── TOOL 1 · GSTR-2A Reconciliation (FEATURED) ── -->
+        <a href="gst-reconciliation-tool.html" class="tool-card tool-featured fade-up" style="--d:0.2s">
+          <div class="tool-top-accent"></div>
+          <div class="tool-card-glow"></div>
+
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:0.5rem;position:relative;z-index:1;margin-bottom:1.4rem;">
+            <div class="tool-free-badge">
+              <span class="badge-pulse"></span>
+              Free Forever
+            </div>
+            <div class="tool-ai-badge">🤖 AI Powered</div>
+          </div>
+
+          <div class="tool-icon-wrap">🔗</div>
+
+          <div class="tool-title">GSTR-2A / 2B<br />Reconciliation</div>
+          <div class="tool-desc">
+            Upload your Purchase Register &amp; GSTR-2A file — our AI matches every invoice by GST number and invoice number in seconds. Get vendor-wise PDF letters and full Excel reports instantly.
+          </div>
+
+          <!-- How it works chips -->
+          <div class="tool-how-strip">
+            <div class="how-chip"><span class="chip-num">1</span> Upload PR &amp; 2A Excel</div>
+            <span class="how-arrow">›</span>
+            <div class="how-chip"><span class="chip-num">2</span> AI matches invoices</div>
+            <span class="how-arrow">›</span>
+            <div class="how-chip"><span class="chip-num">3</span> Download reports</div>
+          </div>
+
+          <!-- Feature list -->
+          <div class="tool-steps">
+            <div class="tool-step">
+              <span class="tool-step-num">✓</span>
+              <span><strong>GST No. mismatch detection</strong> — same invoice, different GSTN caught automatically</span>
+            </div>
+            <div class="tool-step">
+              <span class="tool-step-num">✓</span>
+              <span><strong>Vendor-wise PDF letters</strong> — formal letters to suppliers in one click</span>
+            </div>
+            <div class="tool-step">
+              <span class="tool-step-num">✓</span>
+              <span><strong>Supplier debit note analysis</strong> — detect supplier error reversals</span>
+            </div>
+            <div class="tool-step">
+              <span class="tool-step-num">✓</span>
+              <span><strong>Custom tolerance</strong> — set your own mismatch threshold (₹1, ₹10, ₹500…)</span>
+            </div>
+            <div class="tool-step">
+              <span class="tool-step-num">✓</span>
+              <span><strong>Consolidated Excel export</strong> — 6 sheets, fully branded</span>
+            </div>
+          </div>
+
+          <div class="tool-cta">
+            Try Free Reconciliation
+            <span class="arrow">→</span>
+          </div>
+        </a>
+
+        <!-- ── TOOL: Smart GST Invoice Maker (NEW) ── -->
+        <a href="invoice-maker.html" class="tool-card-invoice fade-up" style="--d:0.15s" aria-label="Open Smart GST Invoice Maker">
+          <div class="tci-new-badge">🆕 New Tool</div>
+          <div class="tci-icon">🧾</div>
+          <div class="tci-title">Smart GST<br/>Invoice Maker</div>
+          <p class="tci-desc">Create professional GST invoices, credit notes, debit notes &amp; delivery challans. Auto IGST/CGST/SGST detection. A4 print-ready PDF in seconds — free, no login.</p>
+          <div class="tci-pills">
+            <span class="tci-pill">Auto GST Calc</span>
+            <span class="tci-pill">IGST/CGST Auto</span>
+            <span class="tci-pill">HSN Summary</span>
+            <span class="tci-pill">PDF Export</span>
+            <span class="tci-pill">Credit Note</span>
+            <span class="tci-pill">Debit Note</span>
+            <span class="tci-pill">Delivery Challan</span>
+            <span class="tci-pill">QR Payment</span>
+          </div>
+          <span class="tci-cta">Create Invoice Now →</span>
+        </a>
+
+        <!-- ── TOOL 2 · TDS Reconciliation (Coming soon) ── -->
+        <div class="tool-card tool-soon fade-up" style="--d:0.3s">
+          <div class="tool-card-glow" style="background:radial-gradient(circle,rgba(99,102,241,0.2) 0%,transparent 65%);"></div>
+          <div class="tool-soon-tag">Coming Soon</div>
+          <div class="tool-icon-wrap" style="background:linear-gradient(135deg,rgba(99,102,241,0.25),rgba(139,92,246,0.15));">📋</div>
+          <div class="tool-title">TDS Reconciliation<br />Tool</div>
+          <div class="tool-desc">Match your TDS deducted against TRACES 26AS / AIS data. Identify short deductions, mismatches, and missing challans — all in one click.</div>
+          <div class="tool-steps">
+            <div class="tool-step"><span class="tool-step-num">·</span><span>Upload TRACES Conso file &amp; Books data</span></div>
+            <div class="tool-step"><span class="tool-step-num">·</span><span>AI matches deductee-wise entries</span></div>
+            <div class="tool-step"><span class="tool-step-num">·</span><span>Get mismatch report &amp; correction list</span></div>
+          </div>
+        </div>
+
+        <!-- ── TOOL 3 · GST Liability Calculator (Coming soon) ── -->
+        <div class="tool-card tool-soon fade-up" style="--d:0.4s">
+          <div class="tool-card-glow" style="background:radial-gradient(circle,rgba(168,85,247,0.18) 0%,transparent 65%);"></div>
+          <div class="tool-soon-tag">Coming Soon</div>
+          <div class="tool-icon-wrap" style="background:linear-gradient(135deg,rgba(168,85,247,0.25),rgba(124,58,237,0.15));">🧮</div>
+          <div class="tool-title">GST Liability<br />Calculator</div>
+          <div class="tool-desc">Instantly compute your monthly GST liability — IGST, CGST, SGST breakdowns — with ITC set-off applied automatically as per GST rules.</div>
+          <div class="tool-steps">
+            <div class="tool-step"><span class="tool-step-num">·</span><span>Enter sales &amp; purchase figures</span></div>
+            <div class="tool-step"><span class="tool-step-num">·</span><span>Auto ITC set-off calculation</span></div>
+            <div class="tool-step"><span class="tool-step-num">·</span><span>Download GSTR-3B ready summary</span></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- PRICING -->
+  <section id="pricing" class="pricing-section">
+    <div class="container">
+      <div class="section-header fade-up" style="--d:0.1s">
+        <div class="section-tag">Pricing</div>
+        <h2 class="section-h2">Simple. Transparent.<br />All-inclusive.</h2>
+        <p class="section-sub">Everything your business needs, one flat monthly fee.</p>
+      </div>
+      <div class="pricing-center fade-up" style="--d:0.2s">
+        <div class="price-card">
+          <div class="price-glow"></div>
+          <div class="price-tag">All-In-One Plan</div>
+          <div class="price-amount">
+            <span class="price-curr" style="background:linear-gradient(170deg,#fff9d0 0%,#ffe566 20%,#ffd000 40%,#e89a00 60%,#ffd000 80%,#fff9d0 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;filter:drop-shadow(0 2px 0 rgba(100,55,0,0.5)) drop-shadow(0 0 12px rgba(255,180,0,0.4));font-size:2.2rem;font-weight:800;padding-top:0.8rem;">₹</span>
+            <span class="price-num">1,000</span>
+            <span class="price-per">/month</span>
+          </div>
+          <div class="price-desc">Everything included. No surprises.</div>
+          <ul class="price-features">
+            <li><span class="pf-check">✓</span> Accounting & Bookkeeping</li>
+            <li><span class="pf-check">✓</span> GST Filing (GSTR-1 & 3B)</li>
+            <li><span class="pf-check">✓</span> GSTR-2B Reconciliation</li>
+            <li><span class="pf-check">✓</span> TDS Filing (26Q & 24Q)</li>
+            <li><span class="pf-check">✓</span> AI Document Processing App</li>
+            <li><span class="pf-check">✓</span> Secure Document Vault</li>
+            <li><span class="pf-check">✓</span> 24-Hour Turnaround</li>
+            <li><span class="pf-check">✓</span> Dedicated Account Manager</li>
+          </ul>
+          <a href="#contact" class="btn btn-primary price-cta">Get Started Today</a>
+          <div class="price-footer-note">No setup fee · Cancel anytime</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTACT -->
+  <section id="contact" class="contact-section">
+    <div class="container">
+      <div class="section-header fade-up" style="--d:0.1s">
+        <div class="section-tag">Contact Us</div>
+        <h2 class="section-h2">Let's get your<br />books in order.</h2>
+        <p class="section-sub">Reach out — we'll get back to you within hours.</p>
+      </div>
+      <div class="contact-cards fade-up" style="--d:0.25s">
+        <a href="mailto:taxnest.info@gmail.com" class="contact-card">
+          <div class="cc-icon">✉️</div>
+          <div class="cc-label">Email</div>
+          <div class="cc-val">taxnest.info@gmail.com</div>
+        </a>
+        <a href="tel:8320222643" class="contact-card">
+          <div class="cc-icon">📞</div>
+          <div class="cc-label">Phone / WhatsApp</div>
+          <div class="cc-val">+91 83202 22643</div>
+        </a>
+        <a href="https://www.instagram.com/taxnest_2026" target="_blank" rel="noopener" class="contact-card">
+          <div class="cc-icon">📸</div>
+          <div class="cc-label">Instagram</div>
+          <div class="cc-val">@taxnest_2026</div>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="site-footer">
+    <div class="footer-inner container">
+      <a href="#home" class="footer-logo">
+        <img src="taxnest-logo.webp" alt="TaxNest" style="width:30px;height:30px;border-radius:50%;object-fit:cover;"
+          onerror="this.style.display='none';" />
+        <span>TaxNest</span>
+      </a>
+      <p class="footer-tagline">We Handle Your Books, GST & TDS — You Handle Your Business</p>
+      <div class="footer-links">
+        <a href="mailto:taxnest.info@gmail.com">Email</a>
+        <a href="tel:8320222643">Phone</a>
+        <a href="https://www.instagram.com/taxnest_2026" target="_blank" rel="noopener">Instagram</a>
+        <a href="gst-reconciliation-tool.html" style="color:#4ade80;">Free GST Tool</a>
+        <a href="invoice-maker.html" style="color:#ffb300;">Invoice Maker</a>
+      </div>
+      <p class="footer-copy">© 2026 TaxNest. All rights reserved. | Ahmedabad, Gujarat</p>
+    </div>
+  </footer>
+
+
+  <script>
+  /* ── TaxNest Theme Toggle ── */
+  (function () {
+    function applyTheme(t) {
+      document.documentElement.setAttribute('data-theme', t);
+      localStorage.setItem('taxnest-theme', t);
+    }
+    // Init (may already be set by inline script in <head>)
+    var saved = localStorage.getItem('taxnest-theme') ||
+      (window.matchMedia('(prefers-color-scheme:light)').matches ? 'light' : 'dark');
+    applyTheme(saved);
+
+    var btn = document.getElementById('themeToggle');
+    if (btn) {
+      btn.addEventListener('click', function () {
+        var cur = document.documentElement.getAttribute('data-theme') || 'dark';
+        applyTheme(cur === 'dark' ? 'light' : 'dark');
+      });
+    }
+  })();
+  </script>
+</body>
+</html>
