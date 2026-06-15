@@ -1205,3 +1205,548 @@ img { display:block; max-width:100%; }
   transform: translateY(-2px);
   box-shadow: 0 8px 28px rgba(180,83,9,0.45);
 }
+/* ═══════════════════════════════════════════════════════════════
+   TAXNEST — NEW FEATURE ADDITIONS (append to end of style.css)
+   Features: Splash, Assistant, Rainbow Hover, Custom Cursor
+   Rule: Never touch existing rules above. Append-only.
+═══════════════════════════════════════════════════════════════ */
+
+/* ──────────────────────────────────────────────
+   1. SPLASH SCREEN
+────────────────────────────────────────────── */
+#tn-splash {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: #060812;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+#tn-splash.fade-out {
+  opacity: 0;
+  pointer-events: none;
+  transform: scale(1.04);
+}
+[data-theme="light"] #tn-splash { background: #f0eeff; }
+
+/* Desk scene */
+.splash-scene {
+  position: relative;
+  width: 340px;
+  height: 300px;
+  margin-bottom: 2.5rem;
+}
+
+/* Desk surface */
+.splash-desk {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 90px;
+  background: linear-gradient(160deg, #2a1a6e 0%, #1a0d4e 60%, #0f0830 100%);
+  border-radius: 14px 14px 8px 8px;
+  border-top: 3px solid rgba(168,85,247,0.45);
+  box-shadow: 0 8px 40px rgba(0,0,0,0.6);
+}
+[data-theme="light"] .splash-desk {
+  background: linear-gradient(160deg, #c8bbf8 0%, #a690f0 60%, #8060d8 100%);
+  border-top-color: rgba(124,58,237,0.5);
+}
+
+/* Laptop */
+.splash-laptop {
+  position: absolute;
+  bottom: 72px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 140px;
+}
+.laptop-screen {
+  width: 140px;
+  height: 90px;
+  background: #0a0820;
+  border: 2.5px solid rgba(124,58,237,0.6);
+  border-radius: 8px 8px 0 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  position: relative;
+  animation: screenGlow 2.5s ease-in-out infinite;
+}
+@keyframes screenGlow {
+  0%,100% { box-shadow: 0 0 12px rgba(124,58,237,0.4), inset 0 0 20px rgba(124,58,237,0.08); }
+  50%      { box-shadow: 0 0 28px rgba(168,85,247,0.6), inset 0 0 30px rgba(168,85,247,0.15); }
+}
+.laptop-screen-inner {
+  font-family: 'Syne', monospace;
+  font-size: 0.55rem;
+  color: #a855f7;
+  padding: 6px;
+  line-height: 1.6;
+  width: 100%;
+}
+.laptop-base {
+  width: 150px;
+  height: 9px;
+  background: linear-gradient(180deg, #2a1a6e, #1a0d4e);
+  border-radius: 0 0 6px 6px;
+  margin: 0 auto;
+  border: 1px solid rgba(124,58,237,0.3);
+  border-top: none;
+}
+
+/* Accountant character */
+.splash-acc {
+  position: absolute;
+  bottom: 80px;
+  right: 28px;
+  width: 80px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  animation: accBreathe 3.5s ease-in-out infinite;
+}
+@keyframes accBreathe {
+  0%,100% { transform: translateY(0); }
+  50%      { transform: translateY(-4px); }
+}
+
+/* Head */
+.acc-head {
+  width: 42px; height: 42px;
+  background: linear-gradient(145deg, #fde4c8, #f5c89a);
+  border-radius: 50%;
+  position: relative;
+  border: 2px solid rgba(200,140,60,0.5);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+}
+/* Eyes */
+.acc-eye {
+  position: absolute;
+  width: 6px; height: 7px;
+  background: #2d1a0e;
+  border-radius: 50% 50% 40% 40%;
+  top: 40%;
+  animation: eyeBlink 4s ease-in-out infinite;
+}
+.acc-eye.l { left: 26%; }
+.acc-eye.r { right: 26%; }
+@keyframes eyeBlink {
+  0%,92%,100% { transform: scaleY(1); }
+  95%         { transform: scaleY(0.1); }
+}
+/* Glasses */
+.acc-glasses {
+  position: absolute;
+  top: 36%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 36px; height: 12px;
+  border: 1.5px solid rgba(80,60,20,0.7);
+  border-radius: 6px;
+  background: rgba(100,150,255,0.08);
+}
+/* Hair */
+.acc-hair {
+  position: absolute;
+  top: -3px; left: 0; right: 0;
+  height: 18px;
+  background: #2d1a0e;
+  border-radius: 50% 50% 0 0;
+}
+/* Body */
+.acc-body {
+  width: 52px; height: 36px;
+  background: linear-gradient(160deg, #3730a3, #2a24a8);
+  border-radius: 8px 8px 4px 4px;
+  margin-top: 2px;
+  position: relative;
+  border: 1px solid rgba(99,102,241,0.4);
+}
+/* Tie */
+.acc-tie {
+  position: absolute;
+  top: 0; left: 50%;
+  transform: translateX(-50%);
+  width: 8px; height: 22px;
+  background: linear-gradient(180deg, #7c3aed, #5b21b6);
+  clip-path: polygon(30% 0%, 70% 0%, 100% 60%, 50% 100%, 0% 60%);
+}
+/* Arms */
+.acc-arms {
+  display: flex;
+  gap: 4px;
+  margin-top: 3px;
+}
+.acc-arm {
+  width: 18px; height: 10px;
+  background: #3730a3;
+  border-radius: 4px;
+  animation: armType 0.6s ease-in-out infinite alternate;
+}
+.acc-arm.r { animation-delay: 0.3s; }
+@keyframes armType {
+  0%   { transform: translateY(0) rotate(-5deg); }
+  100% { transform: translateY(-3px) rotate(5deg); }
+}
+
+/* Desk items */
+.splash-items {
+  position: absolute;
+  bottom: 70px;
+  left: 14px;
+  display: flex;
+  gap: 8px;
+  align-items: flex-end;
+}
+.desk-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-size: 1.3rem;
+  animation: itemWobble 3s ease-in-out infinite;
+}
+.desk-item:nth-child(2) { animation-delay: 0.5s; }
+.desk-item:nth-child(3) { animation-delay: 1s; }
+.desk-item:nth-child(4) { animation-delay: 1.5s; }
+@keyframes itemWobble {
+  0%,100% { transform: translateY(0) rotate(0); }
+  50%      { transform: translateY(-2px) rotate(1.5deg); }
+}
+
+/* Papers animation */
+.splash-paper {
+  position: absolute;
+  bottom: 75px;
+  left: 20px;
+  width: 30px; height: 38px;
+  background: rgba(255,255,255,0.9);
+  border-radius: 3px;
+  border: 1px solid rgba(124,58,237,0.3);
+  animation: paperShift 2.8s ease-in-out infinite;
+}
+.splash-paper::before {
+  content: '';
+  position: absolute;
+  top: 5px; left: 4px; right: 4px;
+  height: 2px;
+  background: rgba(124,58,237,0.4);
+  box-shadow: 0 5px 0 rgba(124,58,237,0.3), 0 10px 0 rgba(124,58,237,0.2);
+}
+@keyframes paperShift {
+  0%,100% { transform: rotate(-3deg); }
+  50%      { transform: rotate(2deg) translateY(-3px); }
+}
+
+/* Splash logo & tagline */
+.splash-logo-area {
+  text-align: center;
+  animation: splashLogoFade 0.8s ease 1.2s both;
+}
+@keyframes splashLogoFade {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.splash-logo-text {
+  font-family: 'Syne', sans-serif;
+  font-size: 2.2rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, #a855f7, #7c3aed, #c084fc);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: -0.02em;
+  margin-bottom: 0.5rem;
+}
+.splash-tagline {
+  font-size: 0.88rem;
+  color: rgba(168,85,247,0.75);
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  max-width: 320px;
+  line-height: 1.5;
+  animation: splashLogoFade 0.8s ease 1.6s both;
+}
+[data-theme="light"] .splash-tagline { color: rgba(100,60,200,0.8); }
+
+/* Typing cursor blink in laptop */
+.splash-cursor {
+  display: inline-block;
+  width: 5px; height: 8px;
+  background: #a855f7;
+  animation: cursorBlink 1s step-end infinite;
+  vertical-align: middle;
+  margin-left: 2px;
+}
+@keyframes cursorBlink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+/* ──────────────────────────────────────────────
+   2. ASSISTANT CHARACTER (bottom-right)
+────────────────────────────────────────────── */
+#tn-assistant {
+  position: fixed;
+  bottom: 28px;
+  right: 28px;
+  z-index: 900;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+  pointer-events: auto;
+}
+@media (max-width: 640px) {
+  #tn-assistant { right: auto; left: 14px; bottom: 18px; align-items: flex-start; }
+}
+
+.asst-bubble {
+  background: rgba(20,12,50,0.95);
+  border: 1px solid rgba(168,85,247,0.4);
+  border-radius: 16px 16px 4px 16px;
+  padding: 0.75rem 1.1rem;
+  font-size: 0.8rem;
+  color: rgba(255,255,255,0.88);
+  max-width: 230px;
+  line-height: 1.5;
+  opacity: 0;
+  transform: translateY(8px) scale(0.95);
+  transition: opacity 0.35s ease, transform 0.35s ease;
+  pointer-events: none;
+  box-shadow: 0 8px 32px rgba(124,58,237,0.25);
+  backdrop-filter: blur(12px);
+}
+.asst-bubble.visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  pointer-events: auto;
+}
+[data-theme="light"] .asst-bubble {
+  background: rgba(240,235,255,0.97);
+  color: #1a0d4e;
+  border-color: rgba(124,58,237,0.3);
+}
+@media (max-width: 640px) {
+  .asst-bubble { border-radius: 16px 16px 16px 4px; }
+}
+
+/* Mini character */
+.asst-char {
+  width: 60px; height: 60px;
+  position: relative;
+  cursor: pointer;
+  animation: asstBreathe 3.5s ease-in-out infinite;
+  filter: drop-shadow(0 4px 12px rgba(124,58,237,0.4));
+}
+@keyframes asstBreathe {
+  0%,100% { transform: translateY(0); }
+  50%      { transform: translateY(-4px); }
+}
+.asst-head-wrap {
+  width: 34px; height: 34px;
+  background: linear-gradient(145deg, #fde4c8, #f5c89a);
+  border-radius: 50%;
+  position: relative;
+  margin: 0 auto;
+  border: 1.5px solid rgba(200,140,60,0.4);
+}
+.asst-hair-mini {
+  position: absolute;
+  top: -2px; left: 0; right: 0;
+  height: 14px;
+  background: #2d1a0e;
+  border-radius: 50% 50% 0 0;
+}
+.asst-eye-mini {
+  position: absolute;
+  width: 4px; height: 5px;
+  background: #2d1a0e;
+  border-radius: 50%;
+  top: 42%;
+  animation: eyeBlink 4s ease-in-out infinite;
+}
+.asst-eye-mini.l { left: 24%; }
+.asst-eye-mini.r { right: 24%; }
+.asst-glasses-mini {
+  position: absolute;
+  top: 38%; left: 50%;
+  transform: translateX(-50%);
+  width: 28px; height: 9px;
+  border: 1px solid rgba(80,60,20,0.6);
+  border-radius: 5px;
+  background: rgba(100,150,255,0.07);
+}
+.asst-body-wrap {
+  width: 40px; height: 26px;
+  background: linear-gradient(160deg, #3730a3, #2a24a8);
+  border-radius: 6px 6px 3px 3px;
+  margin: 2px auto 0;
+  border: 1px solid rgba(99,102,241,0.35);
+}
+.asst-wave {
+  position: absolute;
+  right: -2px;
+  top: 4px;
+  font-size: 1.1rem;
+  animation: waveHand 0.6s ease-in-out 3;
+  transform-origin: bottom right;
+  opacity: 0;
+}
+.asst-wave.active {
+  opacity: 1;
+  animation: waveHand 0.6s ease-in-out 3;
+}
+@keyframes waveHand {
+  0%,100% { transform: rotate(0deg); }
+  25%      { transform: rotate(-20deg); }
+  75%      { transform: rotate(20deg); }
+}
+
+/* Laptop mini on desk */
+.asst-laptop {
+  position: absolute;
+  bottom: 0; left: 6px;
+  width: 26px; height: 18px;
+  background: #0a0820;
+  border: 1.5px solid rgba(124,58,237,0.5);
+  border-radius: 3px 3px 0 0;
+  animation: screenGlow 2.5s ease-in-out infinite;
+}
+.asst-laptop::after {
+  content: '';
+  position: absolute;
+  top: 100%; left: -2px;
+  width: 30px; height: 4px;
+  background: #1a0d4e;
+  border-radius: 0 0 3px 3px;
+}
+
+/* ──────────────────────────────────────────────
+   3. RAINBOW HOVER EFFECTS
+────────────────────────────────────────────── */
+/* Applied via JS class .tn-rainbow-hover */
+.tn-rainbow-hover {
+  position: relative;
+}
+.tn-rainbow-hover::after {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: inherit;
+  background: conic-gradient(
+    from var(--rainbow-angle, 0deg),
+    #ff0080, #ff8c00, #ffd700,
+    #00ff88, #00cfff, #a855f7,
+    #ff0080
+  );
+  opacity: 0;
+  z-index: -1;
+  transition: opacity 0.35s ease;
+  animation: rainbowSpin 3s linear infinite;
+  animation-play-state: paused;
+}
+.tn-rainbow-hover:hover::after {
+  opacity: 0.75;
+  animation-play-state: running;
+}
+@keyframes rainbowSpin {
+  to { --rainbow-angle: 360deg; }
+}
+@property --rainbow-angle {
+  syntax: '<angle>';
+  inherits: false;
+  initial-value: 0deg;
+}
+
+/* Lift + glow on hover for cards/buttons (rainbow variant) */
+.tn-rainbow-hover:hover {
+  transform: translateY(-5px) scale(1.012);
+  box-shadow:
+    0 0 0 2px rgba(168,85,247,0.25),
+    0 20px 50px rgba(0,0,0,0.35),
+    0 0 30px rgba(168,85,247,0.18);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.tn-rainbow-hover:hover * { font-weight: inherit; }
+
+/* ──────────────────────────────────────────────
+   4. CUSTOM CURSOR (desktop only)
+────────────────────────────────────────────── */
+@media (hover: hover) and (pointer: fine) {
+  body { cursor: none; }
+  a, button, [role="button"], .btn,
+  .tool-card, .svc-card, .contact-card,
+  .tci-cta, .nav-cta, .pill {
+    cursor: none;
+  }
+}
+
+#tn-cursor-dot {
+  position: fixed;
+  top: 0; left: 0;
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: #a855f7;
+  pointer-events: none;
+  z-index: 99999;
+  transform: translate(-50%, -50%);
+  transition: width 0.2s ease, height 0.2s ease, background 0.2s ease;
+  mix-blend-mode: screen;
+  will-change: transform;
+}
+#tn-cursor-ring {
+  position: fixed;
+  top: 0; left: 0;
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(168,85,247,0.55);
+  pointer-events: none;
+  z-index: 99998;
+  transform: translate(-50%, -50%);
+  transition:
+    width 0.25s ease,
+    height 0.25s ease,
+    border-color 0.25s ease,
+    opacity 0.25s ease;
+  will-change: transform;
+}
+/* Hover states for cursor */
+body.cursor-on-link #tn-cursor-dot {
+  width: 12px; height: 12px;
+  background: #c084fc;
+}
+body.cursor-on-link #tn-cursor-ring {
+  width: 44px; height: 44px;
+  border-color: rgba(192,132,252,0.7);
+}
+body.cursor-on-card #tn-cursor-dot {
+  width: 10px; height: 10px;
+  background: linear-gradient(135deg, #ff8c00, #a855f7);
+}
+body.cursor-on-card #tn-cursor-ring {
+  width: 52px; height: 52px;
+  border-color: rgba(255,140,0,0.5);
+  background: rgba(168,85,247,0.04);
+}
+
+/* Hide cursor elements on touch/mobile */
+@media (hover: none) {
+  #tn-cursor-dot, #tn-cursor-ring { display: none; }
+}
+
+/* ──────────────────────────────────────────────
+   5. LIGHT MODE OVERRIDES for new elements
+────────────────────────────────────────────── */
+[data-theme="light"] .splash-laptop .laptop-screen,
+[data-theme="light"] .asst-laptop {
+  background: #f0eeff;
+  border-color: rgba(124,58,237,0.4);
+}
+[data-theme="light"] .asst-body-wrap { background: linear-gradient(160deg,#4f46e5,#3730a3); }
+[data-theme="light"] .acc-body { background: linear-gradient(160deg,#4f46e5,#3730a3); }
+[data-theme="light"] .splash-desk {
+  box-shadow: 0 8px 40px rgba(80,60,180,0.25);
+}
+[data-theme="light"] #tn-cursor-ring { border-color: rgba(124,58,237,0.5); }
