@@ -156,7 +156,54 @@
   </style>
 </head>
 <body>
+<div id="tn-splash" role="dialog" aria-label="TaxNest Loading" aria-modal="true">
+  <div class="splash-scene">
+    <!-- Desk items (left) -->
+    <div class="splash-paper"></div>
+    <div class="splash-items">
+      <div class="desk-item" title="Calculator">🧮</div>
+      <div class="desk-item" title="Files">🗂️</div>
+      <div class="desk-item" title="Bills">📋</div>
+      <div class="desk-item" title="Bank">🏦</div>
+    </div>
 
+    <!-- Laptop -->
+    <div class="splash-laptop">
+      <div class="laptop-screen">
+        <div class="laptop-screen-inner">
+          <span class="splash-typing">» GSTR-2B Recon</span><span class="splash-cursor"></span>
+        </div>
+      </div>
+      <div class="laptop-base"></div>
+    </div>
+
+    <!-- Accountant character -->
+    <div class="splash-acc">
+      <div class="acc-head">
+        <div class="acc-hair"></div>
+        <div class="acc-eye l"></div>
+        <div class="acc-eye r"></div>
+        <div class="acc-glasses"></div>
+      </div>
+      <div class="acc-body">
+        <div class="acc-tie"></div>
+      </div>
+      <div class="acc-arms">
+        <div class="acc-arm l"></div>
+        <div class="acc-arm r"></div>
+      </div>
+    </div>
+
+    <!-- Desk surface -->
+    <div class="splash-desk"></div>
+  </div>
+
+  <!-- Logo & tagline -->
+  <div class="splash-logo-area">
+    <div class="splash-logo-text">TaxNest</div>
+    <div class="splash-tagline">We Handle Your Books, GST &amp; TDS — You Handle Your Business</div>
+  </div>
+</div>
   <!-- Golden Rupee Rain -->
   <div class="rupee-rain" aria-hidden="true">
     <span class="rupee r1">₹</span><span class="rupee r2">₹</span>
@@ -600,6 +647,241 @@
       });
     }
   })();
+    (function () {
+  'use strict';
+
+  /* ── 1. SPLASH SCREEN ──────────────────────────────────────── */
+  function initSplash() {
+    var splash = document.getElementById('tn-splash');
+    if (!splash) return;
+    // Auto-dismiss after 3.8s
+    setTimeout(function () {
+      splash.classList.add('fade-out');
+      setTimeout(function () {
+        splash.style.display = 'none';
+        document.body.style.overflow = '';
+      }, 750);
+    }, 3800);
+    // Click to skip
+    splash.addEventListener('click', function () {
+      splash.classList.add('fade-out');
+      setTimeout(function () { splash.style.display = 'none'; document.body.style.overflow = ''; }, 700);
+    });
+    // Prevent scroll while splash shows
+    document.body.style.overflow = 'hidden';
+
+    // Animate laptop typing text
+    var lines = ['> GSTR-2B Recon', '> Matched: 247', '> Diff: ₹0.00', '> ITC: OK ✓'];
+    var lineEl = splash.querySelector('.splash-typing');
+    if (lineEl) {
+      var li = 0;
+      setInterval(function () {
+        lineEl.textContent = lines[li % lines.length];
+        li++;
+      }, 900);
+    }
+  }
+
+  /* ── 2. ASSISTANT CHARACTER ────────────────────────────────── */
+  function initAssistant() {
+    var asst = document.getElementById('tn-assistant');
+    if (!asst) return;
+    var bubble = asst.querySelector('.asst-bubble');
+    var wave   = asst.querySelector('.asst-wave');
+
+    var messages = [
+      'Hello! Need help with GST, TDS, Accounting or Invoicing? 😊',
+      'Check our Free GST Tools — no login needed! 🔗',
+      'Need professional accounting services? We\'re here! 📒',
+      'Book TaxNest services today — flat ₹1,000/month! 💰',
+    ];
+    var msgIndex = 0;
+
+    function showBubble(text) {
+      if (!bubble) return;
+      bubble.textContent = text;
+      bubble.classList.add('visible');
+      setTimeout(function () { bubble.classList.remove('visible'); }, 4500);
+    }
+
+    function triggerWave() {
+      if (!wave) return;
+      wave.classList.remove('active');
+      void wave.offsetWidth; // reflow to restart animation
+      wave.classList.add('active');
+      setTimeout(function () { wave.classList.remove('active'); }, 2000);
+    }
+
+    // Initial greeting after splash (4.8s delay)
+    setTimeout(function () {
+      triggerWave();
+      showBubble(messages[0]);
+    }, 4800);
+
+    // Periodic tips every 18s
+    setInterval(function () {
+      msgIndex = (msgIndex + 1) % messages.length;
+      showBubble(messages[msgIndex]);
+    }, 18000);
+
+    // Click to show next tip
+    var charEl = asst.querySelector('.asst-char');
+    if (charEl) {
+      charEl.addEventListener('click', function () {
+        msgIndex = (msgIndex + 1) % messages.length;
+        triggerWave();
+        showBubble(messages[msgIndex]);
+      });
+    }
+
+    // Scroll-based messages
+    var scrollMsgs = [
+      { at: 0.25, text: '👀 Check our Free GST Tools below!' },
+      { at: 0.50, text: '🤖 Need professional accounting services?' },
+      { at: 0.75, text: '📞 Book TaxNest — +91 83202 22643' },
+    ];
+    var shownAtScroll = {};
+    var lastScrollY = 0;
+    var scrollTick = false;
+
+    window.addEventListener('scroll', function () {
+      if (!scrollTick) {
+        requestAnimationFrame(function () {
+          var progress = window.scrollY / (document.documentElement.scrollHeight - window.innerHeight);
+          scrollMsgs.forEach(function (sm) {
+            var key = sm.at.toString();
+            if (!shownAtScroll[key] && progress >= sm.at) {
+              shownAtScroll[key] = true;
+              showBubble(sm.text);
+            }
+          });
+          // Wave at footer
+          if (progress > 0.92 && !shownAtScroll['footer']) {
+            shownAtScroll['footer'] = true;
+            triggerWave();
+            showBubble('👋 Thanks for visiting TaxNest! Let\'s work together.');
+          }
+          lastScrollY = window.scrollY;
+          scrollTick = false;
+        });
+        scrollTick = true;
+      }
+    }, { passive: true });
+  }
+
+  /* ── 3. RAINBOW HOVER ──────────────────────────────────────── */
+  function initRainbowHover() {
+    // Elements that receive rainbow border on hover
+    var selectors = [
+      '.tool-card',
+      '.tool-card-invoice',
+      '.svc-card',
+      '.contact-card',
+      '.app-feat',
+      '.btn',
+      '.nav-cta',
+      '.price-card',
+    ];
+    selectors.forEach(function (sel) {
+      document.querySelectorAll(sel).forEach(function (el) {
+        el.classList.add('tn-rainbow-hover');
+        // Ensure z-index stacking context for pseudo-element
+        var cs = getComputedStyle(el);
+        if (cs.position === 'static') el.style.position = 'relative';
+      });
+    });
+  }
+
+  /* ── 4. CUSTOM CURSOR (desktop only) ───────────────────────── */
+  function initCursor() {
+    // Only on devices with fine pointer (mouse)
+    if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+
+    var dot  = document.getElementById('tn-cursor-dot');
+    var ring = document.getElementById('tn-cursor-ring');
+    if (!dot || !ring) return;
+
+    var mx = 0, my = 0;      // real mouse position
+    var rx = 0, ry = 0;      // ring lagged position
+    var raf;
+
+    document.addEventListener('mousemove', function (e) {
+      mx = e.clientX;
+      my = e.clientY;
+    });
+
+    function tick() {
+      // Dot: instant
+      dot.style.transform = 'translate(' + (mx - 4) + 'px,' + (my - 4) + 'px)';
+      // Ring: lerp for smooth follow
+      rx += (mx - rx) * 0.18;
+      ry += (my - ry) * 0.18;
+      ring.style.transform = 'translate(' + (rx - 16) + 'px,' + (ry - 16) + 'px)';
+      raf = requestAnimationFrame(tick);
+    }
+    tick();
+
+    // State classes for hover context
+    var linkEls  = 'a, button, [role="button"], .nav-cta, .btn, .pill, .tci-cta';
+    var cardEls  = '.tool-card, .tool-card-invoice, .svc-card, .contact-card, .app-feat, .price-card, .deco-card';
+
+    function setClass(cls) {
+      document.body.classList.remove('cursor-on-link', 'cursor-on-card');
+      if (cls) document.body.classList.add(cls);
+    }
+
+    document.querySelectorAll(linkEls).forEach(function (el) {
+      el.addEventListener('mouseenter', function () { setClass('cursor-on-link'); });
+      el.addEventListener('mouseleave', function () { setClass(''); });
+    });
+    document.querySelectorAll(cardEls).forEach(function (el) {
+      el.addEventListener('mouseenter', function () { setClass('cursor-on-card'); });
+      el.addEventListener('mouseleave', function () { setClass(''); });
+    });
+
+    // Hide ring when leaving window
+    document.addEventListener('mouseleave', function () {
+      dot.style.opacity  = '0';
+      ring.style.opacity = '0';
+    });
+    document.addEventListener('mouseenter', function () {
+      dot.style.opacity  = '1';
+      ring.style.opacity = '1';
+    });
+  }
+
+  /* ── INIT ALL ────────────────────────────────────────────── */
+  function init() {
+    initSplash();
+    initAssistant();
+    initRainbowHover();
+    initCursor();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+
+})();
+
   </script>
-</body>
+  <div id="tn-cursor-dot"  aria-hidden="true"></div>
+<div id="tn-cursor-ring" aria-hidden="true"></div>
+  <div id="tn-assistant" aria-live="polite" aria-label="TaxNest Assistant">
+  <div class="asst-bubble" role="status"></div>
+  <div class="asst-char" role="button" tabindex="0" aria-label="TaxNest assistant — click for tips" title="Click for tips">
+    <div class="asst-head-wrap">
+      <div class="asst-hair-mini"></div>
+      <div class="asst-eye-mini l"></div>
+      <div class="asst-eye-mini r"></div>
+      <div class="asst-glasses-mini"></div>
+    </div>
+    <div class="asst-body-wrap"></div>
+    <div class="asst-laptop"></div>
+    <span class="asst-wave" aria-hidden="true">👋</span>
+  </div>
+</div>
+  </body>
 </html>
