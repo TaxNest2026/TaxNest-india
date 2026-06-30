@@ -156,6 +156,7 @@ img { display:block; max-width:100%; }
   padding:0.9rem 2rem;
 }
 .nav-logo {
+  width: 42px;
   display:flex; align-items:center; gap:0.7rem;
   font-family:'Syne',sans-serif; font-weight:800; font-size:1.3rem;
   color:#fff; letter-spacing:-0.01em;
