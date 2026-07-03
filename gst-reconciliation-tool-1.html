@@ -2481,19 +2481,22 @@ function genVendorLetter(gstn,vName,bucket,rows){
 
 /* ═══ SAMPLE TEMPLATE ═══ */
 function downloadSampleTemplate(){
-  try{
-    const wb=XLSX.utils.book_new();
-    const pr=[
-      {'Date':46113,'Particulars':'RAHUL INTERNATIONAL','GSTIN/UIN':'24AADPP7154M1ZD','Vch Type':'Purchase','Vch No.':1,'Invoice\nNo.':'6/RIG/26-27','Invoice\nDate':46113,'Taxable\nValue':75504,'Integrated Tax\nAmount':0,'Central Tax\nAmount':6795.36,'State Tax\nAmount':6795.36,'Cess\nAmount':0},
-      {'Date':46114,'Particulars':'S P ENTERPRISE','GSTIN/UIN':'08FAVPS8580P1Z3','Vch Type':'Purchase','Vch No.':2,'Invoice\nNo.':'SP/25-26/7','Invoice\nDate':46114,'Taxable\nValue':21600,'Integrated Tax\nAmount':3888,'Central Tax\nAmount':0,'State Tax\nAmount':0,'Cess\nAmount':0},
-      {'Date':46121,'Particulars':'HILLSON FOOTWEAR PVT. LTD.','GSTIN/UIN':'06AACCH0910R1ZJ','Vch Type':'Purchase','Vch No.':4,'Invoice\nNo.':'HFS/26-27/336','Invoice\nDate':46121,'Taxable\nValue':24000,'Integrated Tax\nAmount':1200,'Central Tax\nAmount':0,'State Tax\nAmount':0,'Cess\nAmount':0}
-    ];
-    const ws1=XLSX.utils.json_to_sheet(pr);
-    ws1['!cols']=[{wch:10},{wch:28},{wch:18},{wch:12},{wch:8},{wch:16},{wch:14},{wch:14},{wch:14},{wch:14},{wch:14},{wch:10}];
-    XLSX.utils.book_append_sheet(wb,ws1,'Voucher Register');
-    XLSX.writeFile(wb,'TaxNest_Sample_Tally_PR.xlsx');
-    toast('Sample Tally PR template downloaded','success');
-  }catch(e){toast('Failed to generate sample','error');}
+  const isCombined = uploadMode === 'combined';
+  const fname = isCombined
+    ? 'TaxNest_Combined_Sample_Template.xlsx'
+    : 'TaxNest_PR_Sample_Template.xlsx';
+  const a = document.createElement('a');
+  a.href = fname;
+  a.download = fname;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  toast(
+    isCombined
+      ? 'Combined template downloaded — fill both sheets'
+      : 'PR template downloaded — use in Two-File mode',
+    'success'
+  );
 }
 
 /* ═══ RESET ═══ */
