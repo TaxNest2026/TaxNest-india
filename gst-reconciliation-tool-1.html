@@ -2486,7 +2486,7 @@ function downloadSampleTemplate(){
     ? 'TaxNest_Combined_Sample_Template.xlsx'
     : 'TaxNest_PR_Sample_Template.xlsx';
   const a = document.createElement('a');
-  a.href = fname;
+  a.href = 'https://taxnest2026.github.io/TaxNest-india/' + fname;
   a.download = fname;
   document.body.appendChild(a);
   a.click();
