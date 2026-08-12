@@ -6,6 +6,7 @@
 <title>TaxNest — GSTR-2B Reconciliation Tool v2</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <script src="taxnest-mapping-engine.js"></script>
 <link rel="shortcut icon" href="taxnest-logo.png" type="image/png">
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -1592,7 +1593,7 @@ function handle2BFile(file){
       const data=new Uint8Array(e.target.result);
       // raw:true + cellDates:false → serial date numbers preserved, our parser converts them
       const wb=XLSX.read(data,{type:'array',cellDates:false,raw:true});
-      file2BData=parse2BWorkbook(wb);
+      file2BData = TaxNestMapper.smartParse2BFile(wb, parse2BWorkbook);
       parsedClientInfo=file2BData.meta||{};
 
       // Validation: warn if B2B is empty (may have uploaded wrong file)
@@ -1814,6 +1815,9 @@ function handleCombinedFile(file){
   document.getElementById('loadingText').textContent='Reading combined file…';
   document.getElementById('loading').classList.add('show');
   const r=new FileReader();
+  const combined = await TaxNestMapper.handleCombinedWorkbook(wb, showColMappingUI);
+filePRData = combined.prRows;
+file2BData = combined.file2BData;
   r.onload=async function(e){
     try{
       const data=new Uint8Array(e.target.result);
@@ -2384,6 +2388,8 @@ function exportFullReport(){
   if(recoData.invMismatch&&recoData.invMismatch.length)XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(recoData.invMismatch.map(d=>({GSTIN:d.gstin,Supplier:d.supplier,'Invoice No (Books)':d.prInvoice,'Invoice No (2B)':d.g2aInvoice,Date:d.date,IGST:d.igst,CGST:d.cgst,SGST:d.sgst,'Total Tax':d.totalTax,'Action':'Correct invoice no in Purchase Register'}))),'Inv No. Mismatch');
   const fname=`TaxNest_GSTRecon_${(ci.gstin||'').substring(0,10)}_${(ci.period||'').replace(/\s/g,'')}_Full.xlsx`;
   XLSX.writeFile(wb,fname);toast('Full Excel report downloaded','success');
+  const proof = TaxNestMapper.buildReconciliationProof(recoData);
+XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(TaxNestMapper.proofRowsToSheetData(proof.rows)), 'Reconciliation Proof');
 }
 
 /* ═══ VENDOR MODAL ═══ */
