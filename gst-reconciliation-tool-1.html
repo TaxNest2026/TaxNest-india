@@ -1815,9 +1815,6 @@ function handleCombinedFile(file){
   document.getElementById('loadingText').textContent='Reading combined file…';
   document.getElementById('loading').classList.add('show');
   const r=new FileReader();
-  const combined = await TaxNestMapper.handleCombinedWorkbook(wb, showColMappingUI);
-filePRData = combined.prRows;
-file2BData = combined.file2BData;
   r.onload=async function(e){
     try{
       const data=new Uint8Array(e.target.result);
