@@ -6,7 +6,7 @@
 <title>TaxNest — GSTR-2B Reconciliation Tool v2</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
-  <script src="taxnest-mapping-engine.js"></script>
+<script src="taxnest-mapping-engine.js"></script>
 <link rel="shortcut icon" href="taxnest-logo.png" type="image/png">
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -1822,35 +1822,12 @@ file2BData = combined.file2BData;
     try{
       const data=new Uint8Array(e.target.result);
       const wb=XLSX.read(data,{type:'array',cellDates:false,raw:true});
-      const prSheet=wb.Sheets[wb.SheetNames[0]];
-      const g2aSheet=wb.Sheets[wb.SheetNames[1]];
-      const prRows=XLSX.utils.sheet_to_json(prSheet,{defval:'',raw:false});
-      const g2aRows=XLSX.utils.sheet_to_json(g2aSheet,{defval:'',raw:false});
-      document.getElementById('loading').classList.remove('show');
-
-      // Detect PR columns
-      const prHeaders=prRows.length?Object.keys(prRows[0]):[];
-      const prAutoMapping=detectPRColumns(prHeaders);
-      const prMapping=await showColMappingUI(prHeaders,prAutoMapping,'Column Mapping — Purchase Register (Sheet 1)');
-
-      document.getElementById('loading').classList.add('show');
-      document.getElementById('loadingText').textContent='Processing…';
-
-      filePRData=parsePRRows(prRows,prMapping);
-
-      // Try to detect if g2a sheet is official 2B or custom format
-      const g2aHeaders=g2aRows.length?Object.keys(g2aRows[0]):[];
-      const is2BFormat=g2aHeaders.some(h=>/ITC Availability/i.test(h)||/GSTR-1.*Filing/i.test(h)||/IRN/i.test(h));
-
-      if(is2BFormat){
-        // Parse as 2B-like
-        file2BData={b2b:parseCustomG2ARows(g2aRows),cdn:[],impg:[],meta:{}};
-      }else{
-        // Show mapping for G2A
-        const g2aAutoMapping=detectG2AColumns(g2aHeaders);
-        const g2aMapping=await showColMappingUI(g2aHeaders,g2aAutoMapping,'Column Mapping — GSTR-2A / 2B (Sheet 2)');
-        file2BData={b2b:parseCustomG2ARows(g2aRows,g2aMapping),cdn:[],impg:[],meta:{}};
-      }
+      const combined=await TaxNestMapper.handleCombinedWorkbook(wb,showColMappingUI);
+filePRData=combined.prRows;
+file2BData=combined.file2BData;
+document.getElementById('loading').classList.remove('show');
+document.getElementById('loading').classList.add('show');
+document.getElementById('loadingText').textContent='Processing…';
 
       document.getElementById('fileConfirmCombined').classList.add('show');
       document.getElementById('fileNameCombined').textContent=file.name;
