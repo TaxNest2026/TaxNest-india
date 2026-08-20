@@ -1,0 +1,1070 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Transactions → Tally XML</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,500;8..60,600;8..60,700&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1B2430;
+    --ink-soft: #4C5566;
+    --ink-faint: #8891A0;
+    --paper: #F6F4EC;
+    --paper-deep: #EEEADC;
+    --line: #DEDACB;
+    --card: #FFFFFF;
+    --gold: #A0742E;
+    --gold-deep: #7E5A22;
+    --gold-pale: #F1E6C8;
+    --green: #3F6B4F;
+    --green-pale: #E4ECE4;
+    --rust: #A14A3C;
+    --rust-pale: #F3E4E0;
+    --code-bg: #1B2430;
+    --code-text: #DCD7C7;
+    --code-tag: #E4B75E;
+    --code-attr: #8FB89A;
+    --code-str: #D28B67;
+    --code-punct: #6B7688;
+    --shadow-sm: 0 1px 2px rgba(27,36,48,.08);
+    --shadow-md: 0 10px 30px rgba(27,36,48,.09);
+    --radius: 12px;
+    --radius-sm: 7px;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  }
+
+  body {
+    background-image:
+      linear-gradient(var(--paper-deep) 1px, transparent 1px);
+    background-size: 100% 42px;
+    background-attachment: local;
+    min-height: 100vh;
+  }
+
+  .page {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 56px 24px 80px;
+  }
+
+  header.hero {
+    margin-bottom: 40px;
+  }
+
+  .eyebrow {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--gold-deep);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+
+  .eyebrow::before {
+    content: '';
+    width: 24px;
+    height: 1px;
+    background: var(--gold);
+    display: inline-block;
+  }
+
+  h1 {
+    font-family: 'Source Serif 4', Georgia, serif;
+    font-weight: 600;
+    font-size: 40px;
+    line-height: 1.15;
+    margin: 0 0 14px;
+    letter-spacing: -0.01em;
+  }
+
+  .hero p.sub {
+    font-size: 16px;
+    line-height: 1.6;
+    color: var(--ink-soft);
+    max-width: 56ch;
+    margin: 0;
+  }
+
+  .hero code {
+    font-family: 'IBM Plex Mono', monospace;
+    background: var(--paper-deep);
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-size: 0.92em;
+  }
+
+  /* ---- Upload zone ---- */
+  .drop-zone {
+    border: 1.5px dashed var(--line);
+    border-radius: var(--radius);
+    background: var(--card);
+    padding: 48px 32px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color .15s ease, background .15s ease, transform .15s ease;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .drop-zone:hover {
+    border-color: var(--gold);
+    background: #FFFEFB;
+  }
+
+  .drop-zone:focus-visible {
+    outline: 2px solid var(--gold);
+    outline-offset: 3px;
+  }
+
+  .drop-zone.dragging {
+    border-color: var(--gold);
+    background: var(--gold-pale);
+    transform: scale(1.005);
+  }
+
+  .drop-zone .icon {
+    width: 44px;
+    height: 44px;
+    margin: 0 auto 18px;
+    color: var(--gold);
+  }
+
+  .drop-zone .primary-text {
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 6px;
+  }
+
+  .drop-zone .secondary-text {
+    font-size: 14px;
+    color: var(--ink-faint);
+  }
+
+  .browse-link {
+    color: var(--gold-deep);
+    font-weight: 600;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    background: none;
+    border: none;
+    font: inherit;
+    cursor: pointer;
+    padding: 0;
+  }
+
+  .format-note {
+    margin-top: 16px;
+    font-size: 12.5px;
+    color: var(--ink-faint);
+    font-family: 'IBM Plex Mono', monospace;
+  }
+
+  .status-line {
+    text-align: center;
+    margin-top: 16px;
+    font-size: 14px;
+    color: var(--ink-soft);
+    min-height: 20px;
+  }
+
+  /* ---- Error banner ---- */
+  .error-banner {
+    margin-top: 20px;
+    background: var(--rust-pale);
+    border: 1px solid #DDBBB2;
+    color: #6E2E22;
+    border-radius: var(--radius-sm);
+    padding: 14px 16px;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+  .error-banner[hidden] { display: none; }
+  .error-banner strong { display: block; margin-bottom: 2px; }
+
+  /* ---- Results ---- */
+  .results { margin-top: 36px; }
+  .results[hidden] { display: none; }
+
+  .results-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 22px;
+    flex-wrap: wrap;
+  }
+
+  .results-head h2 {
+    font-family: 'Source Serif 4', Georgia, serif;
+    font-size: 22px;
+    font-weight: 600;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .results-head h2 .dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: var(--green);
+    display: inline-block;
+  }
+
+  #scanNote {
+    font-size: 13px;
+    color: var(--ink-faint);
+    font-family: 'IBM Plex Mono', monospace;
+  }
+
+  .reset-link {
+    font-size: 13.5px;
+    color: var(--ink-soft);
+    background: none;
+    border: none;
+    font: inherit;
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    padding: 0;
+  }
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 22px;
+  }
+
+  .stat-card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    padding: 16px 14px;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .stat-card .label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: .07em;
+    color: var(--ink-faint);
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+
+  .stat-card .value {
+    font-family: 'Source Serif 4', Georgia, serif;
+    font-size: 24px;
+    font-weight: 600;
+    line-height: 1.1;
+    color: var(--ink);
+  }
+
+  .stat-card .sub-value {
+    font-size: 12.5px;
+    color: var(--ink-soft);
+    margin-top: 4px;
+    font-family: 'IBM Plex Mono', monospace;
+  }
+
+  .stat-card.receipts .value { color: var(--green); }
+  .stat-card.payments .value { color: var(--rust); }
+
+  /* ---- Warnings ---- */
+  .warnings-box {
+    background: var(--gold-pale);
+    border: 1px solid #DFC98F;
+    border-radius: var(--radius-sm);
+    padding: 12px 16px;
+    margin-bottom: 22px;
+    font-size: 13.5px;
+  }
+  .warnings-box[hidden] { display: none; }
+
+  .warnings-toggle {
+    background: none;
+    border: none;
+    font: inherit;
+    font-weight: 600;
+    color: #6E5119;
+    cursor: pointer;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .warnings-toggle::before {
+    content: '▸';
+    transition: transform .15s ease;
+    font-size: 11px;
+  }
+  .warnings-toggle.open::before { transform: rotate(90deg); }
+
+  #warningsList {
+    margin: 10px 0 0;
+    padding-left: 20px;
+    color: #6E5119;
+    line-height: 1.7;
+  }
+  #warningsList[hidden] { display: none; }
+
+  /* ---- Preview ---- */
+  .preview-panel {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow-md);
+    margin-bottom: 24px;
+  }
+
+  .preview-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--line);
+    background: #FBFAF6;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .preview-toolbar .title {
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--ink-soft);
+    text-transform: uppercase;
+    letter-spacing: .05em;
+  }
+
+  #previewLabel {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12.5px;
+    color: var(--ink-faint);
+  }
+
+  .nav-btns { display: flex; gap: 6px; }
+
+  .nav-btn {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    border: 1px solid var(--line);
+    background: var(--card);
+    color: var(--ink-soft);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    transition: background .12s ease;
+  }
+  .nav-btn:hover:not(:disabled) { background: var(--paper-deep); }
+  .nav-btn:disabled { opacity: .35; cursor: default; }
+
+  .code-scroll {
+    max-height: 420px;
+    overflow: auto;
+    background: var(--code-bg);
+  }
+
+  pre#previewCode {
+    margin: 0;
+    padding: 20px;
+    font-family: 'IBM Plex Mono', 'SF Mono', Consolas, monospace;
+    font-size: 12.5px;
+    line-height: 1.7;
+    color: var(--code-text);
+    white-space: pre;
+  }
+
+  .tag { color: var(--code-tag); }
+  .attr { color: var(--code-attr); }
+  .str { color: var(--code-str); }
+
+  .preview-note {
+    padding: 10px 16px;
+    font-size: 12px;
+    color: var(--ink-faint);
+    border-top: 1px solid var(--line);
+    background: #FBFAF6;
+  }
+
+  /* ---- Actions ---- */
+  .actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .btn {
+    font: inherit;
+    font-weight: 600;
+    font-size: 14.5px;
+    border-radius: 8px;
+    padding: 13px 22px;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: transform .1s ease, box-shadow .15s ease, background .15s ease;
+  }
+  .btn:active { transform: translateY(1px); }
+
+  .btn-primary {
+    background: var(--ink);
+    color: #F6F4EC;
+    box-shadow: var(--shadow-sm);
+  }
+  .btn-primary:hover { background: #0F1620; }
+
+  .btn-secondary {
+    background: var(--card);
+    color: var(--ink);
+    border-color: var(--line);
+  }
+  .btn-secondary:hover { border-color: var(--gold); }
+
+  #fileNameNote {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    color: var(--ink-faint);
+    margin-left: auto;
+  }
+
+  footer {
+    margin-top: 56px;
+    padding-top: 20px;
+    border-top: 1px solid var(--line);
+    font-size: 12.5px;
+    color: var(--ink-faint);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  footer .lock {
+    width: 13px;
+    height: 13px;
+    flex-shrink: 0;
+  }
+
+  .sr-only {
+    position: absolute;
+    width: 1px; height: 1px;
+    padding: 0; margin: -1px;
+    overflow: hidden;
+    clip: rect(0,0,0,0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  @media (max-width: 640px) {
+    .page { padding: 36px 16px 60px; }
+    h1 { font-size: 30px; }
+    .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    .drop-zone { padding: 36px 18px; }
+    #fileNameNote { margin-left: 0; width: 100%; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header class="hero">
+    <div class="eyebrow">Bank statement → Tally import</div>
+    <h1>Transactions to Tally&nbsp;XML</h1>
+    <p class="sub">
+      Upload a <code>Transactions.xls</code> export and get back a Tally-ready
+      voucher import file, in the exact <code>ENVELOPE</code> / <code>TALLYMESSAGE</code>
+      structure Tally expects. Parsing and XML generation both run right here in
+      the browser.
+    </p>
+  </header>
+
+  <main>
+    <section id="uploadSection">
+      <div class="drop-zone" id="dropZone" role="button" tabindex="0" aria-label="Upload transactions file">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/>
+          <polyline points="7 9 12 4 17 9"/>
+          <line x1="12" y1="4" x2="12" y2="15"/>
+        </svg>
+        <div class="primary-text">Drop your transactions file here</div>
+        <div class="secondary-text">or <button type="button" class="browse-link" id="browseBtn">browse from your computer</button></div>
+        <input type="file" id="fileInput" accept=".xls,.xlsx,.xlsm" class="sr-only" aria-hidden="true" tabindex="-1">
+      </div>
+      <div class="format-note">accepts .xls · .xlsx · .xlsm — matches the TallyTools voucher export layout</div>
+      <div class="status-line" id="statusLine"></div>
+      <div class="error-banner" id="errorBanner" hidden>
+        <strong>Couldn't convert this file</strong>
+        <span id="errorText"></span>
+      </div>
+    </section>
+
+    <section class="results" id="resultsSection" hidden>
+      <div class="results-head">
+        <h2><span class="dot"></span>Ready to import</h2>
+        <button type="button" class="reset-link" id="resetBtn">Convert another file</button>
+      </div>
+      <div id="scanNote" style="margin-bottom:18px;"></div>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="label">Vouchers</div>
+          <div class="value" id="statVouchers">0</div>
+        </div>
+        <div class="stat-card receipts">
+          <div class="label">Receipts</div>
+          <div class="value" id="statReceipts">0</div>
+          <div class="sub-value" id="statReceiptsAmt"></div>
+        </div>
+        <div class="stat-card payments">
+          <div class="label">Payments</div>
+          <div class="value" id="statPayments">0</div>
+          <div class="sub-value" id="statPaymentsAmt"></div>
+        </div>
+        <div class="stat-card">
+          <div class="label">Date range</div>
+          <div class="value" id="statRange" style="font-size:16px;">—</div>
+        </div>
+      </div>
+
+      <div class="warnings-box" id="warningsBox" hidden>
+        <button type="button" class="warnings-toggle" id="warningsToggle" aria-expanded="false"></button>
+        <ul id="warningsList" hidden></ul>
+      </div>
+
+      <div class="preview-panel">
+        <div class="preview-toolbar">
+          <span class="title">Preview</span>
+          <span id="previewLabel"></span>
+          <div class="nav-btns">
+            <button type="button" class="nav-btn" id="prevVoucherBtn" aria-label="Previous voucher">‹</button>
+            <button type="button" class="nav-btn" id="nextVoucherBtn" aria-label="Next voucher">›</button>
+          </div>
+        </div>
+        <div class="code-scroll">
+          <pre id="previewCode"></pre>
+        </div>
+        <div class="preview-note">Shown formatted for readability — the downloaded file is written as one continuous line, matching Tally's own export format.</div>
+      </div>
+
+      <div class="actions">
+        <button type="button" class="btn btn-primary" id="downloadBtn">Download XML</button>
+        <button type="button" class="btn btn-secondary" id="copyBtn">Copy XML</button>
+        <span id="fileNameNote"></span>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <svg class="lock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="3" y="11" width="18" height="11" rx="2"/>
+      <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+    </svg>
+    Everything runs locally in your browser — the file never leaves your computer.
+  </footer>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+/* =========================================================
+   Transactions.xls -> Tally Voucher XML converter
+   All parsing + XML building happens client-side; nothing
+   ever leaves the browser.
+   ========================================================= */
+
+/* ---------- Column mapping ----------
+   Fixed layout of the TallyTools transaction export:
+   row 1 = open-tag template, row 2 = close-tag template,
+   row 3+ = one voucher per row. Indices are 0-based. */
+var COL = {
+  DATE: 5,             // F
+  EFFECTIVEDATE: 6,     // G
+  VOUCHERTYPENAME: 7,   // H
+  VOUCHERNUMBER: 8,     // I
+  NARRATION: 9,         // J
+  GUID: 10,             // K
+  ALTERID: 11,          // L
+  L1_RZE: 13,           // N
+  L1_ISDP: 14,          // O
+  L1_LEDGER: 15,        // P
+  L1_AMOUNT: 16,        // Q
+  BILL_NAME: 18,        // S
+  BILL_TYPE: 19,        // T
+  BILL_AMOUNT: 20,      // U
+  CAT_CATEGORY: 23,     // X
+  CAT_ISDP: 24,         // Y
+  CC_NAME: 26,          // AA
+  CC_AMOUNT: 27,        // AB
+  L2_RZE: 32,           // AG
+  L2_ISDP: 33,          // AH
+  L2_LEDGER: 34,        // AI
+  L2_AMOUNT: 35,        // AJ
+  BANK_TXNTYPE: 37,      // AL
+  BANK_INSTNUM: 38,      // AM
+  BANK_AMOUNT: 39,       // AN
+  BANK_INSTDATE: 40      // AO
+};
+
+var ENVELOPE_PREFIX =
+  '<ENVELOPE><HEADER><TALLYREQUEST>Import Data</TALLYREQUEST></HEADER>' +
+  '<BODY><IMPORTDATA><REQUESTDESC><REPORTNAME>Vouchers</REPORTNAME>' +
+  '<STATICVARIABLES><SVCURRENTCOMPANY/></STATICVARIABLES></REQUESTDESC>' +
+  '<REQUESTDATA>';
+var ENVELOPE_SUFFIX = '</REQUESTDATA></IMPORTDATA></BODY></ENVELOPE>';
+
+function esc(val) {
+  if (val === null || val === undefined) return '';
+  return String(val).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function escAttr(val) {
+  return esc(val).replace(/"/g, '&quot;');
+}
+
+function cellText(val) {
+  if (val === null || val === undefined) return '';
+  if (val instanceof Date) {
+    var y = val.getFullYear();
+    var m = String(val.getMonth() + 1).padStart(2, '0');
+    var d = String(val.getDate()).padStart(2, '0');
+    return '' + y + m + d;
+  }
+  return String(val);
+}
+
+function formatAmount(val) {
+  if (val === null || val === undefined || val === '') return '';
+  var num = typeof val === 'number' ? val : parseFloat(val);
+  if (isNaN(num)) return '';
+  var rounded = Math.round((num + Number.EPSILON) * 100) / 100;
+  return String(rounded);
+}
+
+function isRealRow(row) {
+  var g = row[COL.GUID];
+  if (g === null || g === undefined) return false;
+  var s = String(g);
+  if (s.trim() === '') return false;
+  if (s.indexOf('<') !== -1 || s.indexOf('&lt;') !== -1) return false;
+  return true;
+}
+
+function buildVoucherXML(row) {
+  var guid = cellText(row[COL.GUID]);
+  var vtype = cellText(row[COL.VOUCHERTYPENAME]);
+
+  return (
+    '<TALLYMESSAGE xmlns:UDF="TallyUDF">' +
+    '<VOUCHER REMOTEID="' + escAttr(guid) + '" VCHTYPE="' + escAttr(vtype) + '" ACTION="Create">' +
+    '<DATE>' + esc(cellText(row[COL.DATE])) + '</DATE>' +
+    '<EFFECTIVEDATE>' + esc(cellText(row[COL.EFFECTIVEDATE])) + '</EFFECTIVEDATE>' +
+    '<VOUCHERTYPENAME>' + esc(vtype) + '</VOUCHERTYPENAME>' +
+    '<VOUCHERNUMBER>' + esc(cellText(row[COL.VOUCHERNUMBER])) + '</VOUCHERNUMBER>' +
+    '<NARRATION>' + esc(cellText(row[COL.NARRATION])) + '</NARRATION>' +
+    '<GUID>' + esc(guid) + '</GUID>' +
+    '<ALTERID>' + esc(cellText(row[COL.ALTERID])) + '</ALTERID>' +
+    '<ALLLEDGERENTRIES.LIST>' +
+    '<REMOVEZEROENTRIES>' + esc(cellText(row[COL.L1_RZE])) + '</REMOVEZEROENTRIES>' +
+    '<ISDEEMEDPOSITIVE>' + esc(cellText(row[COL.L1_ISDP])) + '</ISDEEMEDPOSITIVE>' +
+    '<LEDGERNAME>' + esc(cellText(row[COL.L1_LEDGER])) + '</LEDGERNAME>' +
+    '<AMOUNT>' + esc(formatAmount(row[COL.L1_AMOUNT])) + '</AMOUNT>' +
+    '<BILLALLOCATIONS.LIST>' +
+    '<NAME>' + esc(cellText(row[COL.BILL_NAME])) + '</NAME>' +
+    '<BILLTYPE>' + esc(cellText(row[COL.BILL_TYPE])) + '</BILLTYPE>' +
+    '<AMOUNT>' + esc(formatAmount(row[COL.BILL_AMOUNT])) + '</AMOUNT>' +
+    '</BILLALLOCATIONS.LIST>' +
+    '<CATEGORYALLOCATIONS.LIST>' +
+    '<CATEGORY>' + esc(cellText(row[COL.CAT_CATEGORY])) + '</CATEGORY>' +
+    '<ISDEEMEDPOSITIVE>' + esc(cellText(row[COL.CAT_ISDP])) + '</ISDEEMEDPOSITIVE>' +
+    '<COSTCENTREALLOCATIONS.LIST>' +
+    '<NAME>' + esc(cellText(row[COL.CC_NAME])) + '</NAME>' +
+    '<AMOUNT>' + esc(formatAmount(row[COL.CC_AMOUNT])) + '</AMOUNT>' +
+    '</COSTCENTREALLOCATIONS.LIST>' +
+    '</CATEGORYALLOCATIONS.LIST>' +
+    '</ALLLEDGERENTRIES.LIST>' +
+    '<ALLLEDGERENTRIES.LIST>' +
+    '<REMOVEZEROENTRIES>' + esc(cellText(row[COL.L2_RZE])) + '</REMOVEZEROENTRIES>' +
+    '<ISDEEMEDPOSITIVE>' + esc(cellText(row[COL.L2_ISDP])) + '</ISDEEMEDPOSITIVE>' +
+    '<LEDGERNAME>' + esc(cellText(row[COL.L2_LEDGER])) + '</LEDGERNAME>' +
+    '<AMOUNT>' + esc(formatAmount(row[COL.L2_AMOUNT])) + '</AMOUNT>' +
+    '<BANKALLOCATIONS.LIST>' +
+    '<TRANSACTIONTYPE>' + esc(cellText(row[COL.BANK_TXNTYPE])) + '</TRANSACTIONTYPE>' +
+    '<INSTRUMENTNUMBER>' + esc(cellText(row[COL.BANK_INSTNUM])) + '</INSTRUMENTNUMBER>' +
+    '<AMOUNT>' + esc(formatAmount(row[COL.BANK_AMOUNT])) + '</AMOUNT>' +
+    '<INSTRUMENTDATE>' + esc(cellText(row[COL.BANK_INSTDATE])) + '</INSTRUMENTDATE>' +
+    '</BANKALLOCATIONS.LIST>' +
+    '</ALLLEDGERENTRIES.LIST>' +
+    '</VOUCHER>' +
+    '</TALLYMESSAGE>'
+  );
+}
+
+function extractVoucherRows(sheetRows) {
+  var out = [];
+  for (var i = 0; i < sheetRows.length; i++) {
+    if (isRealRow(sheetRows[i])) {
+      out.push({ excelRow: i + 1, data: sheetRows[i] });
+    }
+  }
+  return out;
+}
+
+function checkWarnings(entry) {
+  var row = entry.data;
+  var issues = [];
+  if (!cellText(row[COL.DATE])) issues.push('missing date');
+  if (!cellText(row[COL.L1_LEDGER])) issues.push('missing counter-ledger name');
+  if (!cellText(row[COL.L2_LEDGER])) issues.push('missing bank ledger name');
+  var a1 = parseFloat(row[COL.L1_AMOUNT]);
+  var a2 = parseFloat(row[COL.L2_AMOUNT]);
+  if (isNaN(a1) || a1 === 0) issues.push('missing/zero amount');
+  if (!isNaN(a1) && !isNaN(a2) && Math.abs(a1 + a2) > 0.01) issues.push('ledger amounts do not balance');
+  return issues;
+}
+
+function buildFullXML(sheetRows) {
+  var entries = extractVoucherRows(sheetRows);
+  var body = '';
+  var warnings = [];
+  for (var i = 0; i < entries.length; i++) {
+    body += buildVoucherXML(entries[i].data);
+    var issues = checkWarnings(entries[i]);
+    if (issues.length) {
+      warnings.push({ excelRow: entries[i].excelRow, issues: issues, guid: cellText(entries[i].data[COL.GUID]) });
+    }
+  }
+  return {
+    xml: ENVELOPE_PREFIX + body + ENVELOPE_SUFFIX,
+    entries: entries,
+    warnings: warnings
+  };
+}
+
+/* ---------- Pretty-printer (preview display only) ---------- */
+function prettyPrintXML(xml) {
+  var PADDING = '  ';
+  var formatted = '';
+  var pad = 0;
+  var nodes = xml.replace(/></g, '>\n<').split('\n');
+
+  var merged = [];
+  for (var i = 0; i < nodes.length; i++) {
+    var cur = nodes[i];
+    var next = nodes[i + 1];
+    var m = cur.match(/^<([\w.:-]+)/);
+    var tagName = m ? m[1] : null;
+    if (tagName && next === '</' + tagName + '>') {
+      merged.push(cur + next);
+      i++;
+    } else {
+      merged.push(cur);
+    }
+  }
+
+  merged.forEach(function (node) {
+    var indentNext = 0;
+    if (/^<\/\w/.test(node)) {
+      pad = Math.max(pad - 1, 0);
+    } else if (/^<[\w.:-]+[^>]*\/>$/.test(node)) {
+      indentNext = 0;
+    } else if (/^<([\w.:-]+)[^>]*>.*<\/\1>$/.test(node)) {
+      indentNext = 0;
+    } else if (/^<[\w.:-]+[^>]*>$/.test(node)) {
+      indentNext = 1;
+    }
+    formatted += PADDING.repeat(pad) + node + '\n';
+    pad += indentNext;
+  });
+  return formatted.trim();
+}
+
+function escapeHtml(s) {
+  return String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+
+/* Syntax-highlight a pretty-printed XML string for display (adds <span> tags).
+   Single-pass: matches one whole tag at a time so the attribute regex only
+   ever runs on that tag's original substring, never on markup this function
+   already inserted (that self-referential replace was an earlier bug). */
+function highlightXML(prettyXml) {
+  var escaped = escapeHtml(prettyXml);
+  return escaped.replace(/(&lt;\/?)([\w.:-]+)([\s\S]*?)(\/?)(&gt;)/g, function (whole, open, name, middle, selfSlash, close) {
+    var attrsHtml = middle.replace(/([\w:-]+)="([^"]*)"/g, function (m2, attrName, val) {
+      return '<span class="attr">' + attrName + '</span>="<span class="str">' + val + '</span>"';
+    });
+    return open + '<span class="tag">' + name + '</span>' + attrsHtml + selfSlash + close;
+  });
+}
+
+/* ---------- UI wiring ---------- */
+(function () {
+  var fileInput = document.getElementById('fileInput');
+  var dropZone = document.getElementById('dropZone');
+  var browseBtn = document.getElementById('browseBtn');
+  var uploadSection = document.getElementById('uploadSection');
+  var statusLine = document.getElementById('statusLine');
+  var errorBanner = document.getElementById('errorBanner');
+  var errorText = document.getElementById('errorText');
+  var resultsSection = document.getElementById('resultsSection');
+  var statVouchers = document.getElementById('statVouchers');
+  var statReceipts = document.getElementById('statReceipts');
+  var statReceiptsAmt = document.getElementById('statReceiptsAmt');
+  var statPayments = document.getElementById('statPayments');
+  var statPaymentsAmt = document.getElementById('statPaymentsAmt');
+  var statRange = document.getElementById('statRange');
+  var scanNote = document.getElementById('scanNote');
+  var warningsBox = document.getElementById('warningsBox');
+  var warningsList = document.getElementById('warningsList');
+  var warningsToggle = document.getElementById('warningsToggle');
+  var previewCode = document.getElementById('previewCode');
+  var previewLabel = document.getElementById('previewLabel');
+  var prevBtn = document.getElementById('prevVoucherBtn');
+  var nextBtn = document.getElementById('nextVoucherBtn');
+  var downloadBtn = document.getElementById('downloadBtn');
+  var copyBtn = document.getElementById('copyBtn');
+  var resetBtn = document.getElementById('resetBtn');
+  var fileNameNote = document.getElementById('fileNameNote');
+
+  var currentResult = null;
+  var currentXmlBlobName = '';
+  var previewIndex = 0;
+
+  function fmtINR(n) {
+    return '\u20B9' + n.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+
+  function showError(msg) {
+    errorText.textContent = msg;
+    errorBanner.hidden = false;
+    resultsSection.hidden = true;
+    statusLine.textContent = '';
+  }
+
+  function clearError() {
+    errorBanner.hidden = true;
+  }
+
+  function formatDateDisplay(yyyymmdd) {
+    if (!/^\d{8}$/.test(yyyymmdd)) return yyyymmdd || '\u2014';
+    var y = yyyymmdd.slice(0, 4), m = yyyymmdd.slice(4, 6), d = yyyymmdd.slice(6, 8);
+    var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    var mi = parseInt(m, 10) - 1;
+    return d + ' ' + (months[mi] || m) + ' ' + y;
+  }
+
+  function renderPreview() {
+    var entries = currentResult.entries;
+    if (!entries.length) return;
+    var idx = Math.max(0, Math.min(previewIndex, entries.length - 1));
+    previewIndex = idx;
+    var voucherXml = buildVoucherXML(entries[idx].data);
+    var pretty = prettyPrintXML(voucherXml);
+    previewCode.innerHTML = highlightXML(pretty);
+    previewLabel.textContent = 'Voucher ' + (idx + 1) + ' of ' + entries.length + ' \u2014 row ' + entries[idx].excelRow + ' in the sheet';
+    prevBtn.disabled = idx === 0;
+    nextBtn.disabled = idx === entries.length - 1;
+  }
+
+  function renderResults(result, fileName) {
+    currentResult = result;
+    previewIndex = 0;
+
+    var entries = result.entries;
+    var receipts = 0, payments = 0, receiptsAmt = 0, paymentsAmt = 0;
+    var minDate = null, maxDate = null;
+
+    entries.forEach(function (e) {
+      var row = e.data;
+      var vtype = cellText(row[COL.VOUCHERTYPENAME]);
+      var amt = Math.abs(parseFloat(row[COL.L1_AMOUNT]) || 0);
+      if (vtype === 'Receipt') { receipts++; receiptsAmt += amt; }
+      else if (vtype === 'Payment') { payments++; paymentsAmt += amt; }
+      var d = cellText(row[COL.DATE]);
+      if (/^\d{8}$/.test(d)) {
+        if (minDate === null || d < minDate) minDate = d;
+        if (maxDate === null || d > maxDate) maxDate = d;
+      }
+    });
+
+    statVouchers.textContent = entries.length.toLocaleString('en-IN');
+    statReceipts.textContent = receipts.toLocaleString('en-IN');
+    statReceiptsAmt.textContent = fmtINR(receiptsAmt);
+    statPayments.textContent = payments.toLocaleString('en-IN');
+    statPaymentsAmt.textContent = fmtINR(paymentsAmt);
+    statRange.textContent = minDate ? (formatDateDisplay(minDate) + ' \u2013 ' + formatDateDisplay(maxDate)) : '\u2014';
+
+    scanNote.textContent = 'Scanned ' + entries.length + ' matching rows in the sheet.';
+
+    if (result.warnings.length) {
+      warningsBox.hidden = false;
+      warningsToggle.textContent = 'Show ' + result.warnings.length + ' row' + (result.warnings.length === 1 ? '' : 's') + ' with possible issues';
+      warningsList.innerHTML = '';
+      warningsList.hidden = true;
+      result.warnings.slice(0, 50).forEach(function (w) {
+        var li = document.createElement('li');
+        li.textContent = 'Row ' + w.excelRow + ': ' + w.issues.join(', ');
+        warningsList.appendChild(li);
+      });
+      if (result.warnings.length > 50) {
+        var li2 = document.createElement('li');
+        li2.textContent = '\u2026and ' + (result.warnings.length - 50) + ' more.';
+        warningsList.appendChild(li2);
+      }
+    } else {
+      warningsBox.hidden = true;
+    }
+
+    var ts = Date.now();
+    currentXmlBlobName = ts + '_tally.xml';
+    fileNameNote.textContent = 'Downloads as ' + currentXmlBlobName;
+
+    renderPreview();
+
+    resultsSection.hidden = false;
+    uploadSection.hidden = true;
+    clearError();
+    statusLine.textContent = '';
+  }
+
+  function processWorkbook(arrayBuffer, fileName) {
+    var data = new Uint8Array(arrayBuffer);
+    var wb;
+    try {
+      wb = XLSX.read(data, { type: 'array' });
+    } catch (readErr) {
+      showError('"' + fileName + '" doesn\u2019t look like a spreadsheet \u2014 make sure you\u2019re uploading the .xls/.xlsx transactions export, not the XML.');
+      return;
+    }
+    if (!wb.SheetNames.length) {
+      showError('This file does not contain any sheets.');
+      return;
+    }
+    var sheet = wb.Sheets[wb.SheetNames[0]];
+    var rows = XLSX.utils.sheet_to_json(sheet, { header: 1, raw: true, defval: '' });
+    var result = buildFullXML(rows);
+    if (result.entries.length === 0) {
+      showError('No transaction rows were found in "' + fileName + '". Make sure this is a TallyTools transaction export \u2014 the sheet should have voucher rows starting from row 3, with a GUID in column K.');
+      return;
+    }
+    renderResults(result, fileName);
+  }
+
+  function handleFile(file) {
+    clearError();
+    resultsSection.hidden = true;
+    statusLine.textContent = 'Reading ' + file.name + '\u2026';
+    var reader = new FileReader();
+    reader.onload = function (e) {
+      try {
+        processWorkbook(e.target.result, file.name);
+      } catch (err) {
+        showError('Something went wrong while converting "' + file.name + '". Double-check it\u2019s an unmodified TallyTools export and try again.');
+      }
+    };
+    reader.onerror = function () {
+      showError('Failed to read "' + file.name + '". Please try again.');
+    };
+    reader.readAsArrayBuffer(file);
+  }
+
+  browseBtn.addEventListener('click', function () { fileInput.click(); });
+  dropZone.addEventListener('click', function () { fileInput.click(); });
+  dropZone.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fileInput.click(); }
+  });
+
+  fileInput.addEventListener('change', function () {
+    if (fileInput.files && fileInput.files[0]) handleFile(fileInput.files[0]);
+  });
+
+  ['dragenter', 'dragover'].forEach(function (evt) {
+    dropZone.addEventListener(evt, function (e) {
+      e.preventDefault(); e.stopPropagation();
+      dropZone.classList.add('dragging');
+    });
+  });
+  ['dragleave', 'drop'].forEach(function (evt) {
+    dropZone.addEventListener(evt, function (e) {
+      e.preventDefault(); e.stopPropagation();
+      dropZone.classList.remove('dragging');
+    });
+  });
+  dropZone.addEventListener('drop', function (e) {
+    var files = e.dataTransfer.files;
+    if (files && files[0]) handleFile(files[0]);
+  });
+
+  prevBtn.addEventListener('click', function () { previewIndex--; renderPreview(); });
+  nextBtn.addEventListener('click', function () { previewIndex++; renderPreview(); });
+
+  warningsToggle.addEventListener('click', function () {
+    var showing = !warningsList.hidden;
+    warningsList.hidden = showing;
+    warningsToggle.setAttribute('aria-expanded', String(!showing));
+    warningsToggle.classList.toggle('open', !showing);
+  });
+
+  downloadBtn.addEventListener('click', function () {
+    if (!currentResult) return;
+    var blob = new Blob([currentResult.xml], { type: 'application/xml' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = currentXmlBlobName;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+  });
+
+  copyBtn.addEventListener('click', function () {
+    if (!currentResult) return;
+    navigator.clipboard.writeText(currentResult.xml).then(function () {
+      var original = copyBtn.textContent;
+      copyBtn.textContent = 'Copied';
+      setTimeout(function () { copyBtn.textContent = original; }, 1500);
+    }).catch(function () {
+      var original = copyBtn.textContent;
+      copyBtn.textContent = 'Could not copy';
+      setTimeout(function () { copyBtn.textContent = original; }, 1500);
+    });
+  });
+
+  resetBtn.addEventListener('click', function () {
+    currentResult = null;
+    fileInput.value = '';
+    resultsSection.hidden = true;
+    uploadSection.hidden = false;
+    clearError();
+    statusLine.textContent = '';
+  });
+})();
+
+</script>
+</body>
+</html>
