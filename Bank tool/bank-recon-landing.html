@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Convert a bank statement — TaxNest</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,500;8..60,600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="bank-recon-landing.css">
+</head>
+<body>
+
+<header class="site-bar">
+  <span class="wordmark">TaxNest</span>
+  <span class="site-bar-sub">Bank statement intake</span>
+</header>
+
+<main class="sheet-wrap">
+  <div class="sheet">
+    <div class="sheet-margin" aria-hidden="true"></div>
+    <div class="sheet-content">
+
+      <h1>Convert a bank statement</h1>
+      <p class="lede">Pick the bank, then upload the PDF. Extraction and ledger review come in the next step — this just captures the two inputs for now.</p>
+
+      <div class="field">
+        <label for="bank-input">Bank</label>
+        <div class="combobox" id="bank-combobox">
+          <input
+            type="text"
+            id="bank-input"
+            placeholder="Search or select a bank"
+            autocomplete="off"
+            role="combobox"
+            aria-expanded="false"
+            aria-controls="bank-listbox"
+            aria-autocomplete="list"
+          >
+          <button type="button" class="combobox-toggle" id="bank-toggle" aria-label="Show bank list">▾</button>
+          <ul class="combobox-list" id="bank-listbox" role="listbox" hidden></ul>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="field">
+        <label id="dropzone-label">Statement PDF</label>
+        <div class="dropzone" id="dropzone" aria-labelledby="dropzone-label">
+          <input type="file" id="file-input" accept="application/pdf" hidden>
+
+          <div class="dropzone-empty" id="dropzone-empty">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+              <path d="M12 15V4M12 4l-4 4M12 4l4 4" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <p>Drop the PDF here, or</p>
+            <button type="button" class="btn-choose" id="choose-file-btn">Choose file</button>
+          </div>
+
+          <div class="dropzone-file" id="dropzone-file" hidden>
+            <span class="file-badge">PDF</span>
+            <span class="file-name" id="file-name"></span>
+            <span class="file-size" id="file-size"></span>
+            <span class="file-check" aria-hidden="true">✓</span>
+            <button type="button" class="file-remove" id="file-remove">Remove</button>
+          </div>
+        </div>
+        <p class="hint" id="file-hint" hidden></p>
+      </div>
+
+      <button type="button" class="btn-continue" id="continue-btn" disabled>Continue</button>
+      <p class="note" id="continue-note" hidden></p>
+
+    </div>
+  </div>
+</main>
+
+<script src="bank-list.js"></script>
+<script src="bank-recon-landing.js"></script>
+</body>
+</html>
