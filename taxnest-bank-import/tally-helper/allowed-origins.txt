@@ -1,0 +1,2 @@
+# One website address per line (e.g. https://yourname.github.io). Lines starting with # are ignored.
+# localhost and local files are always allowed.
