@@ -21,7 +21,7 @@
   }
   function seed() {
     items = [];
-    var coins = reduced ? 8 : Math.max(18, Math.min(40, Math.round(W / 45))), dust = reduced ? 30 : Math.max(90, Math.min(220, Math.round(W / 7)));
+    var coins = reduced ? 8 : Math.max(30, Math.min(70, Math.round(W / 45))), dust = reduced ? 30 : Math.max(180, Math.min(440, Math.round(W / 7)));
     for (var i = 0; i < coins; i++) items.push(spawn({ t: 'c', r: rnd(14, 26), z: rnd(.5, 1) }, false));
     for (var j = 0; j < dust; j++) items.push(spawn({ t: 'd', r: rnd(.9, 2.2), z: rnd(.3, 1) }, false));
   }
