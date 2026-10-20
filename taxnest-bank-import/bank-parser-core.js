@@ -238,8 +238,8 @@
      at load time; here it's an explicit map for clarity. register() is
      what a new bank-specific parser file calls on itself. */
   var registry = {};
-  function registerParser(bankId, parseFn) { registry[bankId] = parseFn; }
-  function getParser(bankId) { return registry[bankId] || extractGeneric; }
+  function getParser(key) { return registry[key] || extractGeneric; }
+function hasSpecificParser(key) { return !!registry[key]; }
   function hasSpecificParser(bankId) { return !!registry[bankId]; }
 
   var BankParserCore = {
@@ -268,5 +268,3 @@ function findParser(bankId, text) {
   for (var j = 0; j < keys.length; j++) { var g = registry[keys[j]]; try { if (g.meta.detect && g.meta.detect(text)) return g; } catch (e) {} }
   return null;
 }
-function getParser(key) { return registry[key] || extractGeneric; }
-function hasSpecificParser(key) { return !!registry[key]; }
