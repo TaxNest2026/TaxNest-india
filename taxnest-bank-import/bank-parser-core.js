@@ -258,3 +258,15 @@
     root.BankParserCore = BankParserCore;
   }
 })(typeof window !== 'undefined' ? window : this);
+/* PASTE into bank-parser-core.js, replacing the old registerParser/getParser lines.
+   registerParser now takes optional metadata; findParser picks by bank id first, then by statement text. */
+var registry = {};
+function registerParser(key, parseFn, meta) { parseFn.meta = meta || parseFn.meta || { key: key, bankIds: [], detect: function () { return false; } }; registry[key] = parseFn; }
+function findParser(bankId, text) {
+  var keys = Object.keys(registry);
+  for (var i = 0; i < keys.length; i++) { var f = registry[keys[i]]; if (f.meta.bankIds && f.meta.bankIds.indexOf(String(bankId)) >= 0) return f; }
+  for (var j = 0; j < keys.length; j++) { var g = registry[keys[j]]; try { if (g.meta.detect && g.meta.detect(text)) return g; } catch (e) {} }
+  return null;
+}
+function getParser(key) { return registry[key] || extractGeneric; }
+function hasSpecificParser(key) { return !!registry[key]; }
