@@ -238,27 +238,7 @@
      at load time; here it's an explicit map for clarity. register() is
      what a new bank-specific parser file calls on itself. */
   var registry = {};
-  function getParser(key) { return registry[key] || extractGeneric; }
-function hasSpecificParser(key) { return !!registry[key]; }
-  function hasSpecificParser(bankId) { return !!registry[bankId]; }
-
-  var BankParserCore = {
-    findDate: findDate, normalizeDate: normalizeDate, stripAllDates: stripAllDates, fixSplitDates: fixSplitDates,
-    splitIntoBlocks: splitIntoBlocks,
-    MONEY_RE: MONEY_RE, parseMoneyToken: parseMoneyToken,
-    inferDirections: inferDirections,
-    NON_TRANSACTION_RE: NON_TRANSACTION_RE,
-    extractGeneric: extractGeneric,
-    registerParser: registerParser, getParser: getParser, hasSpecificParser: hasSpecificParser
-  };
-
-  if (typeof module !== 'undefined' && module.exports) {
-    module.exports = BankParserCore;
-  } else {
-    root.BankParserCore = BankParserCore;
-  }
-})(typeof window !== 'undefined' ? window : this);
-/* PASTE into bank-parser-core.js, replacing the old registerParser/getParser lines.
+  /* PASTE into bank-parser-core.js, replacing the old registerParser/getParser lines.
    registerParser now takes optional metadata; findParser picks by bank id first, then by statement text. */
 var registry = {};
 function registerParser(key, parseFn, meta) { parseFn.meta = meta || parseFn.meta || { key: key, bankIds: [], detect: function () { return false; } }; registry[key] = parseFn; }
@@ -268,3 +248,5 @@ function findParser(bankId, text) {
   for (var j = 0; j < keys.length; j++) { var g = registry[keys[j]]; try { if (g.meta.detect && g.meta.detect(text)) return g; } catch (e) {} }
   return null;
 }
+   function getParser(key) { return registry[key] || extractGeneric; }
+function hasSpecificParser(key) { return !!registry[key]; }
