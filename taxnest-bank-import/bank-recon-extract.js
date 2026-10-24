@@ -20,7 +20,7 @@
 
   // bank-list.js ids are numeric and can shift if that list is regenerated, so they're kept decoupled from
   // bank-parser-core's stable registry keys. Add one line here for every new bank-specific parser.
-  var BANK_ID_TO_PARSER_KEY = { '11': 'kotak_mahindra', '36': 'bandhan', '8': 'icici', '5': 'canara', '301': 'sarvodaya' };
+  var BANK_ID_TO_PARSER_KEY = { '11': 'kotak_mahindra', '36': 'bandhan', '8': 'icici', '5': 'canara', '301': 'sarvodaya','7':'hdfc' };
 
   var STAGES = ['Reading PDF', 'Detecting pages', 'Extracting text', 'Identifying statement structure', 'Parsing transactions', 'Normalizing dates and amounts', 'Validating balances', 'Preparing review'];
 
