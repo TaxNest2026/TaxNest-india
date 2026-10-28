@@ -2,6 +2,7 @@
 // PDF text extraction (pdf.js) -> bank-specific parser if registered, universal parser otherwise
 // -> normalised entries (TXN-000001..., Suspense default) -> balance validation -> BankReconReview.
 // Entry point: window.BankReconExtract.start(bank, file), called by bank-recon-landing.js.
+if (window.BankParserLoader) await window.BankParserLoader.ready;
 (function () {
   'use strict';
 
