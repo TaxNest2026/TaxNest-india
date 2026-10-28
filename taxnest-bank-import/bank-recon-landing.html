@@ -90,32 +90,33 @@
 </main>
 
 <script src="bank-list.js"></script>
-<script src="bank-recon-landing.js"></script>
 
 <!-- Parsing + Tally XML engine -->
 <script src="bank-parser-core.js"></script>
 <script src="universal-parser.js"></script>
 <script src="pdf-lines.js"></script>
-<script src="balance-validator.js"></script>
-<script src="bank-parser-loader.js"></script>  
 <script src="excel-import.js"></script>
+<script src="balance-validator.js"></script>
+<script src="bank-parser-loader.js"></script>
+<script src="tally-xml-builder.js"></script>
 <script src="mapping-engine.js"></script>
 <script src="smart-mapping.js"></script>
 <script src="ledger-import.js"></script>
 
-<!-- pdf.js -- pinned to 3.11.174, the last release with a classic (non-module)
-     build, so it drops in as a plain <script> alongside everything else here.
-     Newer pdf.js (4.x+) ships ES-modules-only and would need type="module". -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-<script>
-  pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-</script>
 
 <!-- SheetJS (Excel export). Pinned; loaded from cdnjs like pdf.js. -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
 <script src="sounds.js"></script>
 <script src="fx.js"></script>
+<script src="bank-recon-landing.js"></script>
+  <!-- pdf.js -- pinned to 3.11.174, the last release with a classic (non-module)
+     build, so it drops in as a plain <script> alongside everything else here.
+     Newer pdf.js (4.x+) ships ES-modules-only and would need type="module". -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script>
+  pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+</script>
 <script src="bank-recon-review.js"></script>
 <script src="bank-recon-extract.js"></script>
 </body>
