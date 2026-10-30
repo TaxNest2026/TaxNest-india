@@ -4,8 +4,8 @@
     "parser-adc.js",
     "parser-bandhan-bank.js",
     "parser-hdfc.js",
-    "parser-kotak-mahindra.js"
-    "pparser-axis-bank.js"
+    "parser-kotak-mahindra.js",
+    "parser-axis-bank.js",
     "parser-federal-bank.js"
   ]
 }
