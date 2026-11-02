@@ -8,6 +8,18 @@
     "parser-axis-bank.js",
     "parser-federal-bank.js",
     "parser-idfc-first-bank.js",
+    "parser-indusind-bank",
+    "parser-punjab-national-bank-instrument",
+    "parser-punjab-national-bank-tran",
+    "parser-canara-bank-txn",
+    "parser-canara-bank-dep",
+    "parser-nutan-nagrik-bank",
+    "parser-icici-statement-of-transactions",
+    "parser-icici-detailed-statement",
+    "parser-icici-account-statement",
+    "parser-kotak-mahindra",
+    "parser-kotak-mahindra-crdr",
+    "parser-bandhan-current-savings",
     "parser-indian-overseas-bank.js"
   ]
 }
