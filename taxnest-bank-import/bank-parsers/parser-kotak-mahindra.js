@@ -13,7 +13,7 @@
    ========================================================= */
 (function (root) {
   'use strict';
-  var Core = (typeof module !== 'undefined' && module.exports) ? require('../bank-parser-core.js') : root.BankParserCore;
+  var Core = (typeof module !== 'undefined' && module.exports) ? require('./bank-parser-core.js') : root.BankParserCore;
 
 
   /* ---------------------------------------------------------------
@@ -167,8 +167,8 @@
   }
 
   if (Core && Core.registerParser) Core.registerParser('kotak_mahindra', parseKotakMahindra, {
-    key: 'kotak_mahindra', label: 'Kotak Mahindra Bank', bankIds: ['11'],
-    detect: function (t) { return /kotak/i.test(t) && /Account Statement|Current Account Transactions|Statement Summary/i.test(t); }
+    key: 'kotak_mahindra', label: 'Kotak Mahindra Bank (Serial / Dr.-Cr. column format)', bankIds: ['11'],
+    detect: function (t) { return /Current Account Transactions/i.test(t) && /Withdrawal \(Dr\.\)/i.test(t); }
   });
 
   if (typeof module !== 'undefined' && module.exports) {
