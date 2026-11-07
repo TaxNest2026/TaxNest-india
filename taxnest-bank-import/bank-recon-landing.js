@@ -222,6 +222,21 @@
     continueBtn.disabled = !(selectedBank && selectedFile);
   }
 
+    // ---- password-protected PDFs: ask the user, use the password only in memory, never store it ----
+  var pwBox = document.getElementById('pdf-password-box');
+  var pwInput = document.getElementById('pdf-password');
+  var pwHint = document.getElementById('pdf-password-hint');
+  var pwSubmit = document.getElementById('pdf-password-submit');
+
+  function openPdf(buf, password) {
+    return pdfjsLib.getDocument({ data: buf.slice(0), password: password || undefined }).promise;
+  }
+  function startWith(password) {
+    if (pwBox) pwBox.hidden = true;
+    if (pwInput) pwInput.value = '';
+    window.BankReconExtract.start(selectedBank, selectedFile, password || undefined);
+  }
+
   continueBtn.addEventListener('click', function () {
     if (!window.BankReconExtract) {
       continueNote.hidden = false;
@@ -229,8 +244,36 @@
       return;
     }
     continueNote.hidden = true;
-    window.BankReconExtract.start(selectedBank, selectedFile);
+    var isPdf = selectedFile && /\.pdf$/i.test(selectedFile.name);
+    if (!isPdf || typeof pdfjsLib === 'undefined' || !pwBox) { startWith(null); return; }
+    selectedFile.arrayBuffer().then(function (buf) {
+      return openPdf(buf, null).then(function () { startWith(null); }, function (err) {
+        if (err && err.name === 'PasswordException') {
+          pwBox.hidden = false;
+          pwHint.hidden = true;
+          pwInput.focus();
+          return;
+        }
+        startWith(null);        // any other problem is reported by the extractor itself
+      });
+    });
   });
+
+  if (pwSubmit) pwSubmit.addEventListener('click', function () {
+    var pw = pwInput.value;
+    if (!pw) { pwHint.hidden = false; pwHint.textContent = 'Please type the password.'; return; }
+    selectedFile.arrayBuffer().then(function (buf) {
+      return openPdf(buf, pw).then(function () { startWith(pw); }, function (err) {
+        if (err && err.name === 'PasswordException' && err.code === 2) {
+          pwHint.hidden = false; pwHint.textContent = 'That password is not correct. Please try again.';
+          pwInput.select();
+          return;
+        }
+        pwHint.hidden = false; pwHint.textContent = 'This PDF could not be opened with that password.';
+      });
+    });
+  });
+  if (pwInput) pwInput.addEventListener('keydown', function (ev) { if (ev.key === 'Enter' && pwSubmit) pwSubmit.click(); });
 
   renderList('');
 })();
