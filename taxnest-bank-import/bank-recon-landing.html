@@ -74,6 +74,13 @@
         </div>
         <p class="hint" id="file-hint" hidden></p>
       </div>
+<div class="field" id="pdf-password-box" hidden>
+  <label for="pdf-password">This PDF is password-protected. Type the password to continue.</label>
+  <input type="password" id="pdf-password" autocomplete="off" placeholder="PDF password" style="width:100%">
+  <p class="hint" id="pdf-password-hint" hidden></p>
+  <button type="button" class="btn-continue" id="pdf-password-submit">Unlock and continue</button>
+  <p class="hint">The password is used only in your browser to open the PDF. It is not saved or sent anywhere.</p>
+</div>
 
       <button type="button" class="btn-continue" id="continue-btn" disabled>Continue</button>
       <p class="note" id="continue-note" hidden></p>
