@@ -31,7 +31,7 @@
   async function extractPdfText(file, onPages, opts) {
     if (typeof pdfjsLib === 'undefined') throw new Error('pdf.js did not load (check your internet connection and the CDN script tag)');
     var buf = await file.arrayBuffer();
-    var pdf = await pdfjsLib.getDocument({ data: buf }).promise;
+    var pdf = await pdfjsLib.getDocument({ data: buf, password: (opts && opts.password) || undefined }).promise;
     if (onPages) onPages(pdf.numPages);
     var plain = [], hinted = [], chars = 0, st = {};
     for (var p = 1; p <= pdf.numPages; p++) {
@@ -79,7 +79,7 @@
 
   function isSheetFile(file) { return /\.(xlsx|xls|csv|tsv)$/i.test(file.name); }
   /* Excel / CSV: no bank parser needed. The column headers say what each column is (see excel-import.js). */
-  async function startSheet(bank, file) {
+  async function start(bank, file, password) {
     showStep2();
     var prog = BankReconReview.showProgress(['Reading the spreadsheet', 'Finding the header row', 'Matching columns', 'Reading transactions', 'Checking balances', 'Preparing review']);
     var fail = function (info) { BankReconReview.showError(info, backToStep1); };
@@ -121,7 +121,7 @@
       // (3) the older id table below. Choosing by bank id first means a registered parser is never silently skipped.
       var parserKey = BANK_ID_TO_PARSER_KEY[bank.id];
       var preParser = BankParserCore.findParser(bank.id, '');
-      try { ex = await extractPdfText(file, function () { prog.set(2); }, { centered: !!(preParser && preParser.centered) }); }
+     try { ex = await extractPdfText(file, function () { prog.set(2); }, { centered: !!(specific && specific.centered), password: password }); }
       catch (err) {
         var pw = err && (err.name === 'PasswordException' || /password/i.test(err.message || ''));
         return fail({ reason: pw ? 'This PDF is password-protected.' : 'The PDF could not be read.', detail: err && err.message,
