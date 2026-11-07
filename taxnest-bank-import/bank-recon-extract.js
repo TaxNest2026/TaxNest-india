@@ -20,7 +20,7 @@
 
   // bank-list.js ids are numeric and can shift if that list is regenerated, so they're kept decoupled from
   // bank-parser-core's stable registry keys. Add one line here for every new bank-specific parser.
-  var BANK_ID_TO_PARSER_KEY = { '11': 'kotak_mahindra', '36': 'bandhan', '8': 'icici', '5': 'canara', '301': 'sarvodaya' };   // parsers that list their bank id in parser.meta.bankIds are found automatically; this table is only a backup for older parsers
+  var BANK_ID_TO_PARSER_KEY = { '11': 'kotak_mahindra', '36': 'bandhan', '8': 'icici', '5': 'canara', '301': 'sarvodaya' };
 
   var STAGES = ['Reading PDF', 'Detecting pages', 'Extracting text', 'Identifying statement structure', 'Parsing transactions', 'Normalizing dates and amounts', 'Validating balances', 'Preparing review'];
 
@@ -79,7 +79,7 @@
 
   function isSheetFile(file) { return /\.(xlsx|xls|csv|tsv)$/i.test(file.name); }
   /* Excel / CSV: no bank parser needed. The column headers say what each column is (see excel-import.js). */
-  async function start(bank, file, password) {
+  async function startSheet(bank, file) {
     showStep2();
     var prog = BankReconReview.showProgress(['Reading the spreadsheet', 'Finding the header row', 'Matching columns', 'Reading transactions', 'Checking balances', 'Preparing review']);
     var fail = function (info) { BankReconReview.showError(info, backToStep1); };
@@ -104,8 +104,7 @@
     }
   }
 
-  async function start(bank, file) {
-    if (window.BankParserLoader) await window.BankParserLoader.ready;   // parsers in bank-parsers/ must be loaded first
+  async function start(bank, file, password) {
     if (isSheetFile(file)) return startSheet(bank, file);
     showStep2();
     var prog = BankReconReview.showProgress(STAGES);
@@ -117,11 +116,8 @@
 
       prog.set(1); await tick();
       var ex;
-      // Which parser handles this bank? (1) a parser file that lists this bank id, (2) a parser that recognises the statement text,
-      // (3) the older id table below. Choosing by bank id first means a registered parser is never silently skipped.
-      var parserKey = BANK_ID_TO_PARSER_KEY[bank.id];
-      var preParser = BankParserCore.findParser(bank.id, '');
-     try { ex = await extractPdfText(file, function () { prog.set(2); }, { centered: !!(specific && specific.centered), password: password }); }
+      var parserKey = BANK_ID_TO_PARSER_KEY[bank.id], specific = parserKey ? BankParserCore.getParser(parserKey) : null;
+      try { ex = await extractPdfText(file, function () { prog.set(2); }, { centered: !!(specific && specific.centered), password: password }); }
       catch (err) {
         var pw = err && (err.name === 'PasswordException' || /password/i.test(err.message || ''));
         return fail({ reason: pw ? 'This PDF is password-protected.' : 'The PDF could not be read.', detail: err && err.message,
@@ -131,27 +127,19 @@
       if (ex.chars < 80) return fail({ title: 'Scanned PDF detected', reason: 'This appears to be a scanned/image-based PDF. OCR extraction is required.', detail: 'OCR is not available in this version, so no data was extracted (nothing was guessed).',
         solutions: ['Download the electronic (text) statement from net banking instead', 'Ask the bank for a digitally generated PDF'] });
 
-      var parserMode = 'universal', result = null, usedFallback = false, parserLabel = 'Universal parser', fallbackReason = '';
+      var parserMode = 'universal', result = null, usedFallback = false;
       prog.set(4); await tick();
-      var parser = BankParserCore.findParser(bank.id, ex.text) || (parserKey && BankParserCore.hasSpecificParser(parserKey) ? BankParserCore.getParser(parserKey) : null);
-      if (parser) {
-        parserLabel = (parser.meta && parser.meta.label) || parserKey || 'Bank parser';
-        try { result = parser(parser.wantsHints ? ex.hinted : ex.text); parserMode = 'bank_specific'; }
-        catch (err) { fallbackReason = 'parser error: ' + (err && err.message); console.error('TaxNest: ' + parserLabel + ' failed, using universal parser.', err); result = null; }
-        if (result && (!result.transactions || !result.transactions.length)) { fallbackReason = 'parser found no transactions'; result = null; }
-        if (result) { usedFallback = false; console.info('TaxNest: used ' + parserLabel + ' (' + result.transactions.length + ' rows)'); }
-        else { usedFallback = true; console.warn('TaxNest: ' + parserLabel + ' could not read this statement (' + fallbackReason + '). Using universal parser.'); }
-      } else {
-        console.info('TaxNest: no bank-specific parser for bank id ' + bank.id + ' or this statement text. Using universal parser.');
+      if (parserKey) {
+        try { result = specific(specific.wantsHints ? ex.hinted : ex.text); parserMode = 'bank_specific'; } catch (err) { console.error('Bank-specific parser failed, falling back to universal:', err); result = null; }
+        if (!result || !result.transactions || !result.transactions.length) { result = null; usedFallback = true; }
       }
-      if (!result) { result = UniversalParser.extractUniversal(ex.hinted); parserMode = 'universal'; parserLabel = 'Universal parser'; }
+      if (!result) { result = UniversalParser.extractUniversal(ex.hinted); parserMode = 'universal'; }
       if (!result.transactions.length) return fail({ reason: 'Transaction columns could not be identified.', detail: 'No rows with a date, an amount and a balance were found in ' + ex.pages + ' page(s).', rawText: ex.text,
         solutions: ['Try another PDF (e.g. a different date range)', 'Make sure you selected the right bank', 'Download the extracted text (below) and send it for a parser to be built for this bank'] });
 
       prog.set(5); await tick();
       prog.set(6); await tick();
       var session = buildSession(bank, file.name, result, parserMode, parserKey, ex, usedFallback);
-      session.parserLabel = parserLabel; session.fallbackReason = fallbackReason;
       prog.set(7); await tick(); if (window.TaxNestSound) TaxNestSound.play('extracted');
       BankReconReview.open(session);
       BankReconReview.persist();
